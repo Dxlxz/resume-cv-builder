@@ -38,8 +38,11 @@ const PRESETS: { label: string; instruction: string }[] = [
   },
 ]
 
-const WELCOME =
-  'Hi! I am Idrizz, your resume wingman. Tell me what to edit, add, or remove, or pick a shortcut below. English atau Bahasa Melayu pun boleh.'
+const CAPABILITIES = [
+  'Rewrite and tighten sections to sound stronger',
+  'Sharpen bullet points with measurable outcomes',
+  'Tailor your document to a job description',
+]
 
 function SparkleIcon({ size = 22 }: { size?: number }) {
   return (
@@ -68,19 +71,12 @@ export function IdrizzChat({ open, onOpen, onClose }: IdrizzChatProps) {
   const { result, busy, error, consentOpen, run, acceptConsent, declineConsent } = useAi('ai-edit')
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [input, setInput] = useState('')
-  const [started, setStarted] = useState(false)
   const inputRef = useRef<HTMLTextAreaElement>(null)
   const scrollRef = useRef<HTMLDivElement>(null)
-  const initialisedRef = useRef(false)
   const lastResultRef = useRef<string | null>(null)
   const lastErrorRef = useRef<string | null>(null)
 
-  useEffect(() => {
-    if (open && !initialisedRef.current) {
-      initialisedRef.current = true
-      setMessages([{ role: 'idrizz', text: WELCOME }])
-    }
-  }, [open])
+  const hasUserMessage = messages.some((m) => m.role === 'user')
 
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: 'smooth' })
@@ -111,7 +107,6 @@ export function IdrizzChat({ open, onOpen, onClose }: IdrizzChatProps) {
     if (!text || busy) return
     setMessages((prev) => [...prev, { role: 'user', text }])
     setInput('')
-    setStarted(true)
     run({ instruction: text, context: buildDocumentContext(document) })
   }
 
@@ -157,7 +152,9 @@ export function IdrizzChat({ open, onOpen, onClose }: IdrizzChatProps) {
         </span>
         <div className="min-w-0 flex-1">
           <p className="text-sm font-semibold leading-tight text-foreground">Idrizz</p>
-          <p className="text-xs text-muted-foreground">Your resume wingman</p>
+          <p className="text-xs text-muted-foreground" aria-live="polite">
+            {hasUserMessage ? 'Your resume wingman' : 'Starting conversation…'}
+          </p>
         </div>
         <button
           type="button"
@@ -172,6 +169,59 @@ export function IdrizzChat({ open, onOpen, onClose }: IdrizzChatProps) {
       </header>
 
       <div ref={scrollRef} className="min-h-0 flex-1 space-y-3 overflow-y-auto p-3">
+        {!hasUserMessage && !consentOpen && (
+          <div className="animate-slide-up rounded-lg border border-border bg-muted p-4">
+            <span
+              className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-primary"
+              aria-hidden
+            >
+              <SparkleIcon size={18} />
+            </span>
+            <h3 className="mt-3 text-sm font-semibold text-foreground">
+              Hi, I&apos;m Idrizz — your resume wingman
+            </h3>
+            <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
+              Tolong aku kemas resume kau — English atau Bahasa Melayu pun boleh.
+            </p>
+            <ul className="mt-3 space-y-1.5">
+              {CAPABILITIES.map((capability) => (
+                <li key={capability} className="flex items-start gap-2 text-sm text-foreground">
+                  <svg
+                    width="14"
+                    height="14"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2.2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="mt-0.5 shrink-0 text-status-success"
+                    aria-hidden
+                  >
+                    <path d="M20 6 9 17l-5-5" />
+                  </svg>
+                  <span>{capability}</span>
+                </li>
+              ))}
+            </ul>
+            <div className="mt-4 flex flex-wrap gap-1.5">
+              {PRESETS.map((preset) => (
+                <button
+                  key={preset.label}
+                  type="button"
+                  className="rounded-full border border-border bg-card px-2.5 py-0.5 text-xs text-foreground transition-colors duration-[var(--duration-state)] hover:text-primary"
+                  onClick={() => {
+                    setInput(preset.instruction)
+                    inputRef.current?.focus()
+                  }}
+                >
+                  {preset.label}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
         {messages.map((message, index) =>
           message.plan ? (
             <div key={index} className="animate-slide-up">
@@ -238,25 +288,6 @@ export function IdrizzChat({ open, onOpen, onClose }: IdrizzChatProps) {
             </div>
           </div>
         )}
-
-        {!started && !consentOpen && (
-          <div className="flex flex-wrap gap-1.5 pt-1">
-            {PRESETS.map((preset) => (
-              <button
-                key={preset.label}
-                type="button"
-                className="rounded-full border border-border bg-muted px-2.5 py-0.5 text-xs text-muted-foreground transition-colors duration-[var(--duration-state)] hover:text-foreground"
-                onClick={() => {
-                  setInput(preset.instruction)
-                  setStarted(true)
-                  inputRef.current?.focus()
-                }}
-              >
-                {preset.label}
-              </button>
-            ))}
-          </div>
-        )}
       </div>
 
       <footer className="shrink-0 border-t border-border bg-header p-2.5">
@@ -272,7 +303,7 @@ export function IdrizzChat({ open, onOpen, onClose }: IdrizzChatProps) {
                 send()
               }
             }}
-            placeholder="Edit, tambah, buang... apa sahaja."
+            placeholder="Start a conversation… e.g. &quot;Tighten my summary&quot;"
             className="min-h-10 flex-1 resize-none rounded-sm border border-border bg-card px-3 py-2 text-sm text-foreground transition-colors duration-[var(--duration-state)] focus:border-[var(--ring)]"
           />
           <button

@@ -63,6 +63,8 @@ leak check greps the repo and the bundle for personal markers on every push.
 
 ## Deploy
 
+**Live demo:** <https://resume-cv-builder-bay.vercel.app/>
+
 Deploy with Vercel (recommended): import this repo at vercel.com/new —
 Vite + pnpm are auto-detected (`build: pnpm run build`, output `dist/`),
 and the site redeploys on every push to `main`. The same `pnpm run build`

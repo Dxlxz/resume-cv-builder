@@ -63,7 +63,7 @@ describe('persistence', () => {
     expect(localStorage.getItem(RECOVERY_KEY)).toBe(corrupt)
   })
 
-  it('migrates a v1 draft to v2, persists it, and removes the v1 key', () => {
+  it('migrates a v1 draft to v3, persists it, and removes the v1 key', () => {
     const v1: ResumeDocumentV1 = {
       meta: {
         schemaVersion: 1,
@@ -88,7 +88,7 @@ describe('persistence', () => {
 
     const result = loadFromStorage()
 
-    expect(result?.meta.schemaVersion).toBe(2)
+    expect(result?.meta.schemaVersion).toBe(3)
     expect(result?.meta.presetId).toBe('international-generic')
     expect(localStorage.getItem(STORAGE_KEY_V1)).toBeNull()
     expect(JSON.parse(localStorage.getItem(STORAGE_KEY_V2) ?? 'null')).toEqual(result)

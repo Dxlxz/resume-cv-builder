@@ -100,4 +100,19 @@ describe('buildDocumentContext', () => {
     expect(parsed.experience[0].id).toBe(sampleResumeDocument.experience[0].id)
     expect(parsed.skills.length).toBe(sampleResumeDocument.skills.length)
   })
+
+  it('includes section order and section guides so the model knows the sections', () => {
+    const guided = {
+      ...sampleResumeDocument,
+      meta: {
+        ...sampleResumeDocument.meta,
+        sectionOrder: ['summary', 'experience'] as ResumeDocument['meta']['sectionOrder'],
+        sectionGuides: { summary: 'British English, 2-4 sentences.' },
+      },
+    }
+    const context = buildDocumentContext(guided)
+    const parsed = JSON.parse(context) as ResumeDocument
+    expect(parsed.meta.sectionOrder).toEqual(['summary', 'experience'])
+    expect(parsed.meta.sectionGuides).toEqual({ summary: 'British English, 2-4 sentences.' })
+  })
 })

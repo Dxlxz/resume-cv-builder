@@ -1,4 +1,3 @@
-import { useState } from 'react'
 import {
   DndContext,
   closestCenter,
@@ -142,11 +141,14 @@ function SortableSectionRow({
   )
 }
 
-export function SectionList() {
+/**
+ * Sections management content, hosted in the editor panel's popover:
+ * reorder (drag or arrows) and show/hide per section.
+ */
+export function SectionListContent() {
   const sectionOrder = useDocumentStore((s) => s.document?.meta.sectionOrder ?? [])
   const document = useDocumentStore((s) => s.document)
   const reorderSections = useDocumentStore((s) => s.reorderSections)
-  const [open, setOpen] = useState(false)
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
@@ -166,48 +168,24 @@ export function SectionList() {
   const filled = document ? filledSectionIds(document, sectionOrder) : new Set<SectionId>()
 
   return (
-    <div className="rounded-md border border-border bg-card shadow-[var(--shadow-raised)]">
-      <button
-        type="button"
-        aria-expanded={open}
-        onClick={() => setOpen((v) => !v)}
-        className="flex w-full items-center justify-between gap-3 px-4 py-3 text-left hover:bg-muted/50"
-      >
-        <span className="min-w-0">
-          <span className="text-sm font-semibold text-foreground">Sections</span>
-          <span className="ml-2 text-xs text-muted-foreground">Reorder and hide</span>
-        </span>
-        <span
-          aria-hidden
-          className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-sm bg-muted text-sm font-medium text-muted-foreground transition-transform duration-[var(--duration-state)] ${
-            open ? 'rotate-180' : ''
-          }`}
-        >
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M6 9l6 6 6-6" />
-          </svg>
-        </span>
-      </button>
-
-      {open && (
-        <div className="animate-slide-up border-t border-border p-4">
-          <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={onDragEnd}>
-            <SortableContext items={sectionOrder} strategy={verticalListSortingStrategy}>
-              <ul className="space-y-2">
-                {sectionOrder.map((sectionId, index) => (
-                  <SortableSectionRow
-                    key={sectionId}
-                    sectionId={sectionId}
-                    index={index}
-                    total={sectionOrder.length}
-                    filled={filled.has(sectionId)}
-                  />
-                ))}
-              </ul>
-            </SortableContext>
-          </DndContext>
-        </div>
-      )}
+    <div>
+      <p className="text-sm font-semibold text-foreground">Sections</p>
+      <p className="text-xs text-muted-foreground">Reorder and choose what shows in the PDF.</p>
+      <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={onDragEnd}>
+        <SortableContext items={sectionOrder} strategy={verticalListSortingStrategy}>
+          <ul className="mt-3 space-y-2">
+            {sectionOrder.map((sectionId, index) => (
+              <SortableSectionRow
+                key={sectionId}
+                sectionId={sectionId}
+                index={index}
+                total={sectionOrder.length}
+                filled={filled.has(sectionId)}
+              />
+            ))}
+          </ul>
+        </SortableContext>
+      </DndContext>
     </div>
   )
 }

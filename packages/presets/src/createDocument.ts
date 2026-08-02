@@ -12,7 +12,7 @@ export function createEmptyDocument(
 
   return {
     meta: {
-      schemaVersion: 2,
+      schemaVersion: 3,
       documentType,
       presetId,
       templateId: defaults.templateId ?? (documentType === 'resume' ? 'classic' : 'academic'),
@@ -21,6 +21,7 @@ export function createEmptyDocument(
       locale: defaults.locale,
       sectionOrder: defaults.sectionOrder ?? [...ALL_SECTIONS],
       hiddenSections: [],
+      sectionGuides: {},
       pageSize: defaults.pageSize ?? (documentType === 'resume' ? 'letter' : 'a4'),
       updatedAt: now,
     },

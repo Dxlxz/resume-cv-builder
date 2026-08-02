@@ -73,12 +73,14 @@ output also serves statically on Netlify, GitHub Pages, or any static host.
 ## AI assistance (optional)
 
 **Idrizz** is the built-in AI assistant: ask it to edit, add, or remove
-anything. Each form section has a round Idrizz icon, and the editor has an
-"Ask Idrizz" box with quick presets (rewrite summary, improve bullets,
-tailor to a job) plus free text. Idrizz replies with a typed JSON edit
-plan that is validated before anything is shown, and you review each
-change group (Apply / Discard) before it touches your document. Nothing is
-applied automatically, and the first use shows a consent notice.
+anything. Each form section has a round Idrizz icon, and a floating chat
+bubble (resizable) handles the conversation. Set a **section guide** (the
+pencil icon in any section header) to tell Idrizz exactly how to write
+that section - guides live in the document and travel with JSON
+export/import. Idrizz replies with a typed JSON edit plan that is
+validated before anything is shown, and you review each change group
+(Apply / Discard) before it touches your document. Nothing is applied
+automatically, and the first use shows a consent notice.
 
 AI calls go through a small serverless proxy (`api/ai.ts`) so the API key
 never ships in the client bundle. The upstream is OpenCode Go

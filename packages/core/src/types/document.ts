@@ -1,6 +1,6 @@
 export type DocumentType = 'resume' | 'cv'
 export type PageSize = 'letter' | 'a4'
-export type SchemaVersion = 1 | 2
+export type SchemaVersion = 1 | 2 | 3
 
 export const PRESET_IDS = ['malaysia-corporate', 'international-generic'] as const
 export type PresetId = (typeof PRESET_IDS)[number]
@@ -63,7 +63,7 @@ export interface DocumentMetaV1 {
 }
 
 export interface DocumentMeta {
-  schemaVersion: 2
+  schemaVersion: 3
   documentType: DocumentType
   presetId: PresetId
   templateId: TemplateId
@@ -72,6 +72,8 @@ export interface DocumentMeta {
   locale: Locale
   sectionOrder: SectionId[]
   hiddenSections: SectionId[]
+  /** Per-section instructions for the AI assistant (Idrizz). */
+  sectionGuides: Partial<Record<SectionId, string>>
   pageSize: PageSize
   updatedAt: string
 }

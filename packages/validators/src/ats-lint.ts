@@ -1,6 +1,6 @@
 import type { ResumeDocument } from '@rb/core/types/document'
 import { SECTION_LABELS } from '@rb/core/types/document'
-import { validateForExport } from '@rb/core/schema/v2'
+import { validateForExport } from '@rb/core/schema/v3'
 import { getPreset } from '@rb/presets/registry'
 import { getTheme } from '@rb/themes/registry'
 import type { ValidatorId } from '@rb/presets/types'

@@ -7,13 +7,13 @@ import { createEmptyDocument } from '@rb/presets/createDocument'
 import { sampleResume } from '@rb/fixtures'
 import { MAX_IMPORT_BYTES } from '@/lib/utils'
 
-describe('resumeDocumentSchema v2', () => {
+describe('resumeDocumentSchema v3', () => {
   it('accepts a valid minimal document', () => {
     const doc = createEmptyDocument('resume')
     const result = safeParseDocument(doc)
     expect(result.success).toBe(true)
     if (result.success) {
-      expect(result.data.meta.schemaVersion).toBe(2)
+      expect(result.data.meta.schemaVersion).toBe(3)
     }
   })
 

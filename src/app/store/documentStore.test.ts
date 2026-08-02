@@ -76,4 +76,16 @@ describe('document store onboarding', () => {
     expect(state.recoverableBackup).toBe(false)
     expect(localStorage.getItem(RECOVERY_KEY)).toBeNull()
   })
+
+  it('sets and clears a section guide', () => {
+    useDocumentStore.getState().startFromSample('resume', 'malaysia-corporate')
+
+    useDocumentStore.getState().updateSectionGuide('summary', 'British English, 2-4 sentences.')
+    expect(useDocumentStore.getState().document?.meta.sectionGuides.summary).toBe(
+      'British English, 2-4 sentences.',
+    )
+
+    useDocumentStore.getState().updateSectionGuide('summary', '   ')
+    expect(useDocumentStore.getState().document?.meta.sectionGuides.summary).toBeUndefined()
+  })
 })

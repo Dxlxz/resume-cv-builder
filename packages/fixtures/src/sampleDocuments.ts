@@ -12,7 +12,8 @@ import { createId } from '@rb/core/utils'
  */
 
 const baseMeta = {
-  schemaVersion: 2 as const,
+  schemaVersion: 3 as const,
+  sectionGuides: {},
   sectionOrder: [
     'contact',
     'summary',

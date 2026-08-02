@@ -316,7 +316,9 @@ export function buildDocumentContext(document: ResumeDocument): string {
     meta: {
       documentType: document.meta.documentType,
       presetId: document.meta.presetId,
+      sectionOrder: document.meta.sectionOrder,
       hiddenSections: document.meta.hiddenSections,
+      sectionGuides: document.meta.sectionGuides,
     },
     summary: document.summary,
     experience: document.experience.map((e) => ({

@@ -80,6 +80,8 @@ interface DocumentState {
   dismissRecovery: () => void
   applyPreset: (presetId: PresetId) => void
   setDocument: (document: ResumeDocument) => void
+  /** Sets or clears the AI guide for a section (empty text clears it). */
+  updateSectionGuide: (sectionId: SectionId, text: string) => void
   /** Applies a validated Idrizz edit plan to the current document. */
   applyAiEditPlan: (plan: AiEditPlan) => void
   setDocumentType: (type: DocumentType) => void
@@ -124,7 +126,7 @@ function applyPresetToDocument(
     ...(preserveContent ? doc : createEmptyDocument(d.documentType, presetId)),
     meta: {
       ...doc.meta,
-      schemaVersion: 2,
+      schemaVersion: 3,
       presetId,
       templateId: d.templateId,
       themeId: d.themeId,
@@ -309,6 +311,18 @@ export const useDocumentStore = create<DocumentState>((set, get) => {
 
   setDocument: (document) => {
     set({ document: touchMeta(document), exportFieldErrors: {}, pdfError: null, lintIssues: [] })
+  },
+
+  updateSectionGuide: (sectionId, text) => {
+    const current = get().document
+    if (!current) return
+    const trimmed = text.trim()
+    const guides = { ...current.meta.sectionGuides }
+    if (trimmed) guides[sectionId] = trimmed
+    else delete guides[sectionId]
+    set({
+      document: touchMeta({ ...current, meta: { ...current.meta, sectionGuides: guides } }),
+    })
   },
 
   applyAiEditPlan: (plan) => {

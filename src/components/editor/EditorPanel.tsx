@@ -3,7 +3,8 @@ import { useDocumentStore } from '@/app/store/documentStore'
 import { type SectionId } from '@rb/core/types/document'
 import { getSectionLabel } from '@rb/core/selectors/getSectionLabel'
 import { getPreset } from '@rb/presets/registry'
-import { SectionList } from '@/components/editor/SectionList'
+import { SectionListContent } from '@/components/editor/SectionList'
+import { DocumentSettingsContent } from '@/components/editor/DocumentSettings'
 import { ContactForm } from '@/components/editor/ContactForm'
 import { SummaryForm } from '@/components/editor/SummaryForm'
 import { ExperienceForm } from '@/components/editor/ExperienceForm'
@@ -13,12 +14,11 @@ import { ProjectsForm } from '@/components/editor/ProjectsForm'
 import { CertificationsForm } from '@/components/editor/CertificationsForm'
 import { VolunteerForm } from '@/components/editor/VolunteerForm'
 import { ReferencesForm } from '@/components/editor/ReferencesForm'
-import { DocumentSettings } from '@/components/editor/DocumentSettings'
 import { IdrizzIconButton } from '@/components/ai/IdrizzIconButton'
 import { FormSection } from '@/components/ui/FormSection'
+import { Popover } from '@/components/ui/Popover'
 import { Button } from '@/components/ui/Button'
 import { filledSectionIds } from '@/lib/sectionStatus'
-import { scrollToFormSection } from '@/lib/scrollToSection'
 
 const SECTION_FORMS: Record<SectionId, ComponentType> = {
   contact: ContactForm,
@@ -30,11 +30,6 @@ const SECTION_FORMS: Record<SectionId, ComponentType> = {
   projects: ProjectsForm,
   volunteer: VolunteerForm,
   references: ReferencesForm,
-}
-
-interface EditorPanelProps {
-  /** Opens the floating Idrizz chat with a prefilled instruction. */
-  onAskIdrizz: (instruction: string) => void
 }
 
 const SECTION_HINTS: Partial<Record<SectionId, string>> = {
@@ -61,11 +56,17 @@ const SECTION_AI_HINTS: Partial<Record<SectionId, string>> = {
   contact: 'Review my contact section for anything missing.',
 }
 
+interface EditorPanelProps {
+  /** Opens the floating Idrizz chat with a prefilled instruction. */
+  onAskIdrizz: (instruction: string) => void
+}
+
 export function EditorPanel({ onAskIdrizz }: EditorPanelProps) {
   const document = useDocumentStore((s) => s.document)
   const showOnboarding = useDocumentStore((s) => s.showOnboarding)
   const dismissOnboarding = useDocumentStore((s) => s.dismissOnboarding)
   const startFromSample = useDocumentStore((s) => s.startFromSample)
+  const updateSectionGuide = useDocumentStore((s) => s.updateSectionGuide)
 
   if (!document) return null
 
@@ -75,39 +76,52 @@ export function EditorPanel({ onAskIdrizz }: EditorPanelProps) {
     (sectionId) => sectionId === 'contact' || !hidden.has(sectionId),
   )
   const filled = filledSectionIds(document, visibleSections)
+  const done = filled.size
+  const total = visibleSections.length
+  const progress = total > 0 ? Math.round((done / total) * 100) : 0
 
   return (
     <div className="space-y-5">
-      <DocumentSettings />
-
-      <nav
-        aria-label="Sections"
-        className="sticky top-0 z-10 -mx-4 flex flex-wrap gap-1.5 bg-sidebar px-4 py-2 lg:-mx-5 lg:px-5"
-      >
-        {visibleSections.map((sectionId) => {
-          const label = getSectionLabel(sectionId, preset.labels)
-          return (
-            <button
-              key={sectionId}
-              type="button"
-              onClick={() => scrollToFormSection(sectionId)}
-              className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs transition-colors duration-[var(--duration-state)] ${
-                filled.has(sectionId)
-                  ? 'border-border bg-card text-foreground hover:border-foreground/30'
-                  : 'border-border/60 bg-transparent text-muted-foreground hover:border-foreground/30 hover:text-foreground'
-              }`}
+      <div className="rounded-md border border-border bg-card shadow-[var(--shadow-raised)]">
+        <div className="flex items-center gap-3 px-4 py-3">
+          <div className="min-w-0 flex-1">
+            <p className="text-sm font-semibold text-foreground">
+              {done} of {total} sections done
+            </p>
+            <div
+              aria-hidden
+              className="mt-1.5 h-1 w-full overflow-hidden rounded-full bg-muted"
             >
-              <span
-                aria-hidden
-                className={`h-1.5 w-1.5 shrink-0 rounded-full ${
-                  filled.has(sectionId) ? 'bg-status-success' : 'bg-foreground/20'
-                }`}
+              <div
+                className="h-full rounded-full bg-status-success transition-all duration-[var(--duration-state)]"
+                style={{ width: `${progress}%` }}
               />
-              {label}
-            </button>
-          )
-        })}
-      </nav>
+            </div>
+          </div>
+          <Popover
+            ariaLabel="Document settings"
+            trigger={
+              <Button type="button" variant="secondary" size="sm">
+                Document
+              </Button>
+            }
+            className="w-72"
+          >
+            <DocumentSettingsContent />
+          </Popover>
+          <Popover
+            ariaLabel="Sections management"
+            trigger={
+              <Button type="button" variant="secondary" size="sm">
+                Sections
+              </Button>
+            }
+            className="w-80"
+          >
+            <SectionListContent />
+          </Popover>
+        </div>
+      </div>
 
       {showOnboarding && (
         <div className="rounded-md border border-status-info/30 bg-badge-info p-4 text-sm text-status-info-foreground">
@@ -139,8 +153,6 @@ export function EditorPanel({ onAskIdrizz }: EditorPanelProps) {
         </div>
       )}
 
-      <SectionList />
-
       <div className="space-y-4">
         {document.meta.sectionOrder.map((sectionId) => {
           if (sectionId !== 'contact' && hidden.has(sectionId)) return null
@@ -153,6 +165,8 @@ export function EditorPanel({ onAskIdrizz }: EditorPanelProps) {
               hint={SECTION_HINTS[sectionId]}
               defaultOpen={sectionId === 'contact' || sectionId === 'summary'}
               filled={filled.has(sectionId)}
+              guide={document.meta.sectionGuides[sectionId]}
+              onGuideChange={(text) => updateSectionGuide(sectionId, text)}
               action={
                 <IdrizzIconButton
                   label={`Ask Idrizz about ${getSectionLabel(sectionId, preset.labels)}`}

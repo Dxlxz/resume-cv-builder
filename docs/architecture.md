@@ -1,6 +1,6 @@
 # Full System Architecture
 
-Resume & CV Builder — local-first, browser-based document editor with ATS-aware PDF export.
+Rizzume - local-first, browser-based document editor with ATS-aware PDF export.
 
 **Quick reference:** [../ARCHITECTURE.md](../ARCHITECTURE.md) · **Engine decision:** [../ENGINE_DECISION.md](../ENGINE_DECISION.md) · **Specs:** [../.kiro/README.md](../.kiro/README.md)
 
@@ -8,22 +8,22 @@ Resume & CV Builder — local-first, browser-based document editor with ATS-awar
 
 ## Table of contents
 
-1. [Part 1 — General](#part-1--general)
-2. [Part 2 — Detailed](#part-2--detailed)
-3. [Part 3 — Technical](#part-3--technical)
+1. [Part 1 - General](#part-1--general)
+2. [Part 2 - Detailed](#part-2--detailed)
+3. [Part 3 - Technical](#part-3--technical)
 
 ---
 
-# Part 1 — General
+# Part 1 - General
 
 ## 1.1 Purpose
 
-The Resume & CV Builder is a **single-page application** that lets users create structured resumes and CVs without an account. Users edit content in a form-based editor, see a **live PDF preview**, run **ATS and regional lint checks**, and **export a text-selectable PDF** suitable for job portals (JobStreet, Maukerja, email applications).
+Rizzume is a **single-page application** that lets users create structured resumes and CVs without an account. Users edit content in a form-based editor, see a **live PDF preview**, run **ATS and regional lint checks**, and **export a text-selectable PDF** suitable for job portals (JobStreet, Maukerja, email applications).
 
 Primary audiences:
 
-- **Malaysia corporate** applicants — ATS-strict template, A4, navy accent, British English hints
-- **International** applicants — classic template, US Letter, standard export profile
+- **Malaysia corporate** applicants - ATS-strict template, A4, navy accent, British English hints
+- **International** applicants - classic template, US Letter, standard export profile
 
 ## 1.2 System constraints
 
@@ -58,7 +58,7 @@ flowchart LR
 
 ## 1.4 Architectural style
 
-**Modular monolith** — one deployable SPA with strict module boundaries. No microservices, no shared database. Modules communicate through typed interfaces and Zustand stores, not through a network layer.
+**Modular monolith** - one deployable SPA with strict module boundaries. No microservices, no shared database. Modules communicate through typed interfaces and Zustand stores, not through a network layer.
 
 ## 1.5 Core principle
 
@@ -106,17 +106,17 @@ There is no API server, authentication provider, or cloud storage in the current
 
 ---
 
-# Part 2 — Detailed
+# Part 2 - Detailed
 
 ## 2.1 Bounded contexts
 
 | Module | Path | Responsibility |
 |--------|------|----------------|
 | **core** | `packages/core/src/` | `ResumeDocument` schema (v1/v2), Zod parsing, Zustand document store |
-| **presets** | `packages/presets/src/` | Regional defaults — template, theme, page size, validators, section labels |
-| **themes** | `packages/themes/src/` | Visual tokens — colors, typography scale, layout profile, font stacks |
+| **presets** | `packages/presets/src/` | Regional defaults - template, theme, page size, validators, section labels |
+| **themes** | `packages/themes/src/` | Visual tokens - colors, typography scale, layout profile, font stacks |
 | **templates** | `packages/templates/src/` | Thin PDF entrypoints; layout profile overrides per template |
-| **layout** | `packages/layout/src/` | Compile IR, DOM measure, page plan, PDF hints — **no UI chrome, no final PDF** |
+| **layout** | `packages/layout/src/` | Compile IR, DOM measure, page plan, PDF hints - **no UI chrome, no final PDF** |
 | **render** | `packages/render/src/` | Shared block components (`LayoutBlockHtml`, `LayoutBlockPdf`) + `RenderBackend` contract |
 | **renderers** | `src/renderers/` | PDF generation orchestration, style resolution, PDF.js helpers, download |
 | **validators** | `packages/validators/src/` | ATS, typography, spacing, layout, pagination, regional lint |
@@ -180,7 +180,7 @@ flowchart TB
   catalog --> presets
 ```
 
-## 2.4 Data flow diagram — Level 0
+## 2.4 Data flow diagram - Level 0
 
 ```mermaid
 flowchart LR
@@ -198,7 +198,7 @@ flowchart LR
   User -->|view download| PDF
 ```
 
-## 2.5 Data flow diagram — Level 1
+## 2.5 Data flow diagram - Level 1
 
 ```mermaid
 flowchart TB
@@ -251,7 +251,7 @@ flowchart TB
 | P6 Persist | `usePersistence`, `catalogStore` | State → localStorage |
 | P7 Admin | `CatalogAdminPage` | CRUD on catalog overrides |
 
-## 2.6 Entity-relationship — document model
+## 2.6 Entity-relationship - document model
 
 ```mermaid
 erDiagram
@@ -324,7 +324,7 @@ erDiagram
 
 Schema versions: v1 drafts are migrated to v2 on load (`migrateV1ToV2`). v2 adds `presetId`, `themeId`, `exportProfile`, and `locale`.
 
-## 2.7 Entity-relationship — catalog model
+## 2.7 Entity-relationship - catalog model
 
 Catalog entries are **suggestions**. The resume document stores plain label strings, not catalog IDs.
 
@@ -369,7 +369,7 @@ Bundles: `malaysia-default` (preset `malaysia-corporate`), `international-defaul
 
 ## 2.8 Application routing and onboarding
 
-Hash-based routing — no React Router.
+Hash-based routing - no React Router.
 
 ```mermaid
 flowchart TD
@@ -436,7 +436,7 @@ Forms write strings into `documentStore`. Catalog pickers resolve labels via `ca
 
 ---
 
-# Part 3 — Technical
+# Part 3 - Technical
 
 ## 3.1 Layout intermediate representation
 
@@ -446,7 +446,7 @@ Every piece of rendered content becomes a **`LayoutBlock`** in `packages/layout/
 |-------|---------|
 | `id` | Stable key for measure, plan, and PDF hints |
 | `type` | `header`, `sectionTitle`, `paragraph`, `bullet`, `skillGroup`, `experienceItem`, … |
-| `breakPolicy` | `auto` \| `keep` \| `keepWithNext` — pagination behavior |
+| `breakPolicy` | `auto` \| `keep` \| `keepWithNext` - pagination behavior |
 | `spacingBeforePt` / `spacingAfterPt` | Vertical rhythm owned by IR, not CSS margins |
 | `content` | Typed discriminated union (`kind: 'header'`, `kind: 'bullet'`, …) |
 
@@ -503,11 +503,11 @@ flowchart TB
 
 | Layer | Role |
 |-------|------|
-| `LayoutProfile` (theme) | Semantic intent — `nameToMetaPt`, `ruleToFirstSectionPt`, bullet gaps |
+| `LayoutProfile` (theme) | Semantic intent - `nameToMetaPt`, `ruleToFirstSectionPt`, bullet gaps |
 | `compileLayout` | Assigns per-block `spacingBeforePt` / `spacingAfterPt` |
 | `blockSpacing.ts` | Applies spacing once in HTML and PDF wrappers |
 | `resolveDocumentStyles` | Typography + colors; **section titles have `marginTop: 0`** |
-| react-pdf hints | Pagination only — not spacing |
+| react-pdf hints | Pagination only - not spacing |
 
 ## 3.3 Preview and export sequence
 
@@ -551,7 +551,7 @@ sequenceDiagram
 |---------|----------------|
 | Preview fidelity | Same blob for iframe and export |
 | Page drift | `paginateDriftIssue()` warns if export pages differ from preview by more than 1 |
-| Layout debug | `LayoutDebugInspector` reads `LayoutPlanResult` — schematic only, not pixel-synced to iframe |
+| Layout debug | `LayoutDebugInspector` reads `LayoutPlanResult` - schematic only, not pixel-synced to iframe |
 | Debounce | `usePdfPreview` 400ms; `useLayoutPlan` 300ms |
 
 ## 3.4 RenderBackend contract
@@ -578,7 +578,7 @@ interface RenderBackend {
 |---------|--------|------|
 | react-pdf + block walker | **v1 (shipped)** | `renderDocumentToPdf` → `BlockLayoutPdf` |
 | `reactPdfBackend` | Pluggable adapter | `packages/render/src/reactPdfBackend.tsx` |
-| Forme | v2 candidate | Not implemented — see [ENGINE_DECISION.md](../ENGINE_DECISION.md) |
+| Forme | v2 candidate | Not implemented - see [ENGINE_DECISION.md](../ENGINE_DECISION.md) |
 
 ### Font registration
 
@@ -660,12 +660,12 @@ Preset `validators` array filters which regional rules run (e.g. `malaysia-regio
 
 ## 3.8 Anti-patterns
 
-Avoid these — they caused spacing and parity bugs in earlier iterations:
+Avoid these - they caused spacing and parity bugs in earlier iterations:
 
-1. **Parallel render trees** — duplicate HTML preview JSX alongside measure renderer + PDF blocks (legacy HTML preview removed 2026-06-11)
-2. **Double spacing** — margins on both IR blocks and section title CSS
-3. **SVG overlay on browser PDF plugin** — opaque canvas; cannot align with blob
-4. **DOM measure as PDF proof** — Yoga layout ≠ CSS; use plan vs `countPdfPages` for parity
+1. **Parallel render trees** - duplicate HTML preview JSX alongside measure renderer + PDF blocks (legacy HTML preview removed 2026-06-11)
+2. **Double spacing** - margins on both IR blocks and section title CSS
+3. **SVG overlay on browser PDF plugin** - opaque canvas; cannot align with blob
+4. **DOM measure as PDF proof** - Yoga layout ≠ CSS; use plan vs `countPdfPages` for parity
 
 ## 3.9 File map
 
@@ -711,7 +711,7 @@ src/
 | New render backend | Implement `RenderBackend`; swap in generate path | Forme candidate |
 | DOCX export | New `renderers/docx/` from same `ResolvedStyles` + document | Future spec |
 | JSON Resume import | `adapters/jsonResume.ts` | Future spec |
-| Content coach | `coaches/` module — STAR, verb picker | Future spec |
+| Content coach | `coaches/` module - STAR, verb picker | Future spec |
 | Regional presets v2 | New preset definitions + bundles | Future spec |
 | New template | Add `TEMPLATE_LAYOUTS` entry + thin `*Pdf.tsx` delegating to `BlockLayoutPdf` | Supported today |
 | New theme | `createTheme()` + registry entry | Supported today |
@@ -729,4 +729,4 @@ src/
 
 ---
 
-*Last updated: 2026-06-11 — reflects as-built codebase (schema v2, layout engine v1, Carlito PDF fonts).*
+*Last updated: 2026-06-11 - reflects as-built codebase (schema v2, layout engine v1, Carlito PDF fonts).*

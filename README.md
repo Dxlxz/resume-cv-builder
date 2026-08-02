@@ -1,6 +1,6 @@
-# Resume & CV Builder
+# Rizzume
 
-A browser-based resume and CV builder with live preview, templates, auto-save, and PDF export. No account required — drafts are stored in your browser.
+Rizzume is a browser-based resume and CV builder with live preview, templates, auto-save, and PDF export. No account required — drafts are stored in your browser.
 
 ## Features
 

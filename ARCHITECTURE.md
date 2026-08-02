@@ -1,8 +1,8 @@
-# Resume & CV Builder — Architecture
+# Rizzume - Architecture
 
 > **Quick reference.** Full system architecture (DFD, ERD, flows, module map): [docs/architecture.md](docs/architecture.md)
 
-**Style:** modular monolith (pnpm workspace — engine packages under `packages/*`, thin app shell in `src/`).
+**Style:** modular monolith (pnpm workspace - engine packages under `packages/*`, thin app shell in `src/`).
 
 ## Principle
 
@@ -14,7 +14,7 @@
 | Module | Package / Path | Responsibility |
 |--------|----------------|----------------|
 | **core** | `@rb/core` (`packages/core/`) | `ResumeDocument`, schema, migration, selectors, utils |
-| **layout** | `@rb/layout` (`packages/layout/`) | Compile IR, measure, plan, lint — **no UI, no PDF** |
+| **layout** | `@rb/layout` (`packages/layout/`) | Compile IR, measure, plan, lint - **no UI, no PDF** |
 | **render** | `@rb/render` (`packages/render/`) | Block views + `RenderBackend` adapters + react-pdf document adapter |
 | **styles** | `@rb/styles` (`packages/styles/`) | `resolveDocumentStyles`, page specs, shared style types, UDS CSS tokens |
 | **templates** | `@rb/templates` (`packages/templates/`) | Template entrypoints (thin) + shared block layout |
@@ -46,7 +46,7 @@ planPages() ──► PagePlan + blockHints
     ▼
 RenderBackend.render(layout, plan, styles) ──► Blob
     │
-    ├─► PreviewHost (iframe — output only)
+    ├─► PreviewHost (iframe - output only)
     └─► Export / download
 ```
 
@@ -60,10 +60,10 @@ Every vertical rhythm value is on the **block**:
 
 **Measure** and **PDF** both walk `layout.blocks[]` via shared block components:
 
-- `LayoutBlockHtml` — DOM measure
-- `LayoutBlockPdf` — react-pdf paint
+- `LayoutBlockHtml` - DOM measure
+- `LayoutBlockPdf` - react-pdf paint
 
-Templates (e.g. ATS Strict) only choose **which compiler** runs and page size — not parallel JSX trees.
+Templates (e.g. ATS Strict) only choose **which compiler** runs and page size - not parallel JSX trees.
 
 ## Spacing rules
 
@@ -79,8 +79,8 @@ Templates (e.g. ATS Strict) only choose **which compiler** runs and page size �
 
 | Feature | Correct model |
 |---------|----------------|
-| Live preview | iframe of PDF blob — WYSIWYG |
-| Layout debug | **Inspector + schematic** from `LayoutPlanResult` — never pixel-synced to iframe |
+| Live preview | iframe of PDF blob - WYSIWYG |
+| Layout debug | **Inspector + schematic** from `LayoutPlanResult` - never pixel-synced to iframe |
 | Parity CI | `plan.pageCount` ≈ `countPdfPages(blob)` |
 
 ## RenderBackend (v1 / v2)
@@ -92,16 +92,16 @@ interface RenderBackend {
 }
 ```
 
-- **v1:** `reactPdfBackend` — `@react-pdf/renderer` + block walker
-- **v2 candidate:** Forme adapter — same `RenderInput`, swap backend
+- **v1:** `reactPdfBackend` - `@react-pdf/renderer` + block walker
+- **v2 candidate:** Forme adapter - same `RenderInput`, swap backend
 
 See [ENGINE_DECISION.md](./ENGINE_DECISION.md).
 
 ## Anti-patterns (avoid)
 
-1. Parallel render trees (duplicate HTML preview + MeasureRenderer + PDF blocks — HTML preview removed)
+1. Parallel render trees (duplicate HTML preview + MeasureRenderer + PDF blocks - HTML preview removed)
 2. Spacing margins on both IR blocks **and** section title CSS
-3. SVG overlay on browser PDF plugin (opaque — cannot align)
+3. SVG overlay on browser PDF plugin (opaque - cannot align)
 4. Using DOM measure as proof of PDF spacing (Yoga ≠ CSS)
 
 ## File map (layout + render)

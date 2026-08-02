@@ -56,7 +56,7 @@ export function Brand({ showName = true, nameClassName = '' }: BrandProps) {
       <BrandMark />
       {showName && (
         <span className={`text-[15px] font-semibold tracking-tight text-foreground ${nameClassName}`}>
-          Resume &amp; CV Builder
+          Rizzume
         </span>
       )}
     </span>

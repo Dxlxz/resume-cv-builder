@@ -191,7 +191,7 @@ export function LandingPage({
             </span>
 
             <h1 className="mt-5 text-4xl font-semibold leading-[1.08] tracking-tight text-background sm:text-5xl">
-              Resumes that clear ATS.
+              Resumes with rizz.
             </h1>
 
             <p className="mt-4 max-w-xl text-base leading-relaxed text-background/80 sm:text-lg">
@@ -219,11 +219,6 @@ export function LandingPage({
             <HeroPdfCard />
           </div>
         </div>
-
-        <div
-          className="pointer-events-none absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-background to-transparent"
-          aria-hidden
-        />
       </section>
 
       {/* --- Examples --- */}
@@ -296,7 +291,7 @@ export function LandingPage({
       <footer className="border-t border-border">
         <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3 px-5 py-6 text-xs text-muted-foreground">
           <p>
-            © 2026 Resume &amp; CV Builder. Drafts stay in your browser. AI assistance
+            © 2026 Rizzume. Drafts stay in your browser. AI assistance
             is opt-in and sends text to an external service that stores nothing.
           </p>
           <button

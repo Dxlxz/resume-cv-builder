@@ -343,7 +343,6 @@ export function Toolbar({ onHome, previewVisible, onTogglePreview }: ToolbarProp
 
       {showLintPanel && (
         <LintPanel
-          issues={lintIssues}
           onClose={() => {
             setShowLintPanel(false)
             setPendingExport(false)

@@ -39,6 +39,24 @@ describe('planPages', () => {
     expect(plan.fillRatio.length).toBe(plan.pageCount)
   })
 
+  it('keeps box-drawing invariants: one slice per block, y on page, fits page', async () => {
+    const layout = compileStandardLayout(sampleProfileDocument)
+    const styles = resolveDocumentStyles(sampleProfileDocument)
+    const measured = await measureLayout(layout, styles)
+    const plan = planPages(measured.blocks, layout.contentHeightPt, layout.contentWidthPt)
+    const blocksById = new Map(measured.blocks.map((b) => [b.id, b]))
+
+    expect(plan.slices.length).toBe(measured.blocks.length)
+    for (const slice of plan.slices) {
+      const block = blocksById.get(slice.blockId)
+      expect(block).toBeDefined()
+      expect(slice.pageIndex).toBeGreaterThanOrEqual(0)
+      expect(slice.pageIndex).toBeLessThan(plan.pageCount)
+      expect(slice.yPt).toBeGreaterThanOrEqual(0)
+      expect(slice.yPt + block!.bbox.height).toBeLessThanOrEqual(plan.contentHeightPt + 0.001)
+    }
+  })
+
   it('avoids orphan section titles when possible', async () => {
     const layout = compileStandardLayout(sampleProfileDocument)
     const styles = resolveDocumentStyles(sampleProfileDocument)

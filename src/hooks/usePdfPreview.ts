@@ -15,7 +15,6 @@ import { countPdfPages } from '@/renderers/pdf/countPdfPages'
 const DEBOUNCE_MS = 400
 
 export interface PdfPreviewOptions {
-  layoutDebug?: boolean
   containerWidth?: number
   zoomMode?: 'fit' | '100'
 }
@@ -32,12 +31,20 @@ export interface PdfPreviewState {
   revision: number
 }
 
+/**
+ * Live PDF preview state. Two phases:
+ *  1. blob generation, keyed on the content revision (debounced), with the
+ *     layout plan committed atomically;
+ *  2. pdf.js layout parse, keyed on the blob + container width, so panel
+ *     resizes re-render pages at the new scale without regenerating the
+ *     PDF.
+ */
 export function usePdfPreview(
   document: ResumeDocument,
   contentKey: string,
   options: PdfPreviewOptions = {},
 ): PdfPreviewState {
-  const { layoutDebug = false, containerWidth = 0, zoomMode = 'fit' } = options
+  const { containerWidth = 0, zoomMode = 'fit' } = options
 
   const [state, setState] = useState<PdfPreviewState>({
     loading: true,
@@ -58,6 +65,7 @@ export function usePdfPreview(
     documentRef.current = document
   }, [document])
 
+  // Phase 1: generate the blob for this content revision.
   useEffect(() => {
     const currentRequest = ++requestId.current
     let cancelled = false
@@ -77,38 +85,19 @@ export function usePdfPreview(
         const blob = await generatePdfWithPlan(documentRef.current, plan)
         if (cancelled || currentRequest !== requestId.current) return
 
-        let pages: PdfPageLayout[] = []
-        let scale = 1
-        let pdf: PDFDocumentProxy | null = null
-
-        if (layoutDebug && containerWidth > 0) {
-          const layout = await loadPdfPreviewLayout(blob, { zoomMode, containerWidth })
-          if (cancelled || currentRequest !== requestId.current) return
-
-          if (pdfRef.current) {
-            await destroyPdfDocument(pdfRef.current)
-          }
-          pdfRef.current = layout.pdf
-          pages = layout.pages
-          scale = layout.scale
-          pdf = layout.pdf
-        }
-
+        useDocumentStore.getState().setLayoutPlan(plan)
         const pdfPageCount = await countPdfPages(blob)
         if (cancelled || currentRequest !== requestId.current) return
 
-        useDocumentStore.getState().setLayoutPlan(plan)
-        setState({
+        setState((prev) => ({
+          ...prev,
           loading: false,
           refreshing: false,
           error: null,
-          pages,
-          pageCount: pdfPageCount,
           blob,
-          scale,
-          pdf,
+          pageCount: pdfPageCount,
           revision: currentRequest,
-        })
+        }))
       } catch (err) {
         console.error('PDF preview failed:', err)
         if (cancelled || currentRequest !== requestId.current) return
@@ -134,7 +123,40 @@ export function usePdfPreview(
       cancelled = true
       clearTimeout(timer)
     }
-  }, [contentKey, layoutDebug, containerWidth, zoomMode])
+  }, [contentKey])
+
+  // Phase 2: parse the pdf.js layout at the current container width.
+  const { blob } = state
+  useEffect(() => {
+    if (!blob) return
+    let cancelled = false
+
+    const run = async () => {
+      try {
+        const layout = await loadPdfPreviewLayout(blob, { zoomMode, containerWidth })
+        if (cancelled) return
+
+        if (pdfRef.current) {
+          await destroyPdfDocument(pdfRef.current)
+        }
+        pdfRef.current = layout.pdf
+        setState((prev) => ({
+          ...prev,
+          pages: layout.pages,
+          scale: layout.scale,
+          pdf: layout.pdf,
+        }))
+      } catch {
+        if (cancelled) return
+        setState((prev) => ({ ...prev, pages: [], scale: 1, pdf: null }))
+      }
+    }
+
+    void run()
+    return () => {
+      cancelled = true
+    }
+  }, [blob, containerWidth, zoomMode])
 
   useEffect(() => {
     return () => {

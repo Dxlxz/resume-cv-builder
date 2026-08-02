@@ -26,7 +26,12 @@ vi.mock('@/renderers/pdf/countPdfPages', () => ({
 }))
 
 vi.mock('@/renderers/pdf/renderPdfWithPdfJs', () => ({
-  loadPdfPreviewLayout: vi.fn(),
+  loadPdfPreviewLayout: vi.fn(async () => ({
+    pages: [],
+    pageCount: 0,
+    scale: 1,
+    pdf: { destroy: vi.fn() },
+  })),
   destroyPdfDocument: vi.fn(async () => {}),
 }))
 

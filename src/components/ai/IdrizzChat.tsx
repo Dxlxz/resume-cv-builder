@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useDocumentStore } from '@/app/store/documentStore'
 import { useAi } from '@/hooks/useAi'
+import { useMediaQuery } from '@/hooks/useMediaQuery'
 import { useResizablePanel } from '@/hooks/useResizablePanel'
 import { buildDocumentContext, parseAiEditPlan, type AiEditPlan } from '@/lib/ai/edits'
 import { AiEditReview } from '@/components/ai/AiEditReview'
@@ -55,6 +56,7 @@ interface IdrizzChatProps {
 
 export function IdrizzChat({ open, onOpen, onClose }: IdrizzChatProps) {
   const document = useDocumentStore((s) => s.document)
+  const isMobile = useMediaQuery('(max-width: 767px)')
   const { result, busy, error, consentOpen, run, acceptConsent, declineConsent } = useAi('ai-edit')
   const { size, onPointerDown } = useResizablePanel({
     defaultSize: { width: 384, height: 512 },
@@ -136,13 +138,21 @@ export function IdrizzChat({ open, onOpen, onClose }: IdrizzChatProps) {
       role="dialog"
       aria-modal="true"
       aria-label="Chat with Idrizz"
-      className="fixed bottom-20 right-5 z-40 flex animate-chat-in flex-col overflow-hidden rounded-lg border border-border bg-card shadow-[var(--shadow-modal)]"
-      style={{
-        width: size.width,
-        height: size.height,
-        maxWidth: 'calc(100vw - 2rem)',
-        maxHeight: 'calc(100dvh - 7rem)',
-      }}
+      className={
+        isMobile
+          ? 'fixed inset-x-0 bottom-0 z-40 flex h-[min(85dvh,100dvh)] animate-chat-in flex-col overflow-hidden rounded-t-lg border border-b-0 border-border bg-card shadow-[var(--shadow-modal)]'
+          : 'fixed bottom-20 right-5 z-40 flex animate-chat-in flex-col overflow-hidden rounded-lg border border-border bg-card shadow-[var(--shadow-modal)]'
+      }
+      style={
+        isMobile
+          ? undefined
+          : {
+              width: size.width,
+              height: size.height,
+              maxWidth: 'calc(100vw - 2rem)',
+              maxHeight: 'calc(100dvh - 7rem)',
+            }
+      }
     >
       <header className="flex shrink-0 items-center gap-2.5 border-b border-border bg-header px-3 py-2.5">
         <span className="relative flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary" aria-hidden>
@@ -284,18 +294,20 @@ export function IdrizzChat({ open, onOpen, onClose }: IdrizzChatProps) {
         </div>
       </footer>
 
-      <div
-        role="separator"
-        aria-label="Resize chat"
-        aria-orientation="horizontal"
-        onPointerDown={onPointerDown}
-        className="absolute bottom-0 left-0 flex h-5 w-5 cursor-nesw-resize touch-none items-start justify-start p-1 text-muted-foreground/60 transition-colors duration-[var(--duration-state)] hover:text-muted-foreground"
-      >
-        <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
-          <path d="M22 14v8h-8l8-8z" />
-          <path d="M22 2v6L16 2h6zM2 22v-8l8 8H2z" />
-        </svg>
-      </div>
+      {!isMobile && (
+        <div
+          role="separator"
+          aria-label="Resize chat"
+          aria-orientation="horizontal"
+          onPointerDown={onPointerDown}
+          className="absolute bottom-0 left-0 flex h-5 w-5 cursor-nesw-resize touch-none items-start justify-start p-1 text-muted-foreground/60 transition-colors duration-[var(--duration-state)] hover:text-muted-foreground"
+        >
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+            <path d="M22 14v8h-8l8-8z" />
+            <path d="M22 2v6L16 2h6zM2 22v-8l8 8H2z" />
+          </svg>
+        </div>
+      )}
     </div>
   )
 }

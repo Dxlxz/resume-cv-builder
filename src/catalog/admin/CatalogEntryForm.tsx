@@ -40,7 +40,7 @@ export function CatalogEntryForm({ catalogType, entry, onSave, onCancel }: Catal
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-[var(--gray-1000)]/40 p-4">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-foreground/40 p-4">
       <form
         onSubmit={handleSubmit}
         className="w-full max-w-md space-y-4 rounded-md bg-overlay-surface p-6 text-overlay-foreground shadow-[var(--shadow-modal)]"

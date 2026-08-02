@@ -61,7 +61,7 @@ export function LintPanel({ issues, onClose, onProceed, showProceed }: LintPanel
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-[var(--gray-1000)]/40 p-4"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-foreground/40 p-4"
       role="dialog"
       aria-labelledby="lint-panel-title"
       aria-modal="true"

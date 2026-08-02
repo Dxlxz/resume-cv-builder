@@ -68,7 +68,7 @@ export function PdfJsPreview({ document, contentKey, containerWidth }: PdfJsPrev
       <div className="relative min-h-[20rem] min-w-0 flex-1">
         {refreshing && (
           <div
-            className="pointer-events-none absolute inset-0 z-10 flex items-start justify-center bg-[var(--gray-1000)]/20 pt-6"
+            className="pointer-events-none absolute inset-0 z-10 flex items-start justify-center bg-foreground/20 pt-6"
             aria-live="polite"
             aria-busy="true"
           >
@@ -83,7 +83,7 @@ export function PdfJsPreview({ document, contentKey, containerWidth }: PdfJsPrev
           key={revision}
           src={blobUrl}
           title="Resume PDF live preview"
-          className="h-full min-h-[20rem] w-full border-0 bg-[var(--gray-900)]"
+          className="h-full min-h-[20rem] w-full border-0 bg-muted"
         />
       </div>
 

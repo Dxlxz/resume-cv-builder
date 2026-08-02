@@ -15,6 +15,7 @@ import { CertificationsForm } from '@/components/editor/CertificationsForm'
 import { VolunteerForm } from '@/components/editor/VolunteerForm'
 import { ReferencesForm } from '@/components/editor/ReferencesForm'
 import { TailorToJob } from '@/components/ai/TailorToJob'
+import { DocumentSettings } from '@/components/editor/DocumentSettings'
 import { FormSection } from '@/components/ui/FormSection'
 import { Button } from '@/components/ui/Button'
 
@@ -56,6 +57,8 @@ export function EditorPanel() {
 
   return (
     <div className="space-y-5">
+      <DocumentSettings />
+
       <div className="rounded-md border border-border bg-card p-4 shadow-[var(--shadow-raised)]">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>

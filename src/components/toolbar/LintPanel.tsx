@@ -1,6 +1,7 @@
 import type { LintIssue } from '@rb/validators/types'
 import { useDocumentStore } from '@/app/store/documentStore'
 import { getSectionLabel } from '@rb/core/selectors/getSectionLabel'
+import { scoreDocument } from '@rb/validators/score'
 import { scrollToFormSection } from '@/lib/scrollToSection'
 import { Button } from '@/components/ui/Button'
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@/components/ui/Dialog'
@@ -9,6 +10,25 @@ const LEVEL_STYLES: Record<LintIssue['level'], string> = {
   error: 'border-status-danger/30 bg-badge-danger text-status-danger-foreground',
   warning: 'border-status-warning/30 bg-badge-warning text-status-warning-foreground',
   info: 'border-status-info/30 bg-badge-info text-status-info-foreground',
+}
+
+const BAND_TONES: Record<'excellent' | 'good' | 'fair' | 'poor', { stroke: string; chip: string }> = {
+  excellent: {
+    stroke: 'var(--color-status-success)',
+    chip: 'border-status-success/30 bg-badge-success text-status-success-foreground',
+  },
+  good: {
+    stroke: 'var(--color-status-warning)',
+    chip: 'border-status-warning/30 bg-badge-warning text-status-warning-foreground',
+  },
+  fair: {
+    stroke: 'var(--color-status-warning)',
+    chip: 'border-status-warning/30 bg-badge-warning text-status-warning-foreground',
+  },
+  poor: {
+    stroke: 'var(--color-status-danger)',
+    chip: 'border-status-danger/30 bg-badge-danger text-status-danger-foreground',
+  },
 }
 
 const GROUP_TITLES: Record<LintIssue['level'], string> = {
@@ -31,6 +51,12 @@ export function LintPanel({ issues, onClose, onProceed, showProceed }: LintPanel
   const errors = issues.filter((i) => i.level === 'error')
   const warnings = issues.filter((i) => i.level === 'warning')
   const infos = issues.filter((i) => i.level === 'info')
+  const score = scoreDocument(issues)
+  const tone = BAND_TONES[score.band]
+
+  const RADIUS = 34
+  const CIRCUMFERENCE = 2 * Math.PI * RADIUS
+  const dash = (score.score / 100) * CIRCUMFERENCE
 
   const pageSize = useDocumentStore((s) => s.document?.meta.pageSize)
   let pageInfo = [
@@ -98,10 +124,19 @@ export function LintPanel({ issues, onClose, onProceed, showProceed }: LintPanel
 
   const verdict =
     errors.length > 0
-      ? { tone: 'border-status-danger/30 bg-badge-danger text-status-danger-foreground', text: `Fix ${errors.length} error${errors.length === 1 ? '' : 's'} before exporting.` }
+      ? {
+          tone: 'border-status-danger/30 bg-badge-danger text-status-danger-foreground',
+          text: `Score ${score.score} - fix ${errors.length} error${errors.length === 1 ? '' : 's'} before exporting.`,
+        }
       : warnings.length > 0
-        ? { tone: 'border-status-warning/30 bg-badge-warning text-status-warning-foreground', text: `${warnings.length} warning${warnings.length === 1 ? '' : 's'} - review before exporting.` }
-        : { tone: 'border-status-success/30 bg-badge-success text-status-success-foreground', text: 'Ready to export.' }
+        ? {
+            tone: 'border-status-warning/30 bg-badge-warning text-status-warning-foreground',
+            text: `Score ${score.score} - ${warnings.length} warning${warnings.length === 1 ? '' : 's'} to review.`,
+          }
+        : {
+            tone: 'border-status-success/30 bg-badge-success text-status-success-foreground',
+            text: `Score ${score.score} - ready to export.`,
+          }
 
   return (
     <Dialog open onOpenChange={(open) => !open && onClose()}>
@@ -111,8 +146,36 @@ export function LintPanel({ issues, onClose, onProceed, showProceed }: LintPanel
           {pageInfo}
         </DialogDescription>
 
+        <div className="mt-4 flex items-center gap-4">
+          <svg viewBox="0 0 80 80" className="h-20 w-20 shrink-0" aria-hidden>
+            <circle cx="40" cy="40" r={RADIUS} fill="none" stroke="var(--border)" strokeWidth="7" />
+            <circle
+              cx="40"
+              cy="40"
+              r={RADIUS}
+              fill="none"
+              stroke={tone.stroke}
+              strokeWidth="7"
+              strokeLinecap="round"
+              strokeDasharray={`${dash} ${CIRCUMFERENCE - dash}`}
+              transform="rotate(-90 40 40)"
+            />
+          </svg>
+          <div className="min-w-0">
+            <p className="text-3xl font-bold leading-none text-foreground" aria-label={`ATS score ${score.score} out of 100`}>
+              {score.score}
+              <span className="text-base font-medium text-muted-foreground">/100</span>
+            </p>
+            <span className={`mt-2 inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs ${tone.chip}`}>
+              {score.bandLabel}
+            </span>
+          </div>
+        </div>
+
         <div className="mt-4 space-y-4">
-          <p className={`rounded-md border px-3 py-2 text-sm ${verdict.tone}`}>{verdict.text}</p>
+          <p className={`rounded-md border px-3 py-2 text-sm ${verdict.tone}`} aria-live="polite">
+            {verdict.text}
+          </p>
 
           {issues.length === 0 && (
             <p className="rounded-md border border-status-success/30 bg-badge-success px-3 py-2 text-sm text-status-success-foreground">

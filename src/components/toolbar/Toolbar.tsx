@@ -6,6 +6,7 @@ import { countPdfPages } from '@/renderers/pdf/countPdfPages'
 import { exportDocumentJson, importDocumentJson } from '@/lib/importExport'
 import { runValidation, hasBlockingErrors } from '@rb/validators/ats-lint'
 import { paginateDriftIssue } from '@rb/validators/paginate-lint'
+import { scoreDocument } from '@rb/validators/score'
 import { LintPanel } from '@/components/toolbar/LintPanel'
 import { PdfPreviewModal } from '@/components/toolbar/PdfPreviewModal'
 import { Button } from '@/components/ui/Button'
@@ -159,19 +160,48 @@ export function Toolbar({ onHome, previewVisible, onTogglePreview }: ToolbarProp
     }
   }
 
-  const saveLabel =
-    saveStatus === 'saving'
-      ? 'Saving…'
-      : saveStatus === 'error'
-        ? saveError ?? 'Save failed'
-        : 'Saved locally'
-
-  const saveTone =
+  const saveStatusBadge =
     saveStatus === 'error'
-      ? 'text-status-danger'
+      ? {
+          label: saveError ?? 'Save failed',
+          tone: 'border-status-danger/30 bg-badge-danger text-status-danger-foreground',
+          icon: (
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+              <path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+              <line x1="12" y1="9" x2="12" y2="13" />
+              <line x1="12" y1="17" x2="12.01" y2="17" />
+            </svg>
+          ),
+        }
       : saveStatus === 'saving'
-        ? 'text-status-warning'
-        : 'text-status-success'
+        ? {
+            label: 'Saving…',
+            tone: 'border-status-warning/30 bg-badge-warning text-status-warning-foreground',
+            icon: (
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                <circle cx="12" cy="12" r="10" />
+                <path d="M12 6v6l4 2" />
+              </svg>
+            ),
+          }
+        : {
+            label: 'Saved locally',
+            tone: 'border-status-success/30 bg-badge-success text-status-success-foreground',
+            icon: (
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                <path d="M20 6 9 17l-5-5" />
+              </svg>
+            ),
+          }
+
+  const atsScore = lintIssues.length > 0 ? scoreDocument(lintIssues) : null
+  const atsChipTone = atsScore
+    ? atsScore.band === 'excellent'
+      ? 'border-status-success/30 bg-badge-success text-status-success-foreground'
+      : atsScore.band === 'poor'
+        ? 'border-status-danger/30 bg-badge-danger text-status-danger-foreground'
+        : 'border-status-warning/30 bg-badge-warning text-status-warning-foreground'
+    : ''
 
   return (
     <>
@@ -185,15 +215,23 @@ export function Toolbar({ onHome, previewVisible, onTogglePreview }: ToolbarProp
               <span className="font-normal text-muted-foreground"> · {preset.name}</span>
             </h1>
             <span
-              className={`ml-auto inline-flex shrink-0 items-center gap-1.5 rounded-full border border-border bg-card px-2.5 py-1 text-xs ${saveTone}`}
+              className={`ml-auto inline-flex shrink-0 items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs ${saveStatusBadge.tone}`}
               aria-live="polite"
               title={saveStatus === 'error' && saveError ? saveError : undefined}
             >
-              <span aria-hidden className={`h-1.5 w-1.5 rounded-full ${saveTone}`} />
-              {saveLabel}
+              {saveStatusBadge.icon}
+              {saveStatusBadge.label}
             </span>
-            <Button variant="secondary" size="sm" onClick={runAtsCheck} className="shrink-0">
+            <Button variant="secondary" size="sm" onClick={runAtsCheck} className="shrink-0 gap-1.5">
               ATS Check
+              {atsScore && (
+                <span
+                  className={`inline-flex h-4 min-w-4 items-center justify-center rounded-full border px-1 text-[10px] font-semibold ${atsChipTone}`}
+                  aria-label={`ATS score ${atsScore.score} out of 100`}
+                >
+                  {atsScore.score}
+                </span>
+              )}
             </Button>
             <Button
               size="sm"

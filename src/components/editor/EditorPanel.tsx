@@ -44,6 +44,7 @@ export function EditorPanel() {
   const document = useDocumentStore((s) => s.document)
   const showOnboarding = useDocumentStore((s) => s.showOnboarding)
   const dismissOnboarding = useDocumentStore((s) => s.dismissOnboarding)
+  const startFromSample = useDocumentStore((s) => s.startFromSample)
 
   if (!document) return null
 
@@ -56,28 +57,30 @@ export function EditorPanel() {
         <div className="rounded-md border border-status-info/30 bg-badge-info p-4 text-sm text-status-info-foreground">
           <p className="font-semibold">Welcome — {preset.name}</p>
           <p className="mt-1 text-status-info-foreground/90">
-            Fill in each section below. Your preview updates on the right as you type.
+            Three quick steps to an ATS-ready document:
           </p>
-          <ul className="mt-3 list-disc space-y-1 pl-5">
-            {preset.hints.map((hint) => (
-              <li key={hint}>{hint}</li>
-            ))}
+          <ol className="mt-3 list-decimal space-y-1.5 pl-5">
             <li>
-              Customize skill lists and job titles in{' '}
-              <a href="#/admin" className="font-medium text-primary underline">
-                Manage catalogs
-              </a>
-              .
+              Fill in your details — the live preview on the right updates as
+              you type.
             </li>
-          </ul>
-          <Button
-            type="button"
-            variant="secondary"
-            className="mt-4"
-            onClick={dismissOnboarding}
-          >
-            Got it
-          </Button>
+            <li>Add sections you need (skills, projects, references) from the section list.</li>
+            <li>Run the ATS check in the toolbar, then export your PDF.</li>
+          </ol>
+          <div className="mt-4 flex flex-wrap gap-2">
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={() =>
+                startFromSample(document.meta.documentType, document.meta.presetId)
+              }
+            >
+              Start from a sample instead
+            </Button>
+            <Button type="button" onClick={dismissOnboarding}>
+              Got it
+            </Button>
+          </div>
         </div>
       )}
 

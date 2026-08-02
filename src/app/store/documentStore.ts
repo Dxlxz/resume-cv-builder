@@ -16,6 +16,11 @@ import { themeForDocument } from '@rb/themes/registry'
 import { clearStorage, loadFromStorage } from '@/lib/persistence'
 import type { LintIssue } from '@rb/validators/types'
 import type { LayoutPlanResult } from '@rb/layout/types'
+import {
+  sampleCvDocument,
+  sampleInternationalResumeDocument,
+  sampleResumeDocument,
+} from '@rb/fixtures'
 
 /**
  * Personal pack — Dale's private profile, loaded from `personal/` via the
@@ -55,6 +60,8 @@ interface DocumentState {
     presetId?: PresetId,
     options?: { withPersonalProfile?: boolean },
   ) => void
+  /** Start from a fictional sample document (same type + preset config). */
+  startFromSample: (type: DocumentType, presetId?: PresetId) => void
   loadPersonalProfile: () => void
   resolvePersonalDocument: () => Promise<ResumeDocument | null>
   applyPreset: (presetId: PresetId) => void
@@ -114,21 +121,27 @@ function applyPresetToDocument(
   })
 }
 
-export const useDocumentStore = create<DocumentState>((set, get) => ({
-  document: null,
-  hasStarted: false,
-  personalProfileAvailable: __HAS_PERSONAL__,
-  saveStatus: 'saved',
-  saveError: null,
-  exportFieldErrors: {},
-  pdfError: null,
-  lintIssues: [],
-  showLintPanel: false,
-  showOnboarding: true,
-  previewPageCount: 1,
-  previewPdfBlob: null,
-  layoutPlan: null,
-  layoutDebug: false,
+export const useDocumentStore = create<DocumentState>((set, get) => {
+  /** Once the user starts typing, the onboarding banner has done its job. */
+  const dismissOnboardingIfOpen = () => {
+    if (get().showOnboarding) set({ showOnboarding: false })
+  }
+
+  return {
+    document: null,
+    hasStarted: false,
+    personalProfileAvailable: __HAS_PERSONAL__,
+    saveStatus: 'saved',
+    saveError: null,
+    exportFieldErrors: {},
+    pdfError: null,
+    lintIssues: [],
+    showLintPanel: false,
+    showOnboarding: true,
+    previewPageCount: 1,
+    previewPdfBlob: null,
+    layoutPlan: null,
+    layoutDebug: false,
 
   setPreviewPageCount: (count) => set({ previewPageCount: count }),
   setPreviewPdfBlob: (blob) => set({ previewPdfBlob: blob }),
@@ -185,6 +198,26 @@ export const useDocumentStore = create<DocumentState>((set, get) => ({
     })()
   },
 
+  startFromSample: (type, presetId = 'malaysia-corporate') => {
+    const isIntl = presetId === 'international-generic'
+    const base =
+      type === 'cv'
+        ? sampleCvDocument
+        : isIntl
+          ? sampleInternationalResumeDocument
+          : sampleResumeDocument
+    set({
+      document: applyPresetToDocument(base, presetId, true),
+      hasStarted: true,
+      showOnboarding: false,
+      saveStatus: 'saved',
+      exportFieldErrors: {},
+      pdfError: null,
+      lintIssues: [],
+      showLintPanel: false,
+    })
+  },
+
   loadPersonalProfile: () => {
     void (async () => {
       const mod = await personalProfilePromise
@@ -206,6 +239,7 @@ export const useDocumentStore = create<DocumentState>((set, get) => ({
   },
 
   applyPreset: (presetId) => {
+    dismissOnboardingIfOpen()
     const current = get().document
     if (!current) return
     set({
@@ -220,6 +254,7 @@ export const useDocumentStore = create<DocumentState>((set, get) => ({
   },
 
   setDocumentType: (type) => {
+    dismissOnboardingIfOpen()
     const current = get().document
     if (!current) return
     const preset = getPreset(current.meta.presetId)
@@ -248,6 +283,7 @@ export const useDocumentStore = create<DocumentState>((set, get) => ({
   },
 
   setTemplate: (templateId) => {
+    dismissOnboardingIfOpen()
     const current = get().document
     if (!current) return
     set({
@@ -267,6 +303,7 @@ export const useDocumentStore = create<DocumentState>((set, get) => ({
   },
 
   setTheme: (themeId) => {
+    dismissOnboardingIfOpen()
     const current = get().document
     if (!current) return
     set({
@@ -278,6 +315,7 @@ export const useDocumentStore = create<DocumentState>((set, get) => ({
   },
 
   setExportProfile: (exportProfile) => {
+    dismissOnboardingIfOpen()
     const current = get().document
     if (!current) return
     set({
@@ -289,6 +327,7 @@ export const useDocumentStore = create<DocumentState>((set, get) => ({
   },
 
   updateContact: (contact) => {
+    dismissOnboardingIfOpen()
     const current = get().document
     if (!current) return
     set({
@@ -298,54 +337,63 @@ export const useDocumentStore = create<DocumentState>((set, get) => ({
   },
 
   updateSummary: (summary) => {
+    dismissOnboardingIfOpen()
     const current = get().document
     if (!current) return
     set({ document: touchMeta({ ...current, summary }) })
   },
 
   updateExperience: (experience) => {
+    dismissOnboardingIfOpen()
     const current = get().document
     if (!current) return
     set({ document: touchMeta({ ...current, experience }) })
   },
 
   updateEducation: (education) => {
+    dismissOnboardingIfOpen()
     const current = get().document
     if (!current) return
     set({ document: touchMeta({ ...current, education }) })
   },
 
   updateCertifications: (certifications) => {
+    dismissOnboardingIfOpen()
     const current = get().document
     if (!current) return
     set({ document: touchMeta({ ...current, certifications }) })
   },
 
   updateSkills: (skills) => {
+    dismissOnboardingIfOpen()
     const current = get().document
     if (!current) return
     set({ document: touchMeta({ ...current, skills }) })
   },
 
   updateProjects: (projects) => {
+    dismissOnboardingIfOpen()
     const current = get().document
     if (!current) return
     set({ document: touchMeta({ ...current, projects }) })
   },
 
   updateVolunteer: (volunteer) => {
+    dismissOnboardingIfOpen()
     const current = get().document
     if (!current) return
     set({ document: touchMeta({ ...current, volunteer }) })
   },
 
   updateReferences: (references) => {
+    dismissOnboardingIfOpen()
     const current = get().document
     if (!current) return
     set({ document: touchMeta({ ...current, references }) })
   },
 
   reorderSections: (order) => {
+    dismissOnboardingIfOpen()
     const current = get().document
     if (!current) return
     set({
@@ -357,6 +405,7 @@ export const useDocumentStore = create<DocumentState>((set, get) => ({
   },
 
   toggleSection: (sectionId) => {
+    dismissOnboardingIfOpen()
     const current = get().document
     if (!current || sectionId === 'contact') return
     const hidden = new Set(current.meta.hiddenSections)
@@ -398,4 +447,5 @@ export const useDocumentStore = create<DocumentState>((set, get) => ({
       showOnboarding: true,
     })
   },
-}))
+  }
+})

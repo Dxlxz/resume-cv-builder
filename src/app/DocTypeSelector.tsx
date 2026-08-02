@@ -29,6 +29,7 @@ interface DocTypeSelectorProps {
 
 export function DocTypeSelector({ onBack }: DocTypeSelectorProps) {
   const startDocument = useDocumentStore((s) => s.startDocument)
+  const startFromSample = useDocumentStore((s) => s.startFromSample)
   const loadPersonalProfile = useDocumentStore((s) => s.loadPersonalProfile)
   const personalProfileAvailable = useDocumentStore((s) => s.personalProfileAvailable)
   const [step, setStep] = useState<Step>('preset')
@@ -127,6 +128,13 @@ export function DocTypeSelector({ onBack }: DocTypeSelectorProps) {
             >
               Start blank {option.title}
             </Button>
+            <Button
+              className="mt-2 w-full"
+              variant="secondary"
+              onClick={() => startFromSample(option.type, selectedPreset)}
+            >
+              Start from sample
+            </Button>
             {personalProfileAvailable && (
               <Button
                 className="mt-2 w-full"
@@ -142,8 +150,13 @@ export function DocTypeSelector({ onBack }: DocTypeSelectorProps) {
         ))}
       </div>
 
+      <p className="mt-6 text-center text-sm text-muted-foreground">
+        Start blank and build from scratch, or load a fictional sample to see a
+        finished, ATS-ready example you can edit or replace.
+      </p>
+
       {personalProfileAvailable && (
-        <p className="mt-6 text-center">
+        <p className="mt-2 text-center">
           <button
             type="button"
             className="text-sm text-primary underline"

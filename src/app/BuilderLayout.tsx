@@ -2,7 +2,6 @@ import { useState } from 'react'
 import { Toolbar } from '@/components/toolbar/Toolbar'
 import { EditorPanel } from '@/components/editor/EditorPanel'
 import { PreviewPanel } from '@/components/preview/PreviewPanel'
-import { SectionRail } from '@/components/editor/SectionRail'
 import { RecoveryBanner } from '@/components/RecoveryBanner'
 import { IdrizzChat } from '@/components/ai/IdrizzChat'
 
@@ -70,11 +69,10 @@ export function BuilderLayout({ onHome }: BuilderLayoutProps) {
       <main
         id="main-content"
         tabIndex={-1}
-        className={`grid min-h-0 flex-1 grid-cols-1 outline-none lg:grid-cols-[10rem_minmax(320px,1fr)_minmax(0,2fr)] ${
-          previewHidden ? 'lg:grid-cols-[10rem_minmax(0,1fr)]' : ''
+        className={`grid min-h-0 flex-1 grid-cols-1 outline-none ${
+          previewHidden ? '' : 'lg:grid-cols-[minmax(380px,40%)_minmax(0,60%)]'
         }`}
       >
-        <SectionRail />
         <section
           className={`min-h-0 overflow-y-auto border-border bg-sidebar p-4 lg:p-5 ${
             effectiveTab === 'edit' ? 'block' : 'hidden lg:block'

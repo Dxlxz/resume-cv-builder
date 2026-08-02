@@ -37,7 +37,7 @@ export function FormSection({
   return (
     <section
       id={`form-section-${sectionId}`}
-      className="scroll-mt-4 rounded-md border border-border bg-card shadow-[var(--shadow-raised)] transition-shadow duration-[var(--duration-state)]"
+      className="scroll-mt-12 rounded-md border border-border bg-card shadow-[var(--shadow-raised)] transition-shadow duration-[var(--duration-state)]"
     >
       <div className="flex items-center justify-between gap-1 pr-2">
         <button

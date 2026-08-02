@@ -2,11 +2,37 @@ import { useEffect, useRef, useState } from 'react'
 import { useDocumentStore } from '@/app/store/documentStore'
 import { useAi } from '@/hooks/useAi'
 import { useMediaQuery } from '@/hooks/useMediaQuery'
-import { useResizablePanel } from '@/hooks/useResizablePanel'
 import { buildDocumentContext, parseAiEditPlan, type AiEditPlan } from '@/lib/ai/edits'
 import { AiEditReview } from '@/components/ai/AiEditReview'
 import { Button } from '@/components/ui/Button'
 import { Tooltip } from '@/components/ui/Tooltip'
+
+/**
+ * Idrizz, the floating chatbot. A round bubble sits at the bottom-right of
+ * the builder; it opens a chat panel with a persona: a warm, direct resume
+ * wingman. Edit requests come back as typed JSON plans, reviewed inline
+ * (Apply/Discard per group). Size is a simple S/M/L preset.
+ */
+
+const CHAT_SIZES = {
+  S: { width: 320, height: 400 },
+  M: { width: 384, height: 512 },
+  L: { width: 448, height: 600 },
+} as const
+
+type ChatSize = keyof typeof CHAT_SIZES
+
+const CHAT_SIZE_KEY = 'rizzume-idrizz-size'
+
+function loadChatSize(): ChatSize {
+  try {
+    const raw = window.localStorage.getItem(CHAT_SIZE_KEY)
+    if (raw === 'S' || raw === 'M' || raw === 'L') return raw
+  } catch {
+    // ignore
+  }
+  return 'M'
+}
 
 /**
  * Idrizz, the floating chatbot. A round bubble sits at the bottom-right of
@@ -59,19 +85,16 @@ export function IdrizzChat({ open, onOpen, onClose }: IdrizzChatProps) {
   const document = useDocumentStore((s) => s.document)
   const isMobile = useMediaQuery('(max-width: 767px)')
   const { result, busy, error, consentOpen, run, acceptConsent, declineConsent } = useAi('ai-edit')
-  const { size, onPointerDown, setSize } = useResizablePanel({
-    defaultSize: { width: 384, height: 512 },
-    minWidth: 288,
-    maxWidth: 448,
-    minHeight: 320,
-    maxHeight: 640,
-    storageKey: 'rizzume-idrizz-size',
-  })
-  const [expanded, setExpanded] = useState(false)
-  const lastSizeRef = useRef(size)
+  const [chatSize, setChatSize] = useState<ChatSize>(loadChatSize)
+  const size = CHAT_SIZES[chatSize]
+
   useEffect(() => {
-    if (!expanded) lastSizeRef.current = size
-  }, [size, expanded])
+    try {
+      window.localStorage.setItem(CHAT_SIZE_KEY, chatSize)
+    } catch {
+      // private mode: just don't remember
+    }
+  }, [chatSize])
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [input, setInput] = useState('')
   const [started, setStarted] = useState(false)
@@ -125,19 +148,6 @@ export function IdrizzChat({ open, onOpen, onClose }: IdrizzChatProps) {
     setMessages((prev) => prev.map((m, i) => (i === index ? { ...m, plan: undefined } : m)))
   }
 
-  const toggleExpand = () => {
-    if (expanded) {
-      setExpanded(false)
-      setSize(lastSizeRef.current)
-    } else {
-      setExpanded(true)
-      setSize({
-        width: Math.min(720, window.innerWidth - 32),
-        height: Math.min(640, window.innerHeight - 112),
-      })
-    }
-  }
-
   if (!open) {
     return (
       <button
@@ -183,24 +193,28 @@ export function IdrizzChat({ open, onOpen, onClose }: IdrizzChatProps) {
           <p className="text-xs text-muted-foreground">Your resume wingman</p>
         </div>
         {!isMobile && (
-          <Tooltip label={expanded ? 'Restore chat size' : 'Expand chat'}>
-            <button
-              type="button"
-              onClick={toggleExpand}
-              aria-label={expanded ? 'Restore chat size' : 'Expand chat'}
-              className="rounded-sm px-2 py-1 text-muted-foreground transition-colors duration-[var(--duration-state)] hover:bg-muted hover:text-foreground"
-            >
-              {expanded ? (
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-                  <path d="M8 4v4H4M16 4v4h4M20 16h-4v4M4 16h4v4" />
-                </svg>
-              ) : (
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-                  <path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5" />
-                </svg>
-              )}
-            </button>
-          </Tooltip>
+          <div
+            role="group"
+            aria-label="Chat size"
+            className="flex items-center gap-0.5 rounded-sm border border-border bg-muted p-0.5"
+          >
+            {(['S', 'M', 'L'] as const).map((preset) => (
+              <Tooltip key={preset} label={`Chat size ${preset}`}>
+                <button
+                  type="button"
+                  onClick={() => setChatSize(preset)}
+                  aria-pressed={chatSize === preset}
+                  className={`h-6 w-7 rounded-sm text-xs font-medium transition-colors duration-[var(--duration-state)] ${
+                    chatSize === preset
+                      ? 'bg-card text-foreground shadow-[var(--shadow-raised)]'
+                      : 'text-muted-foreground hover:text-foreground'
+                  }`}
+                >
+                  {preset}
+                </button>
+              </Tooltip>
+            ))}
+          </div>
         )}
         <button
           type="button"
@@ -332,23 +346,6 @@ export function IdrizzChat({ open, onOpen, onClose }: IdrizzChatProps) {
           </button>
         </div>
       </footer>
-
-      {!isMobile && (
-        <div
-          role="separator"
-          aria-label="Drag to resize"
-          aria-orientation="horizontal"
-          title="Drag to resize"
-          onPointerDown={onPointerDown}
-          className="absolute bottom-0 left-0 flex h-5 w-5 cursor-nesw-resize touch-none items-start justify-start p-1 text-muted-foreground/50 transition-colors duration-[var(--duration-state)] hover:text-muted-foreground"
-        >
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" aria-hidden>
-            <path d="M5 19L19 5" />
-            <path d="M9 19L19 9" />
-            <path d="M13 19L19 13" />
-          </svg>
-        </div>
-      )}
     </div>
   )
 }

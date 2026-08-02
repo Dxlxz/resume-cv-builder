@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react'
 import { navigateToAdmin } from '@/hooks/useAppRoute'
 import { Button } from '@/components/ui/Button'
 import { Brand } from '@/components/ui/Brand'
+import { HeroPdfCard } from '@/components/landing/HeroPdfPreview'
 
 /**
  * Marketing landing, editorial persona (see UDS taste-and-feel.md). The one
@@ -111,44 +112,6 @@ const STEPS: { title: string; description: string }[] = [
 ]
 
 /** Abstract resume mock. Skeleton bars that read like a real page without fake text. */
-function ResumeMock() {
-  const bar = (w: string, tone: 'fg' | 'muted' | 'faint') =>
-    `h-2 rounded-full ${w} ${
-      tone === 'fg'
-        ? 'bg-foreground/70'
-        : tone === 'muted'
-          ? 'bg-foreground/40'
-          : 'bg-foreground/20'
-    }`
-  return (
-    <div className="w-full max-w-md rounded-lg border border-border bg-card p-6 shadow-[var(--shadow-raised)]">
-      <div className="flex items-center gap-3">
-        <div className="h-10 w-10 rounded-full bg-primary/20" />
-        <div className="flex-1 space-y-1.5">
-          <div className={bar('w-2/3', 'fg')} />
-          <div className={bar('w-2/5', 'muted')} />
-        </div>
-      </div>
-      <div className="mt-5 space-y-3">
-        <div className={bar('w-1/4', 'fg')} />
-        <div className={bar('w-full', 'muted')} />
-        <div className={bar('w-11/12', 'muted')} />
-        <div className={bar('w-4/5', 'faint')} />
-      </div>
-      <div className="mt-5 space-y-3">
-        <div className={bar('w-1/4', 'fg')} />
-        <div className={bar('w-full', 'muted')} />
-        <div className={bar('w-3/4', 'faint')} />
-        <div className={bar('w-10/12', 'muted')} />
-        <div className={bar('w-2/3', 'faint')} />
-      </div>
-      <div className="mt-5 flex items-center gap-2">
-        <div className="h-2.5 w-2.5 rounded-full bg-status-success" />
-        <div className={bar('w-1/3', 'muted')} />
-      </div>
-    </div>
-  )
-}
 
 /** Hero backdrop: compressed looping video with a dark veil; static poster under reduced motion. */
 function HeroBackground() {
@@ -252,30 +215,7 @@ export function LandingPage({
           </div>
 
           <div className="relative">
-            <div className="overflow-hidden rounded-lg border border-border bg-card shadow-[var(--shadow-raised)]">
-              <div className="flex items-center gap-1.5 border-b border-border bg-muted px-4 py-3">
-                <span className="h-2.5 w-2.5 rounded-full bg-foreground/25" />
-                <span className="h-2.5 w-2.5 rounded-full bg-foreground/25" />
-                <span className="h-2.5 w-2.5 rounded-full bg-foreground/25" />
-                <span className="ml-3 rounded-full bg-card px-2.5 py-0.5 text-[10px] text-muted-foreground">
-                  resume-dale.pdf
-                </span>
-              </div>
-              <div className="flex items-stretch justify-center gap-8 px-6 py-10 sm:px-12">
-                <ResumeMock />
-                <div className="hidden flex-col items-start justify-center gap-4 sm:flex">
-                  <span className="inline-flex items-center gap-2 rounded-full border border-status-success/30 bg-badge-success px-3 py-1.5 text-xs font-medium text-status-success-foreground">
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-                      <path d="M20 6L9 17l-5-5" />
-                    </svg>
-                    ATS check passed
-                  </span>
-                  <span className="text-xs text-muted-foreground">
-                    A4 · 2 pages · Malaysia Corporate
-                  </span>
-                </div>
-              </div>
-            </div>
+            <HeroPdfCard />
           </div>
         </div>
 

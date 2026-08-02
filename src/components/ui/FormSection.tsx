@@ -78,19 +78,21 @@ export function FormSection({
               {!guideOpen ? (
                 <div className="flex items-center gap-2">
                   <IdrizzIconButton
-                    label="Set how Idrizz writes this section"
+                    label={guide ? 'Edit Idrizz guide' : 'Set how Idrizz writes this section'}
                     onClick={() => setGuideOpen(true)}
                   />
-                  <button
-                    type="button"
-                    onClick={() => setGuideOpen(true)}
-                    className="text-xs font-medium text-muted-foreground underline-offset-2 transition-colors duration-[var(--duration-state)] hover:text-foreground hover:underline"
-                  >
-                    {guide ? 'Edit Idrizz guide' : 'Set an Idrizz guide'}
-                  </button>
+                  {guide && (
+                    <button
+                      type="button"
+                      onClick={() => setGuideOpen(true)}
+                      className="min-w-0 flex-1 truncate text-left text-xs leading-relaxed text-muted-foreground transition-colors duration-[var(--duration-state)] hover:text-foreground"
+                    >
+                      {guide}
+                    </button>
+                  )}
                 </div>
               ) : (
-                <div className="animate-slide-up rounded-md border border-border bg-muted/50 p-3">
+                <div className="animate-slide-up space-y-1.5 rounded-md border border-border bg-muted/50 p-3">
                   <label htmlFor={guideId} className="text-xs font-medium text-foreground">
                     How should Idrizz write this section?
                   </label>
@@ -100,9 +102,9 @@ export function FormSection({
                     value={guide ?? ''}
                     onChange={(e) => onGuideChange(e.target.value)}
                     placeholder="e.g. British English, 2-4 sentences, lead with impact."
-                    className="mt-1.5 w-full rounded-sm border border-border bg-card px-3 py-2 text-sm text-foreground transition-colors duration-[var(--duration-state)] focus:border-[var(--ring)]"
+                    className="w-full rounded-sm border border-border bg-card px-3 py-2 text-sm text-foreground transition-colors duration-[var(--duration-state)] focus:border-[var(--ring)]"
                   />
-                  <p className="mt-1 text-xs text-muted-foreground">
+                  <p className="text-xs text-muted-foreground">
                     Saved in your document. Empty means Idrizz uses its default style.
                   </p>
                 </div>

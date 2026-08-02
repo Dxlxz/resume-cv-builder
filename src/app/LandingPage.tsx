@@ -4,6 +4,7 @@ import { navigateToAdmin } from '@/hooks/useAppRoute'
 import { Button } from '@/components/ui/Button'
 import { Brand } from '@/components/ui/Brand'
 import { HeroPdfCard } from '@/components/landing/HeroPdfPreview'
+import { ExamplesSection } from '@/components/landing/ExamplesSection'
 
 /**
  * Marketing landing, editorial persona (see UDS taste-and-feel.md). The one
@@ -224,6 +225,9 @@ export function LandingPage({
           aria-hidden
         />
       </section>
+
+      {/* --- Examples --- */}
+      <ExamplesSection />
 
       {/* --- How it works --- */}
       <section className="border-b border-border bg-muted">

@@ -1,0 +1,401 @@
+import { create } from 'zustand'
+import type {
+  ContactSection,
+  DocumentType,
+  ExportProfile,
+  PresetId,
+  ResumeDocument,
+  SaveStatus,
+  SectionId,
+  TemplateId,
+  ThemeId,
+} from '@rb/core/types/document'
+import { createEmptyDocument } from '@rb/presets/createDocument'
+import { getPreset } from '@rb/presets/registry'
+import { themeForDocument } from '@rb/themes/registry'
+import { clearStorage, loadFromStorage } from '@/lib/persistence'
+import type { LintIssue } from '@rb/validators/types'
+import type { LayoutPlanResult } from '@rb/layout/types'
+
+/**
+ * Personal pack — Dale's private profile, loaded from `personal/` via the
+ * `@personal/profile` alias (defined only when that folder exists, see
+ * vite.config.ts). Shipping builds resolve nothing: the import rejects, the
+ * pack resolves to null, and profile features disable themselves. The
+ * product never bundles personal data.
+ */
+const personalProfilePromise: Promise<{
+  personalDocumentFor: (type: DocumentType) => ResumeDocument
+} | null> = import('@personal/profile').catch(() => null)
+
+
+interface DocumentState {
+  document: ResumeDocument | null
+  hasStarted: boolean
+  /** True when a local personal pack is available ("Load my profile"). */
+  personalProfileAvailable: boolean
+  saveStatus: SaveStatus
+  saveError: string | null
+  exportFieldErrors: Record<string, string>
+  pdfError: string | null
+  lintIssues: LintIssue[]
+  showLintPanel: boolean
+  showOnboarding: boolean
+  previewPageCount: number
+  setPreviewPageCount: (count: number) => void
+  previewPdfBlob: Blob | null
+  setPreviewPdfBlob: (blob: Blob | null) => void
+  layoutPlan: LayoutPlanResult | null
+  layoutDebug: boolean
+  setLayoutPlan: (plan: LayoutPlanResult | null) => void
+  setLayoutDebug: (enabled: boolean) => void
+  init: () => void
+  startDocument: (
+    type: DocumentType,
+    presetId?: PresetId,
+    options?: { withPersonalProfile?: boolean },
+  ) => void
+  loadPersonalProfile: () => void
+  resolvePersonalDocument: () => Promise<ResumeDocument | null>
+  applyPreset: (presetId: PresetId) => void
+  setDocument: (document: ResumeDocument) => void
+  setDocumentType: (type: DocumentType) => void
+  setTemplate: (templateId: TemplateId) => void
+  setTheme: (themeId: ThemeId) => void
+  setExportProfile: (profile: ExportProfile) => void
+  updateContact: (contact: ContactSection) => void
+  updateSummary: (summary: string) => void
+  updateExperience: (experience: ResumeDocument['experience']) => void
+  updateEducation: (education: ResumeDocument['education']) => void
+  updateCertifications: (certifications: ResumeDocument['certifications']) => void
+  updateSkills: (skills: ResumeDocument['skills']) => void
+  updateProjects: (projects: ResumeDocument['projects']) => void
+  updateVolunteer: (volunteer: ResumeDocument['volunteer']) => void
+  updateReferences: (references: ResumeDocument['references']) => void
+  reorderSections: (order: SectionId[]) => void
+  toggleSection: (sectionId: SectionId) => void
+  setSaveStatus: (status: SaveStatus, error?: string | null) => void
+  setExportFieldErrors: (errors: Record<string, string>) => void
+  setPdfError: (error: string | null) => void
+  setLintIssues: (issues: LintIssue[]) => void
+  setShowLintPanel: (show: boolean) => void
+  dismissOnboarding: () => void
+  reset: () => void
+}
+
+function touchMeta(doc: ResumeDocument): ResumeDocument {
+  return {
+    ...doc,
+    meta: { ...doc.meta, updatedAt: new Date().toISOString() },
+  }
+}
+
+function applyPresetToDocument(
+  doc: ResumeDocument,
+  presetId: PresetId,
+  preserveContent = true,
+): ResumeDocument {
+  const preset = getPreset(presetId)
+  const d = preset.defaults
+  return touchMeta({
+    ...(preserveContent ? doc : createEmptyDocument(d.documentType, presetId)),
+    meta: {
+      ...doc.meta,
+      schemaVersion: 2,
+      presetId,
+      templateId: d.templateId,
+      themeId: d.themeId,
+      pageSize: d.pageSize,
+      exportProfile: d.exportProfile,
+      locale: d.locale,
+      sectionOrder: d.sectionOrder ?? doc.meta.sectionOrder,
+      documentType: preserveContent ? doc.meta.documentType : d.documentType,
+    },
+  })
+}
+
+export const useDocumentStore = create<DocumentState>((set, get) => ({
+  document: null,
+  hasStarted: false,
+  personalProfileAvailable: __HAS_PERSONAL__,
+  saveStatus: 'saved',
+  saveError: null,
+  exportFieldErrors: {},
+  pdfError: null,
+  lintIssues: [],
+  showLintPanel: false,
+  showOnboarding: true,
+  previewPageCount: 1,
+  previewPdfBlob: null,
+  layoutPlan: null,
+  layoutDebug: false,
+
+  setPreviewPageCount: (count) => set({ previewPageCount: count }),
+  setPreviewPdfBlob: (blob) => set({ previewPdfBlob: blob }),
+  setLayoutPlan: (plan) => set({ layoutPlan: plan }),
+  setLayoutDebug: (enabled) => set({ layoutDebug: enabled }),
+
+  init: () => {
+    const saved = loadFromStorage()
+    if (saved) {
+      set({
+        document: saved,
+        hasStarted: true,
+        showOnboarding: false,
+        saveStatus: 'saved',
+      })
+    }
+  },
+
+  resolvePersonalDocument: async () => {
+    const mod = await personalProfilePromise
+    return mod ? mod.personalDocumentFor('resume') : null
+  },
+
+  startDocument: (type, presetId = 'international-generic', options) => {
+    void (async () => {
+      let document: ResumeDocument
+      if (options?.withPersonalProfile) {
+        const mod = await personalProfilePromise
+        const profileDocument = mod?.personalDocumentFor(type)
+        document = profileDocument
+          ? touchMeta({
+              ...profileDocument,
+              meta: {
+                ...profileDocument.meta,
+                documentType: type,
+                presetId,
+              },
+            })
+          : createEmptyDocument(type, presetId)
+      } else {
+        document = createEmptyDocument(type, presetId)
+      }
+
+      set({
+        document,
+        hasStarted: true,
+        showOnboarding: !options?.withPersonalProfile,
+        saveStatus: 'saved',
+        exportFieldErrors: {},
+        pdfError: null,
+        lintIssues: [],
+        showLintPanel: false,
+      })
+    })()
+  },
+
+  loadPersonalProfile: () => {
+    void (async () => {
+      const mod = await personalProfilePromise
+      if (!mod) return // no personal pack — feature is hidden anyway
+      // Keep the current document type: reloading while editing a CV loads the
+      // complete CV profile, not the curated resume.
+      const type = get().document?.meta.documentType ?? 'resume'
+      set({
+        document: touchMeta(mod.personalDocumentFor(type)),
+        hasStarted: true,
+        showOnboarding: false,
+        saveStatus: 'saved',
+        exportFieldErrors: {},
+        pdfError: null,
+        lintIssues: [],
+        showLintPanel: false,
+      })
+    })()
+  },
+
+  applyPreset: (presetId) => {
+    const current = get().document
+    if (!current) return
+    set({
+      document: applyPresetToDocument(current, presetId, true),
+      showOnboarding: true,
+      lintIssues: [],
+    })
+  },
+
+  setDocument: (document) => {
+    set({ document: touchMeta(document), exportFieldErrors: {}, pdfError: null, lintIssues: [] })
+  },
+
+  setDocumentType: (type) => {
+    const current = get().document
+    if (!current) return
+    const preset = getPreset(current.meta.presetId)
+    const isIntl = current.meta.presetId === 'international-generic'
+    const templateId = isIntl
+      ? type === 'resume'
+        ? 'classic'
+        : 'academic'
+      : preset.defaults.templateId
+    set({
+      document: touchMeta({
+        ...current,
+        meta: {
+          ...current.meta,
+          documentType: type,
+          templateId,
+          themeId: themeForDocument(templateId, type, current.meta.themeId),
+          pageSize: isIntl
+            ? type === 'resume'
+              ? 'letter'
+              : 'a4'
+            : preset.defaults.pageSize,
+        },
+      }),
+    })
+  },
+
+  setTemplate: (templateId) => {
+    const current = get().document
+    if (!current) return
+    set({
+      document: touchMeta({
+        ...current,
+        meta: {
+          ...current.meta,
+          templateId,
+          themeId: themeForDocument(
+            templateId,
+            current.meta.documentType,
+            current.meta.themeId,
+          ),
+        },
+      }),
+    })
+  },
+
+  setTheme: (themeId) => {
+    const current = get().document
+    if (!current) return
+    set({
+      document: touchMeta({
+        ...current,
+        meta: { ...current.meta, themeId },
+      }),
+    })
+  },
+
+  setExportProfile: (exportProfile) => {
+    const current = get().document
+    if (!current) return
+    set({
+      document: touchMeta({
+        ...current,
+        meta: { ...current.meta, exportProfile },
+      }),
+    })
+  },
+
+  updateContact: (contact) => {
+    const current = get().document
+    if (!current) return
+    set({
+      document: touchMeta({ ...current, contact }),
+      exportFieldErrors: {},
+    })
+  },
+
+  updateSummary: (summary) => {
+    const current = get().document
+    if (!current) return
+    set({ document: touchMeta({ ...current, summary }) })
+  },
+
+  updateExperience: (experience) => {
+    const current = get().document
+    if (!current) return
+    set({ document: touchMeta({ ...current, experience }) })
+  },
+
+  updateEducation: (education) => {
+    const current = get().document
+    if (!current) return
+    set({ document: touchMeta({ ...current, education }) })
+  },
+
+  updateCertifications: (certifications) => {
+    const current = get().document
+    if (!current) return
+    set({ document: touchMeta({ ...current, certifications }) })
+  },
+
+  updateSkills: (skills) => {
+    const current = get().document
+    if (!current) return
+    set({ document: touchMeta({ ...current, skills }) })
+  },
+
+  updateProjects: (projects) => {
+    const current = get().document
+    if (!current) return
+    set({ document: touchMeta({ ...current, projects }) })
+  },
+
+  updateVolunteer: (volunteer) => {
+    const current = get().document
+    if (!current) return
+    set({ document: touchMeta({ ...current, volunteer }) })
+  },
+
+  updateReferences: (references) => {
+    const current = get().document
+    if (!current) return
+    set({ document: touchMeta({ ...current, references }) })
+  },
+
+  reorderSections: (order) => {
+    const current = get().document
+    if (!current) return
+    set({
+      document: touchMeta({
+        ...current,
+        meta: { ...current.meta, sectionOrder: order },
+      }),
+    })
+  },
+
+  toggleSection: (sectionId) => {
+    const current = get().document
+    if (!current || sectionId === 'contact') return
+    const hidden = new Set(current.meta.hiddenSections)
+    if (hidden.has(sectionId)) hidden.delete(sectionId)
+    else hidden.add(sectionId)
+    set({
+      document: touchMeta({
+        ...current,
+        meta: { ...current.meta, hiddenSections: [...hidden] },
+      }),
+    })
+  },
+
+  setSaveStatus: (status, error = null) => {
+    set({ saveStatus: status, saveError: error })
+  },
+
+  setExportFieldErrors: (errors) => set({ exportFieldErrors: errors }),
+
+  setPdfError: (error) => set({ pdfError: error }),
+
+  setLintIssues: (issues) => set({ lintIssues: issues }),
+
+  setShowLintPanel: (show) => set({ showLintPanel: show }),
+
+  dismissOnboarding: () => set({ showOnboarding: false }),
+
+  reset: () => {
+    clearStorage()
+    set({
+      document: null,
+      hasStarted: false,
+      saveStatus: 'saved',
+      saveError: null,
+      exportFieldErrors: {},
+      pdfError: null,
+      lintIssues: [],
+      showLintPanel: false,
+      showOnboarding: true,
+    })
+  },
+}))

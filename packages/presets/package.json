@@ -1,0 +1,11 @@
+{
+  "name": "@rb/presets",
+  "description": "Document presets (Malaysia corporate, international generic)",
+  "type": "module",
+  "private": true,
+  "version": "0.1.0",
+  "exports": {
+    "./*": "./src/*",
+    ".": "./src/index.ts"
+  }
+}

@@ -1,0 +1,553 @@
+/**
+ * VENDORED from the Universal Design System monorepo (2026-07-17).
+ * Source: C:\Users\Dale\Desktop\Universal Design System\packages\tokens\src\tokens.css
+ * Re-copy from source to sync — do not hand-edit here unless the change is
+ * intentionally app-local (see src/styles/uds/README.md).
+ *
+ * UDS design tokens — authority-modern (primitive → semantic)
+ *
+ * Architecture:
+ *   1. Primitive scales (gray, gray-alpha, blue/red/amber/green/teal/purple/pink)
+ *   2. Semantic aliases (--background, --foreground, --primary, --status-*, etc.)
+ *   3. Brand surface (--brand-* / --brand-h) — override via [data-brand] theme packs
+ *   4. @uds/tailwind @theme inline bridges to Tailwind utilities
+ *
+ * Light: gray canvas + elevated white cards
+ * Dark: VS Code Dark+ inspired surfaces
+ *
+ * Default brand hue: 264 (blue family). Status colors are fixed safety vocabulary.
+ */
+
+/* ═══════════════════════════════════════════════════════════════════════
+   1. PRIMITIVE SCALES (light)
+   ═══════════════════════════════════════════════════════════════════════ */
+:root {
+  /* —— Gray scale (solid — holds on any background) ——
+     Steps encode intent, not just lightness:
+     100 default bg · 200 hover bg · 300 active bg
+     400 default border · 500 hover border · 600 active border
+     700 high-contrast fill · 800 hover fill
+     900 secondary text · 1000 primary text                          */
+  --gray-100: oklch(0.965 0.012 250);
+  --gray-200: oklch(0.94 0.014 250);
+  --gray-300: oklch(0.91 0.018 250);
+  --gray-400: oklch(0.88 0.02 250);
+  --gray-500: oklch(0.84 0.02 250);
+  --gray-600: oklch(0.72 0.025 250);
+  --gray-700: oklch(0.55 0.03 255);
+  --gray-800: oklch(0.48 0.035 255);
+  --gray-900: oklch(0.42 0.035 255);
+  --gray-1000: oklch(0.24 0.045 264);
+
+  /* —— Gray-alpha scale (translucent — layers over any bg) —— */
+  --gray-alpha-100: oklch(0.24 0.045 264 / 0.05);
+  --gray-alpha-200: oklch(0.24 0.045 264 / 0.08);
+  --gray-alpha-300: oklch(0.24 0.045 264 / 0.1);
+  --gray-alpha-400: oklch(0.24 0.045 264 / 0.09);
+  --gray-alpha-500: oklch(0.24 0.045 264 / 0.21);
+  --gray-alpha-600: oklch(0.24 0.045 264 / 0.24);
+  --gray-alpha-700: oklch(0.24 0.045 264 / 0.44);
+  --gray-alpha-800: oklch(0.24 0.045 264 / 0.51);
+  --gray-alpha-900: oklch(0.24 0.045 264 / 0.7);
+  --gray-alpha-1000: oklch(0.24 0.045 264 / 0.91);
+
+  /* —— Blue (primary / links / focus / info) —— */
+  --blue-100: oklch(0.965 0.02 250);
+  --blue-200: oklch(0.94 0.03 250);
+  --blue-300: oklch(0.9 0.045 250);
+  --blue-400: oklch(0.82 0.07 250);
+  --blue-500: oklch(0.7 0.12 250);
+  --blue-600: oklch(0.58 0.16 250);
+  --blue-700: oklch(0.46 0.17 264); /* = --primary (default brand) */
+  --blue-800: oklch(0.4 0.17 264); /* = --primary-hover */
+  --blue-900: oklch(0.42 0.14 264);
+  --blue-1000: oklch(0.28 0.1 264);
+
+  /* —— Red (errors / destructive / danger) —— */
+  --red-100: oklch(0.965 0.015 25);
+  --red-200: oklch(0.95 0.02 25);
+  --red-300: oklch(0.93 0.025 25);
+  --red-400: oklch(0.88 0.05 25);
+  --red-500: oklch(0.78 0.1 25);
+  --red-600: oklch(0.65 0.16 25);
+  --red-700: oklch(0.52 0.2 25); /* = --destructive / --status-danger */
+  --red-800: oklch(0.48 0.2 25);
+  --red-900: oklch(0.42 0.18 25);
+  --red-1000: oklch(0.28 0.1 25);
+
+  /* —— Amber (warnings) —— */
+  --amber-100: oklch(0.965 0.02 90);
+  --amber-200: oklch(0.96 0.03 90);
+  --amber-300: oklch(0.95 0.035 85);
+  --amber-400: oklch(0.88 0.08 83);
+  --amber-500: oklch(0.82 0.11 80);
+  --amber-600: oklch(0.75 0.14 75); /* = --status-warning */
+  --amber-700: oklch(0.7 0.15 75);
+  --amber-800: oklch(0.62 0.14 65);
+  --amber-900: oklch(0.5 0.12 65);
+  --amber-1000: oklch(0.35 0.08 60);
+
+  /* —— Green (success) —— */
+  --green-100: oklch(0.965 0.015 155);
+  --green-200: oklch(0.96 0.02 155);
+  --green-300: oklch(0.93 0.035 150);
+  --green-400: oklch(0.88 0.06 148);
+  --green-500: oklch(0.78 0.1 147);
+  --green-600: oklch(0.65 0.12 147);
+  --green-700: oklch(0.48 0.14 147); /* = --status-success */
+  --green-800: oklch(0.42 0.11 150);
+  --green-900: oklch(0.38 0.11 155);
+  --green-1000: oklch(0.25 0.07 155);
+
+  /* —— Teal (chart / categorical) —— */
+  --teal-100: oklch(0.965 0.015 185);
+  --teal-200: oklch(0.96 0.02 185);
+  --teal-300: oklch(0.93 0.035 182);
+  --teal-400: oklch(0.88 0.06 182);
+  --teal-500: oklch(0.78 0.1 182);
+  --teal-600: oklch(0.65 0.13 182);
+  --teal-700: oklch(0.48 0.14 182);
+  --teal-800: oklch(0.42 0.12 182);
+  --teal-900: oklch(0.38 0.1 182);
+  --teal-1000: oklch(0.25 0.06 180);
+
+  /* —— Purple (chart / categorical — not chrome gradients) —— */
+  --purple-100: oklch(0.965 0.015 310);
+  --purple-200: oklch(0.96 0.02 310);
+  --purple-300: oklch(0.93 0.035 310);
+  --purple-400: oklch(0.88 0.06 310);
+  --purple-500: oklch(0.75 0.12 310);
+  --purple-600: oklch(0.6 0.18 310);
+  --purple-700: oklch(0.48 0.22 306);
+  --purple-800: oklch(0.42 0.2 305);
+  --purple-900: oklch(0.38 0.18 305);
+  --purple-1000: oklch(0.25 0.1 305);
+
+  /* —— Pink (chart / categorical) —— */
+  --pink-100: oklch(0.965 0.015 0);
+  --pink-200: oklch(0.96 0.02 0);
+  --pink-300: oklch(0.93 0.035 0);
+  --pink-400: oklch(0.88 0.06 358);
+  --pink-500: oklch(0.78 0.1 358);
+  --pink-600: oklch(0.65 0.15 1);
+  --pink-700: oklch(0.52 0.2 1);
+  --pink-800: oklch(0.48 0.2 4);
+  --pink-900: oklch(0.42 0.18 2);
+  --pink-1000: oklch(0.25 0.08 359);
+
+  /* —— Chart palette (categorical — 6 series) —— */
+  --chart-1: var(--blue-700);
+  --chart-2: var(--teal-700);
+  --chart-3: var(--purple-700);
+  --chart-4: var(--pink-700);
+  --chart-5: var(--amber-700);
+  --chart-6: var(--green-700);
+
+  /* —— Background surfaces —— */
+  --background-100: oklch(0.97 0.005 250); /* primary page canvas (gray) */
+  --background-200: oklch(0.95 0.006 250); /* deeper wash / rails */
+
+  /* —— Radii (KD-30): literals on --uds-radius-*; semantic --radius-* alias them.
+     Authority-modern register: 2 / 6 / 8 / full. Soft-saas persona overrides
+     --uds-radius-* via theme import (not dual component trees). */
+  --uds-radius-sm: 0.125rem; /* 2px — everyday controls */
+  --uds-radius-md: 0.375rem; /* 6px — menus, modals, cards */
+  --uds-radius-lg: 0.5rem; /* 8px — large surfaces */
+  --uds-radius-item: 0.125rem; /* 2px — nested rows */
+  --uds-radius-full: 9999px; /* pills, avatars */
+  --radius-sm: var(--uds-radius-sm);
+  --radius-md: var(--uds-radius-md);
+  --radius-lg: var(--uds-radius-lg);
+  --radius-item: var(--uds-radius-item);
+  --radius-full: var(--uds-radius-full);
+  /* Concentric nesting: inner ≈ outer − gap. Rows inside a --radius-md
+     container with p-1 (4px) are 6 − 4 = 2px. */
+  --radius: var(--radius-sm); /* default */
+
+  /* —— Control heights —— */
+  --control-sm: 2rem; /* 32px — compact inputs/buttons */
+  --control-md: 2.5rem; /* 40px — default */
+  --control-lg: 3rem; /* 48px — large/landing */
+
+  /* —— Motion tiers (0 / 100 / 150 / 200 / 300ms + ease) —— */
+  --duration-instant: 0ms;
+  --duration-fast: 100ms;
+  --duration-state: 150ms;
+  --duration-popover: 200ms;
+  --duration-overlay: 300ms;
+  --ease-standard: cubic-bezier(0.2, 0, 0, 1);
+  --ease-emphasis: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-geist: cubic-bezier(0.175, 0.885, 0.32, 1.1);
+
+  /* —— Typography (0.1 interim stacks — KD-35; no @font-face shipped) —— */
+  --font-sans: "Segoe UI", "Helvetica Neue", "Noto Sans", Arial, sans-serif;
+  --font-mono: ui-monospace, "Cascadia Code", "SF Mono", Menlo, Consolas, monospace;
+
+  /* ═══════════════════════════════════════════════════════════════════════
+     2. SEMANTIC ALIASES (light)
+     ═══════════════════════════════════════════════════════════════════════ */
+
+  /* ═══ BRAND / THEME SURFACE ═══════════════════════════════════════════════
+     Re-colour the app by overriding ONLY --brand-* under a [data-brand="…"]
+     block (see @uds/css themes). STATUS colours are intentionally NOT part
+     of this surface — they are a fixed safety vocabulary. */
+  --brand-100: var(--blue-100);
+  --brand-500: var(--blue-500);
+  --brand-700: var(--blue-700);
+  --brand-800: var(--blue-800);
+  --brand-1000: var(--blue-1000);
+  --brand-h: 264;
+
+  /* —— Brand-derived actions —— */
+  --primary: var(--brand-700);
+  --primary-hover: var(--brand-800);
+  --primary-foreground: oklch(1 0 0);
+  /* Domain-specific navy hero fills belong in product/extensions — not core. */
+
+  /* —— Surface ladder ——
+     background = page canvas (gray wash)
+     card       = elevated solid (tables, panels, **form control fills**)
+     fill-muted = subtle wash only (hover, chip idle) — not field fill
+     overlay    = floating menus/dialogs (aliases card in light)
+     Do NOT paint inputs with bg-background — they wash into the canvas.
+     Form chrome: border + bg-card. */
+  --background: var(--background-100);
+  --foreground: var(--gray-1000);
+
+  /* Tailwind bg-muted wash — secondary caption text uses muted-foreground */
+  --fill-muted: var(--gray-100);
+  --muted-foreground: var(--gray-900);
+
+  --border: var(--gray-400);
+  --ring: var(--brand-700);
+
+  /* Solid elevated surface — also the form-control fill (input/select/textarea) */
+  --card: oklch(1 0 0);
+  --card-foreground: var(--gray-1000);
+
+  /* Surface contract — opaque UI over media heroes */
+  --canvas: var(--background);
+  --canvas-foreground: var(--foreground);
+  --overlay-surface: var(--card);
+  --overlay-foreground: var(--card-foreground);
+
+  --destructive: var(--red-700);
+  --destructive-foreground: oklch(1 0 0);
+
+  /* —— App chrome —— */
+  --sidebar: var(--background-200);
+  --sidebar-foreground: var(--gray-800);
+  /* Active fill — brand tint follows --brand-h */
+  --sidebar-accent: oklch(0.88 0.075 var(--brand-h));
+  --sidebar-accent-foreground: var(--brand-1000);
+  --header: oklch(1 0 0);
+
+  /* —— Status (canonical: danger | warning | success | neutral | info) ——
+     Always pair with icon + label in UI — never color alone. */
+  --status-danger: var(--red-700);
+  --status-danger-foreground: var(--red-900);
+  --status-warning: var(--amber-600);
+  --status-warning-foreground: var(--amber-900);
+  --status-success: var(--green-700);
+  --status-success-foreground: var(--green-900);
+  --status-neutral: var(--gray-700);
+  --status-neutral-foreground: var(--gray-900);
+  --status-info: var(--blue-700);
+  --status-info-foreground: var(--blue-900);
+
+  /* NDOS / legacy aliases → canonical (compat only; component APIs use canonical) */
+  --status-blocking: var(--status-danger);
+  --status-blocking-foreground: var(--status-danger-foreground);
+  --status-clear: var(--status-success);
+  --status-clear-foreground: var(--status-success-foreground);
+  --status-pending: var(--status-info);
+  --status-pending-foreground: var(--status-info-foreground);
+
+  /* Badge / chip fills — solid color-mix into --card (not translucent wash on canvas).
+     Mix strength is intentional: ~14% reads washed-out on white table rows;
+     22–28% keeps the tinted-pill rule while staying legible. */
+  --badge-primary-bg: color-mix(in oklch, var(--primary) 22%, var(--card));
+  --badge-danger-bg: color-mix(in oklch, var(--status-danger) 24%, var(--card));
+  --badge-warning-bg: color-mix(in oklch, var(--status-warning) 26%, var(--card));
+  --badge-success-bg: color-mix(in oklch, var(--status-success) 24%, var(--card));
+  --badge-neutral-bg: color-mix(in oklch, var(--status-neutral) 18%, var(--card));
+  --badge-info-bg: color-mix(in oklch, var(--status-info) 24%, var(--card));
+  /* Legacy badge aliases */
+  --badge-blocking-bg: var(--badge-danger-bg);
+  --badge-clear-bg: var(--badge-success-bg);
+  --badge-pending-bg: var(--badge-info-bg);
+
+  /* —— KPI / callout highlight —— */
+  --highlight: var(--brand-100);
+  --highlight-border: var(--brand-500);
+
+  /* Map / domain overlay tokens live in product extensions — not UDS core. */
+
+  /* —— Elevation (raised / popover / menu / modal / tooltip) —— */
+  --shadow-raised:
+    0 1px 2px oklch(0.3 0.04 264 / 0.06), 0 4px 10px -2px oklch(0.3 0.04 264 / 0.08);
+  --shadow-tooltip: 0 1px 2px oklch(0.35 0.04 264 / 0.05);
+  --shadow-menu:
+    0 1px 1px oklch(0.35 0.04 264 / 0.02), 0 4px 8px -4px oklch(0.35 0.04 264 / 0.04),
+    0 16px 24px -8px oklch(0.35 0.04 264 / 0.06);
+  --shadow-modal:
+    0 1px 1px oklch(0.35 0.04 264 / 0.02), 0 8px 16px -4px oklch(0.35 0.04 264 / 0.04),
+    0 24px 32px -8px oklch(0.35 0.04 264 / 0.06);
+
+  /* —— Legacy shadow aliases (backward compat) —— */
+  --shadow-sm: var(--shadow-raised);
+  --shadow-card: var(--shadow-raised);
+
+  /* —— Focus ring (two-layer) —— */
+  --focus-ring: 0 0 0 2px var(--background), 0 0 0 4px var(--blue-700);
+
+  color-scheme: light;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   1. PRIMITIVE SCALES (dark)
+   ═══════════════════════════════════════════════════════════════════════ */
+.dark {
+  /*
+   * Dark surface layer map (authority-modern)
+   * canvas      → --background
+   * elevated    → --sidebar, --card
+   * title bar   → --header
+   * selection   → --sidebar-accent (brand-h tinted)
+   * focus       → --ring
+   * actions     → --primary / --primary-hover
+   */
+
+  /* —— Gray scale (dark) —— */
+  --gray-100: oklch(0.28 0.006 264);
+  --gray-200: oklch(0.3 0.006 264);
+  --gray-300: oklch(0.33 0.006 264);
+  --gray-400: oklch(0.36 0.006 264);
+  --gray-500: oklch(0.42 0.006 264);
+  --gray-600: oklch(0.55 0.006 264);
+  --gray-700: oklch(0.58 0.006 264);
+  --gray-800: oklch(0.52 0.006 264);
+  --gray-900: oklch(0.62 0.006 264);
+  --gray-1000: oklch(0.87 0.004 264);
+
+  /* —— Gray-alpha (dark — white-based translucents) —— */
+  --gray-alpha-100: oklch(1 0 0 / 0.07);
+  --gray-alpha-200: oklch(1 0 0 / 0.09);
+  --gray-alpha-300: oklch(1 0 0 / 0.13);
+  --gray-alpha-400: oklch(1 0 0 / 0.14);
+  --gray-alpha-500: oklch(1 0 0 / 0.24);
+  --gray-alpha-600: oklch(1 0 0 / 0.51);
+  --gray-alpha-700: oklch(1 0 0 / 0.54);
+  --gray-alpha-800: oklch(1 0 0 / 0.47);
+  --gray-alpha-900: oklch(1 0 0 / 0.61);
+  --gray-alpha-1000: oklch(1 0 0 / 0.92);
+
+  /* —— Blue (dark) —— */
+  --blue-100: oklch(0.25 0.07 260);
+  --blue-200: oklch(0.28 0.08 255);
+  --blue-300: oklch(0.32 0.1 255);
+  --blue-400: oklch(0.36 0.12 254);
+  --blue-500: oklch(0.42 0.14 254);
+  --blue-600: oklch(0.58 0.16 251);
+  --blue-700: oklch(0.52 0.14 245);
+  --blue-800: oklch(0.46 0.12 245);
+  --blue-900: oklch(0.65 0.15 250);
+  --blue-1000: oklch(0.9 0.02 245);
+
+  /* —— Red (dark) —— */
+  --red-100: oklch(0.25 0.06 15);
+  --red-200: oklch(0.28 0.08 19);
+  --red-300: oklch(0.33 0.11 21);
+  --red-400: oklch(0.37 0.13 21);
+  --red-500: oklch(0.42 0.15 23);
+  --red-600: oklch(0.58 0.22 23);
+  --red-700: oklch(0.72 0.14 35);
+  --red-800: oklch(0.58 0.22 25);
+  --red-900: oklch(0.6 0.2 22);
+  --red-1000: oklch(0.9 0.03 7);
+
+  /* —— Amber (dark) —— */
+  --amber-100: oklch(0.25 0.05 76);
+  --amber-200: oklch(0.28 0.06 65);
+  --amber-300: oklch(0.33 0.08 64);
+  --amber-400: oklch(0.37 0.09 66);
+  --amber-500: oklch(0.42 0.1 68);
+  --amber-600: oklch(0.68 0.16 74);
+  --amber-700: oklch(0.72 0.15 75);
+  --amber-800: oklch(0.62 0.14 64);
+  --amber-900: oklch(0.62 0.14 64);
+  --amber-1000: oklch(0.9 0.04 85);
+
+  /* —— Green (dark) —— */
+  --green-100: oklch(0.25 0.07 150);
+  --green-200: oklch(0.28 0.09 150);
+  --green-300: oklch(0.3 0.1 149);
+  --green-400: oklch(0.34 0.1 148);
+  --green-500: oklch(0.44 0.15 147);
+  --green-600: oklch(0.58 0.18 147);
+  --green-700: oklch(0.64 0.2 147);
+  --green-800: oklch(0.52 0.18 147);
+  --green-900: oklch(0.65 0.22 148);
+  --green-1000: oklch(0.9 0.06 154);
+
+  /* —— Teal (dark) —— */
+  --teal-100: oklch(0.25 0.05 179);
+  --teal-200: oklch(0.28 0.06 179);
+  --teal-300: oklch(0.33 0.08 181);
+  --teal-400: oklch(0.34 0.08 180);
+  --teal-500: oklch(0.43 0.11 181);
+  --teal-600: oklch(0.58 0.15 180);
+  --teal-700: oklch(0.6 0.14 182);
+  --teal-800: oklch(0.52 0.14 182);
+  --teal-900: oklch(0.6 0.17 183);
+  --teal-1000: oklch(0.9 0.06 180);
+
+  /* —— Purple (dark) —— */
+  --purple-100: oklch(0.25 0.08 317);
+  --purple-200: oklch(0.28 0.09 314);
+  --purple-300: oklch(0.33 0.12 312);
+  --purple-400: oklch(0.37 0.15 310);
+  --purple-500: oklch(0.42 0.17 308);
+  --purple-600: oklch(0.55 0.22 306);
+  --purple-700: oklch(0.55 0.22 306);
+  --purple-800: oklch(0.48 0.21 306);
+  --purple-900: oklch(0.6 0.2 310);
+  --purple-1000: oklch(0.9 0.03 316);
+
+  /* —— Pink (dark) —— */
+  --pink-100: oklch(0.25 0.06 355);
+  --pink-200: oklch(0.28 0.09 357);
+  --pink-300: oklch(0.33 0.11 356);
+  --pink-400: oklch(0.34 0.12 357);
+  --pink-500: oklch(0.38 0.15 358);
+  --pink-600: oklch(0.5 0.21 4);
+  --pink-700: oklch(0.55 0.23 1);
+  --pink-800: oklch(0.48 0.23 4);
+  --pink-900: oklch(0.5 0.22 2);
+  --pink-1000: oklch(0.9 0.03 350);
+
+  /* —— Chart palette (dark — brighter for contrast) —— */
+  --chart-1: var(--blue-600);
+  --chart-2: var(--teal-600);
+  --chart-3: var(--purple-600);
+  --chart-4: var(--pink-700);
+  --chart-5: var(--amber-700);
+  --chart-6: var(--green-600);
+
+  /* —— Background surfaces (dark) —— */
+  --background-100: oklch(0.235 0.004 264);
+  --background-200: oklch(0.255 0.006 264);
+
+  /* Radii, motion, fonts inherit from :root */
+
+  /* Brand surface still points at blue scale (now dark blue values).
+     Packs set [data-brand] overrides; --brand-h stays 264 unless a pack changes it. */
+  --brand-h: 264;
+
+  /* ═══════════════════════════════════════════════════════════════════════
+     2. SEMANTIC ALIASES (dark)
+     ═══════════════════════════════════════════════════════════════════════ */
+
+  --primary: var(--brand-700);
+  --primary-hover: var(--brand-800);
+  --primary-foreground: oklch(1 0 0);
+
+  /* Surface ladder (dark): canvas → card/fields elevated */
+  --background: var(--background-100);
+  --foreground: var(--gray-1000);
+
+  --fill-muted: var(--gray-100);
+  --muted-foreground: var(--gray-900);
+
+  --border: var(--gray-400);
+  --ring: oklch(0.58 0.14 245);
+
+  --card: var(--background-200);
+  --card-foreground: var(--gray-1000);
+
+  --canvas: var(--background);
+  --canvas-foreground: var(--foreground);
+  --overlay-surface: var(--card);
+  --overlay-foreground: var(--card-foreground);
+
+  --destructive: var(--red-700);
+  --destructive-foreground: oklch(0.97 0.004 264);
+
+  --sidebar: var(--background-200);
+  --sidebar-foreground: oklch(0.84 0.004 264);
+  --sidebar-accent: oklch(0.36 0.09 var(--brand-h));
+  --sidebar-accent-foreground: oklch(1 0 0);
+  --header: oklch(0.29 0.006 264);
+
+  /* —— Status (canonical) —— */
+  --status-danger: var(--red-700);
+  --status-danger-foreground: oklch(0.82 0.11 35);
+  --status-warning: var(--amber-700);
+  --status-warning-foreground: oklch(0.82 0.12 95);
+  --status-success: var(--green-700);
+  --status-success-foreground: oklch(0.86 0.1 145);
+  --status-neutral: var(--gray-700);
+  --status-neutral-foreground: oklch(0.78 0.004 264);
+  --status-info: var(--blue-900);
+  --status-info-foreground: oklch(0.78 0.14 250);
+
+  /* Legacy aliases */
+  --status-blocking: var(--status-danger);
+  --status-blocking-foreground: var(--status-danger-foreground);
+  --status-clear: var(--status-success);
+  --status-clear-foreground: var(--status-success-foreground);
+  --status-pending: var(--status-info);
+  --status-pending-foreground: var(--status-info-foreground);
+
+  /* Badge fills recompute via var(--card) / status hues */
+  --badge-primary-bg: color-mix(in oklch, var(--primary) 28%, var(--card));
+  --badge-danger-bg: color-mix(in oklch, var(--status-danger) 28%, var(--card));
+  --badge-warning-bg: color-mix(in oklch, var(--status-warning) 28%, var(--card));
+  --badge-success-bg: color-mix(in oklch, var(--status-success) 28%, var(--card));
+  --badge-neutral-bg: color-mix(in oklch, var(--status-neutral) 22%, var(--card));
+  --badge-info-bg: color-mix(in oklch, var(--status-info) 28%, var(--card));
+  --badge-blocking-bg: var(--badge-danger-bg);
+  --badge-clear-bg: var(--badge-success-bg);
+  --badge-pending-bg: var(--badge-info-bg);
+
+  --highlight: oklch(0.3 0.06 245);
+  --highlight-border: var(--brand-700);
+
+  /* —— Elevation (dark — flatter, border-reliant) —— */
+  --shadow-raised: 0 1px 2px oklch(0 0 0 / 0.16);
+  --shadow-tooltip: 0 1px 2px oklch(0 0 0 / 0.2);
+  --shadow-menu:
+    0 1px 1px oklch(0 0 0 / 0.02), 0 4px 8px -4px oklch(0 0 0 / 0.04),
+    0 16px 24px -8px oklch(0 0 0 / 0.06);
+  --shadow-modal:
+    0 1px 1px oklch(0 0 0 / 0.02), 0 8px 16px -4px oklch(0 0 0 / 0.04),
+    0 24px 32px -8px oklch(0 0 0 / 0.06);
+
+  --shadow-sm: var(--shadow-raised);
+  --shadow-card: var(--shadow-raised);
+
+  --focus-ring: 0 0 0 2px var(--background), 0 0 0 4px var(--blue-900);
+
+  color-scheme: dark;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   3. HIGH CONTRAST MODE
+   ═══════════════════════════════════════════════════════════════════════ */
+[data-contrast="high"] {
+  --border: oklch(0.35 0.03 264);
+  --muted-foreground: oklch(0.38 0.04 264);
+  --foreground: oklch(0.12 0.05 264);
+  --gray-400: oklch(0.35 0.03 264);
+  --gray-900: oklch(0.38 0.04 264);
+  --gray-1000: oklch(0.12 0.05 264);
+}
+
+.dark[data-contrast="high"] {
+  --border: oklch(0.48 0.03 264);
+  --muted-foreground: oklch(0.82 0.02 250);
+  --foreground: oklch(1 0 0);
+  --gray-400: oklch(0.48 0.03 264);
+  --gray-900: oklch(0.82 0.02 250);
+  --gray-1000: oklch(1 0 0);
+}

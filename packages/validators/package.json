@@ -1,0 +1,11 @@
+{
+  "name": "@rb/validators",
+  "description": "ATS lint + regional lint (Malaysia)",
+  "type": "module",
+  "private": true,
+  "version": "0.1.0",
+  "exports": {
+    "./*": "./src/*",
+    ".": "./src/index.ts"
+  }
+}

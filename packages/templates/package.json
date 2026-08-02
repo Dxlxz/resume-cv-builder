@@ -1,0 +1,11 @@
+{
+  "name": "@rb/templates",
+  "description": "Template contract + built-ins (classic, academic, ats-strict)",
+  "type": "module",
+  "private": true,
+  "version": "0.1.0",
+  "exports": {
+    "./*": "./src/*",
+    ".": "./src/index.ts"
+  }
+}

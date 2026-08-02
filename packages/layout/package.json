@@ -1,0 +1,11 @@
+{
+  "name": "@rb/layout",
+  "description": "Compile, measure, plan, lint pipeline — no UI, no PDF",
+  "type": "module",
+  "private": true,
+  "version": "0.1.0",
+  "exports": {
+    "./*": "./src/*",
+    ".": "./src/index.ts"
+  }
+}

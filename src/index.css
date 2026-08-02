@@ -1,0 +1,38 @@
+@import 'tailwindcss';
+/* Carlito font files must stay available in the DOM — the layout measure
+   renderer (MeasureRenderer → LayoutBlockHtml) measures text with Carlito
+   inline styles; removing these silently breaks layout/PDF parity. */
+@import '@fontsource/carlito/latin-400.css';
+@import '@fontsource/carlito/latin-400-italic.css';
+@import '@fontsource/carlito/latin-700.css';
+@import '@fontsource/carlito/latin-700-italic.css';
+/* UDS (vendored — see packages/styles/src/uds/README.md): tokens first, then
+   the non-circular @theme inline bridge. */
+@import '@rb/styles/uds/tokens.css';
+@import '@rb/styles/uds/theme-inline.css';
+
+@layer base {
+  html {
+    @apply antialiased;
+  }
+
+  body {
+    @apply m-0 min-h-screen bg-background text-foreground;
+    font-family: var(--font-sans); /* UDS foundation rule: body uses the token stack directly */
+  }
+
+  *:focus-visible {
+    outline: none;
+    box-shadow: var(--focus-ring); /* UDS two-layer focus ring */
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}

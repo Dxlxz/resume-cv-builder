@@ -1,0 +1,11 @@
+{
+  "name": "@rb/render",
+  "description": "RenderBackend contract + react-pdf adapter + block views",
+  "type": "module",
+  "private": true,
+  "version": "0.1.0",
+  "exports": {
+    "./*": "./src/*",
+    ".": "./src/index.ts"
+  }
+}

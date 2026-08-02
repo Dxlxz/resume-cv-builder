@@ -1,0 +1,24 @@
+---
+description: Protect owner personal profile data — read master markdown, select for jobs, never delete
+globs: personal/**
+alwaysApply: false
+---
+
+# Personal profile stewardship
+
+`personal/personal-profile.md` is **Dale Jeffrey Gilimon's master career record**, not demo/sample data.
+
+## Rules for AI
+
+1. **Do not delete or shorten** `personal/personal-profile.md` unless the user explicitly asks to remove specific content in the current message.
+2. **Do not anonymise** contact details, employers, projects, certifications, volunteer work, or references for "repo hygiene" — the personal pack lives outside the product by design.
+3. **Never import `personal/` from the product (`src/`, `apps/`, `packages/`)** — the product is COTS-clean. The app loads the pack only through the dev-only `@personal/profile` alias; tests use fictional fixtures in `src/test/fixtures/sampleDocuments.ts`.
+4. **Read the full markdown** before tailoring a resume for a job. **Select** relevant bullets/skills/projects; do not edit the master file to match one application.
+5. **Sync direction:** `personal/personal-profile.md` → `personal/personal-profile.ts` when the user asks to sync or update the app default. Never drop sections from `.ts` that still exist in `.md`.
+6. **Writing style** when editing copy the user requested: British English, plain verbs, no AI punctuation patterns (see the `.md` header).
+
+## Sections that must stay complete in the master file
+
+Contact, Summary, Experience, Education, Certifications, Skills, Projects, Leadership & Volunteer, References, Builder Defaults.
+
+Job-specific drafts live in the app (`localStorage`) or exported JSON — not by gutting this file.

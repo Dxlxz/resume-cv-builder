@@ -1,0 +1,47 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  verify:
+    name: Lint, test, build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      - name: Lint
+        run: pnpm run lint
+
+      - name: Test
+        run: pnpm test
+
+      - name: Build
+        run: pnpm run build
+
+      - name: Leak check — no personal data in repo or bundle
+        run: |
+          markers='dalejgm01|644 8821|Dxlxz|pembina_resume|Dale_Jeffrey_Gilimon'
+          if grep -rInE "$markers" --exclude-dir=node_modules --exclude-dir=.git --exclude-dir=dist --exclude-dir=personal --exclude-dir=.github .; then
+            echo "::error::Personal data found in the repository tree"
+            exit 1
+          fi
+          if grep -rInE "$markers" dist/; then
+            echo "::error::Personal data found in the production bundle"
+            exit 1
+          fi
+          echo "Clean — no personal data shipped."

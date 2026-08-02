@@ -1,0 +1,36 @@
+/* Minimal PDF.js text layer styles for selectable preview text */
+.pdf-page-layer {
+  position: relative;
+  margin-left: auto;
+  margin-right: auto;
+  background: white;
+}
+
+.pdf-page-layer canvas {
+  display: block;
+  vertical-align: top;
+}
+
+.pdf-page-layer .textLayer {
+  position: absolute;
+  inset: 0;
+  overflow: clip;
+  line-height: 1;
+  text-size-adjust: none;
+  transform-origin: 0 0;
+  z-index: 2;
+}
+
+.pdf-page-layer .textLayer span,
+.pdf-page-layer .textLayer br {
+  color: transparent;
+  position: absolute;
+  white-space: pre;
+  cursor: text;
+  transform-origin: 0 0;
+  user-select: text;
+}
+
+.pdf-page-layer .textLayer ::selection {
+  background: rgba(37, 99, 235, 0.28);
+}

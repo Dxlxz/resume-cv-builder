@@ -1,0 +1,11 @@
+{
+  "name": "@rb/catalog",
+  "description": "Versioned vocabulary bundles, registry, store, admin logic",
+  "type": "module",
+  "private": true,
+  "version": "0.1.0",
+  "exports": {
+    "./*": "./src/*",
+    ".": "./src/index.ts"
+  }
+}

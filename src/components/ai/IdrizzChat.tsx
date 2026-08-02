@@ -6,6 +6,7 @@ import { useResizablePanel } from '@/hooks/useResizablePanel'
 import { buildDocumentContext, parseAiEditPlan, type AiEditPlan } from '@/lib/ai/edits'
 import { AiEditReview } from '@/components/ai/AiEditReview'
 import { Button } from '@/components/ui/Button'
+import { Tooltip } from '@/components/ui/Tooltip'
 
 /**
  * Idrizz, the floating chatbot. A round bubble sits at the bottom-right of
@@ -58,7 +59,7 @@ export function IdrizzChat({ open, onOpen, onClose }: IdrizzChatProps) {
   const document = useDocumentStore((s) => s.document)
   const isMobile = useMediaQuery('(max-width: 767px)')
   const { result, busy, error, consentOpen, run, acceptConsent, declineConsent } = useAi('ai-edit')
-  const { size, onPointerDown } = useResizablePanel({
+  const { size, onPointerDown, setSize } = useResizablePanel({
     defaultSize: { width: 384, height: 512 },
     minWidth: 288,
     maxWidth: 448,
@@ -66,6 +67,11 @@ export function IdrizzChat({ open, onOpen, onClose }: IdrizzChatProps) {
     maxHeight: 640,
     storageKey: 'rizzume-idrizz-size',
   })
+  const [expanded, setExpanded] = useState(false)
+  const lastSizeRef = useRef(size)
+  useEffect(() => {
+    if (!expanded) lastSizeRef.current = size
+  }, [size, expanded])
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [input, setInput] = useState('')
   const [started, setStarted] = useState(false)
@@ -119,6 +125,19 @@ export function IdrizzChat({ open, onOpen, onClose }: IdrizzChatProps) {
     setMessages((prev) => prev.map((m, i) => (i === index ? { ...m, plan: undefined } : m)))
   }
 
+  const toggleExpand = () => {
+    if (expanded) {
+      setExpanded(false)
+      setSize(lastSizeRef.current)
+    } else {
+      setExpanded(true)
+      setSize({
+        width: Math.min(720, window.innerWidth - 32),
+        height: Math.min(640, window.innerHeight - 112),
+      })
+    }
+  }
+
   if (!open) {
     return (
       <button
@@ -163,6 +182,26 @@ export function IdrizzChat({ open, onOpen, onClose }: IdrizzChatProps) {
           <p className="text-sm font-semibold leading-tight text-foreground">Idrizz</p>
           <p className="text-xs text-muted-foreground">Your resume wingman</p>
         </div>
+        {!isMobile && (
+          <Tooltip label={expanded ? 'Restore chat size' : 'Expand chat'}>
+            <button
+              type="button"
+              onClick={toggleExpand}
+              aria-label={expanded ? 'Restore chat size' : 'Expand chat'}
+              className="rounded-sm px-2 py-1 text-muted-foreground transition-colors duration-[var(--duration-state)] hover:bg-muted hover:text-foreground"
+            >
+              {expanded ? (
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                  <path d="M8 4v4H4M16 4v4h4M20 16h-4v4M4 16h4v4" />
+                </svg>
+              ) : (
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                  <path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5" />
+                </svg>
+              )}
+            </button>
+          </Tooltip>
+        )}
         <button
           type="button"
           onClick={onClose}
@@ -297,14 +336,16 @@ export function IdrizzChat({ open, onOpen, onClose }: IdrizzChatProps) {
       {!isMobile && (
         <div
           role="separator"
-          aria-label="Resize chat"
+          aria-label="Drag to resize"
           aria-orientation="horizontal"
+          title="Drag to resize"
           onPointerDown={onPointerDown}
-          className="absolute bottom-0 left-0 flex h-5 w-5 cursor-nesw-resize touch-none items-start justify-start p-1 text-muted-foreground/60 transition-colors duration-[var(--duration-state)] hover:text-muted-foreground"
+          className="absolute bottom-0 left-0 flex h-5 w-5 cursor-nesw-resize touch-none items-start justify-start p-1 text-muted-foreground/50 transition-colors duration-[var(--duration-state)] hover:text-muted-foreground"
         >
-          <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
-            <path d="M22 14v8h-8l8-8z" />
-            <path d="M22 2v6L16 2h6zM2 22v-8l8 8H2z" />
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" aria-hidden>
+            <path d="M5 19L19 5" />
+            <path d="M9 19L19 9" />
+            <path d="M13 19L19 13" />
           </svg>
         </div>
       )}

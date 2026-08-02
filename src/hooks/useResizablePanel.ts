@@ -107,5 +107,12 @@ export function useResizablePanel({
     }
   }, [size, storageKey])
 
-  return { size, onPointerDown }
+  const setSizeClamped = useCallback(
+    (next: PanelSize) => {
+      setSize(clampPanelSize(next, { minWidth, maxWidth, minHeight, maxHeight }))
+    },
+    [minWidth, maxWidth, minHeight, maxHeight],
+  )
+
+  return { size, onPointerDown, setSize: setSizeClamped }
 }

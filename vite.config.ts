@@ -9,6 +9,9 @@ import { runAiProxy } from './src/lib/ai/server.ts'
 // Private personal pack (Dale's profile) — dev/test only. Shipping builds
 // apply no alias: `@personal/profile` stays an external dynamic import that
 // rejects at runtime, profile features hide, and no personal data is bundled.
+// In test mode without the pack (CI, clean checkouts), the alias points at a
+// stub so the dynamic import resolves; the feature stays off via
+// `__HAS_PERSONAL__`.
 const personalEntry = path.resolve(import.meta.dirname, './personal/personal-profile.ts')
 const hasPersonal = fs.existsSync(personalEntry)
 
@@ -23,6 +26,16 @@ const rbAliases = Object.fromEntries(
 export default defineConfig(({ command, mode }) => {
   const isBuild = command === 'build'
   const env = loadEnv(mode, import.meta.dirname, '')
+  const personalAlias = !isBuild
+    ? hasPersonal
+      ? { '@personal/profile': personalEntry }
+      : {
+          '@personal/profile': path.resolve(
+            import.meta.dirname,
+            './src/test/stubs/personal-profile.ts',
+          ),
+        }
+    : {}
 
   return {
     plugins: [
@@ -59,7 +72,7 @@ export default defineConfig(({ command, mode }) => {
       alias: {
         '@': path.resolve(import.meta.dirname, './src'),
         ...rbAliases,
-        ...(hasPersonal && !isBuild ? { '@personal/profile': personalEntry } : {}),
+        ...personalAlias,
       },
     },
     define: {

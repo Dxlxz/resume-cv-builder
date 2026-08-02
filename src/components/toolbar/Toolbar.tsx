@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useRef, useState } from 'react'
 import { useDocumentStore } from '@/app/store/documentStore'
 import { getPreset } from '@rb/presets/registry'
 import { generatePdf, downloadPdf } from '@/lib/pdf'
@@ -51,16 +51,9 @@ export function Toolbar({ onHome, previewVisible, onTogglePreview }: ToolbarProp
   const [pendingExport, setPendingExport] = useState(false)
   const [exportNotice, setExportNotice] = useState<string | null>(null)
   const [pdfPreview, setPdfPreview] = useState<{
-    url: string
     pageCount: number
     blob: Blob
   } | null>(null)
-
-  useEffect(() => {
-    return () => {
-      if (pdfPreview?.url) URL.revokeObjectURL(pdfPreview.url)
-    }
-  }, [pdfPreview?.url])
 
   if (!document) return null
 
@@ -102,9 +95,7 @@ export function Toolbar({ onHome, previewVisible, onTogglePreview }: ToolbarProp
     try {
       const blob = previewPdfBlob ?? (await generatePdf(document, preset.labels))
       const pageCount = await countPdfPages(blob)
-      if (pdfPreview?.url) URL.revokeObjectURL(pdfPreview.url)
       setPdfPreview({
-        url: URL.createObjectURL(blob),
         pageCount,
         blob,
       })
@@ -326,16 +317,14 @@ export function Toolbar({ onHome, previewVisible, onTogglePreview }: ToolbarProp
 
       {pdfPreview && (
         <PdfPreviewModal
-          url={pdfPreview.url}
+          blob={pdfPreview.blob}
           pageCount={pdfPreview.pageCount}
           onClose={() => {
-            URL.revokeObjectURL(pdfPreview.url)
             setPdfPreview(null)
           }}
           onDownload={() => {
             downloadPdf(pdfPreview.blob, document)
             setExportNotice(`Exported ${pdfPreview.pageCount}-page PDF`)
-            URL.revokeObjectURL(pdfPreview.url)
             setPdfPreview(null)
           }}
         />

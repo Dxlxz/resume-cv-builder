@@ -1,6 +1,8 @@
 interface BrandProps {
   showName?: boolean
   nameClassName?: string
+  /** When provided, the brand renders as a button (logo = home). */
+  onClick?: () => void
 }
 
 /** Product logo: blue document with resume lines (public/favicon.svg). */
@@ -50,15 +52,31 @@ export function BrandMark() {
   )
 }
 
-export function Brand({ showName = true, nameClassName = '' }: BrandProps) {
-  return (
-    <span className="flex items-center gap-2.5">
+export function Brand({ showName = true, nameClassName = '', onClick }: BrandProps) {
+  const content = (
+    <>
       <BrandMark />
       {showName && (
         <span className={`text-[15px] font-semibold tracking-tight text-foreground ${nameClassName}`}>
           Rizzume
         </span>
       )}
-    </span>
+    </>
+  )
+
+  if (!onClick) {
+    return <span className="flex items-center gap-2.5">{content}</span>
+  }
+
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-label="Rizzume - home"
+      title="Home"
+      className="flex items-center gap-2.5 rounded-sm transition-opacity duration-[var(--duration-state)] hover:opacity-80 focus-visible:opacity-80"
+    >
+      {content}
+    </button>
   )
 }

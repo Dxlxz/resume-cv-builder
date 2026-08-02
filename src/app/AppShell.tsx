@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react'
 import { Brand } from '@/components/ui/Brand'
+import { navigateTo } from '@/hooks/useAppRoute'
 
 /**
  * App shell — the persistent chrome for non-builder flows (onboarding).
@@ -46,7 +47,7 @@ export function AppShell({ children, backLabel = 'Home', onBack, rightSlot }: Ap
             </button>
           )}
           <span className="pl-2">
-            <Brand />
+            <Brand onClick={() => navigateTo('landing')} />
           </span>
           {rightSlot && <div className="ml-auto flex flex-wrap items-center gap-2">{rightSlot}</div>}
         </div>

@@ -221,23 +221,7 @@ export function Toolbar({ onHome }: ToolbarProps) {
       <header className="border-b border-border bg-header px-4 py-3 shadow-[var(--shadow-raised)]">
         <div className="mx-auto max-w-[1600px] space-y-3">
           <div className="flex flex-wrap items-center gap-3">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={onHome}
-              aria-label="Back to home page"
-              title="Back to home page"
-              className="shrink-0"
-            >
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-                <path d="M3 10.5L12 3l9 7.5" />
-                <path d="M5 9.5V21h14V9.5" />
-              </svg>
-              Home
-            </Button>
-            <span className="min-w-0">
-              <Brand />
-            </span>
+            <Brand onClick={onHome} />
             <span
               className={`ml-auto inline-flex shrink-0 items-center gap-1.5 rounded-full border border-border bg-card px-2.5 py-1 text-xs ${saveTone}`}
               aria-live="polite"

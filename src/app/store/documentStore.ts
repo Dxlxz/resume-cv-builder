@@ -13,7 +13,13 @@ import type {
 import { createEmptyDocument } from '@rb/presets/createDocument'
 import { getPreset } from '@rb/presets/registry'
 import { themeForDocument } from '@rb/themes/registry'
-import { clearStorage, loadFromStorage } from '@/lib/persistence'
+import {
+  clearStorage,
+  discardRecoveredDraft,
+  hasRecoverableDraft,
+  loadFromStorage,
+  loadRecoveredDraft,
+} from '@/lib/persistence'
 import type { LintIssue } from '@rb/validators/types'
 import type { LayoutPlanResult } from '@rb/layout/types'
 import {
@@ -39,6 +45,8 @@ interface DocumentState {
   hasStarted: boolean
   /** True when a local personal pack is available ("Load my profile"). */
   personalProfileAvailable: boolean
+  /** True when a corrupted draft was quarantined and can be restored. */
+  recoverableBackup: boolean
   saveStatus: SaveStatus
   saveError: string | null
   exportFieldErrors: Record<string, string>
@@ -64,6 +72,12 @@ interface DocumentState {
   startFromSample: (type: DocumentType, presetId?: PresetId) => void
   loadPersonalProfile: () => void
   resolvePersonalDocument: () => Promise<ResumeDocument | null>
+  /** Adopts a draft from another tab (newer revision won). */
+  importExternalDocument: (document: ResumeDocument) => void
+  /** Restores the quarantined draft backup into the editor. */
+  recoverBackup: () => void
+  /** Discards the quarantined backup without restoring it. */
+  dismissRecovery: () => void
   applyPreset: (presetId: PresetId) => void
   setDocument: (document: ResumeDocument) => void
   setDocumentType: (type: DocumentType) => void
@@ -131,6 +145,7 @@ export const useDocumentStore = create<DocumentState>((set, get) => {
     document: null,
     hasStarted: false,
     personalProfileAvailable: __HAS_PERSONAL__,
+    recoverableBackup: false,
     saveStatus: 'saved',
     saveError: null,
     exportFieldErrors: {},
@@ -157,12 +172,55 @@ export const useDocumentStore = create<DocumentState>((set, get) => {
         showOnboarding: false,
         saveStatus: 'saved',
       })
+    } else if (hasRecoverableDraft()) {
+      set({ recoverableBackup: true })
     }
   },
 
   resolvePersonalDocument: async () => {
     const mod = await personalProfilePromise
     return mod ? mod.personalDocumentFor('resume') : null
+  },
+
+  importExternalDocument: (document) => {
+    // From another tab. The incoming revision is newer by construction
+    // (draftPersistence only fires when updatedAt wins), so adopt as-is.
+    set({
+      document,
+      hasStarted: true,
+      showOnboarding: false,
+      recoverableBackup: false,
+      saveStatus: 'saved',
+      exportFieldErrors: {},
+      pdfError: null,
+      lintIssues: [],
+      showLintPanel: false,
+    })
+  },
+
+  recoverBackup: () => {
+    const recovered = loadRecoveredDraft()
+    if (!recovered) {
+      set({ recoverableBackup: false })
+      return
+    }
+    discardRecoveredDraft()
+    set({
+      document: recovered,
+      hasStarted: true,
+      showOnboarding: false,
+      recoverableBackup: false,
+      saveStatus: 'saved',
+      exportFieldErrors: {},
+      pdfError: null,
+      lintIssues: [],
+      showLintPanel: false,
+    })
+  },
+
+  dismissRecovery: () => {
+    discardRecoveredDraft()
+    set({ recoverableBackup: false })
   },
 
   startDocument: (type, presetId = 'international-generic', options) => {
@@ -440,6 +498,7 @@ export const useDocumentStore = create<DocumentState>((set, get) => {
       hasStarted: false,
       saveStatus: 'saved',
       saveError: null,
+      recoverableBackup: false,
       exportFieldErrors: {},
       pdfError: null,
       lintIssues: [],

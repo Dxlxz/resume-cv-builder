@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Toolbar } from '@/components/toolbar/Toolbar'
 import { EditorPanel } from '@/components/editor/EditorPanel'
 import { PreviewPanel } from '@/components/preview/PreviewPanel'
+import { RecoveryBanner } from '@/components/RecoveryBanner'
 
 type MobileTab = 'edit' | 'preview'
 
@@ -15,6 +16,7 @@ export function BuilderLayout({ onHome }: BuilderLayoutProps) {
   return (
     <div className="flex h-dvh flex-col overflow-hidden bg-background">
       <Toolbar onHome={onHome} />
+      <RecoveryBanner />
 
       <div className="shrink-0 border-b border-border bg-card px-4 py-2 lg:hidden">
         <div className="flex gap-2" role="tablist" aria-label="Editor panels">

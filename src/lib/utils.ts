@@ -8,15 +8,22 @@ export function sanitizeFilename(name: string): string {
   return sanitized || 'document'
 }
 
-export function debounce<T extends (...args: never[]) => void>(
-  fn: T,
-  delay: number,
-): (...args: Parameters<T>) => void {
+export interface Debounced<F extends (...args: never[]) => void> {
+  (...args: Parameters<F>): void
+  cancel(): void
+}
+
+export function debounce<F extends (...args: never[]) => void>(fn: F, delay: number): Debounced<F> {
   let timer: ReturnType<typeof setTimeout> | undefined
-  return (...args: Parameters<T>) => {
+  const debounced = ((...args: Parameters<F>) => {
     clearTimeout(timer)
     timer = setTimeout(() => fn(...args), delay)
+  }) as Debounced<F>
+  debounced.cancel = () => {
+    clearTimeout(timer)
+    timer = undefined
   }
+  return debounced
 }
 
 export const MAX_IMPORT_BYTES = 1_000_000

@@ -1,30 +1,31 @@
 import { useEffect } from 'react'
 import { useDocumentStore } from '@/app/store/documentStore'
-import { StorageQuotaError, trySaveToStorage } from '@/lib/persistence'
-import { debounce } from '@/lib/utils'
+import { startDraftPersistence } from '@/lib/draftPersistence'
 
-const debouncedSave = debounce((doc: NonNullable<ReturnType<typeof useDocumentStore.getState>['document']>) => {
-  try {
-    trySaveToStorage(doc)
-    useDocumentStore.getState().setSaveStatus('saved')
-  } catch (error) {
-    if (error instanceof StorageQuotaError) {
-      useDocumentStore
-        .getState()
-        .setSaveStatus('error', 'Storage full. Export a JSON backup to free space.')
-    } else {
-      useDocumentStore.getState().setSaveStatus('error', 'Could not save draft.')
-    }
-  }
-}, 500)
+/**
+ * Wires the draft persistence controller to the document store. The
+ * controller lives for the app's lifetime: debounced autosave, flush on
+ * tab hide/unload, and cross-tab adoption of newer revisions.
+ */
+
+let controller: ReturnType<typeof startDraftPersistence> | null = null
 
 export function usePersistence() {
   const document = useDocumentStore((s) => s.document)
-  const hasStarted = useDocumentStore((s) => s.hasStarted)
 
   useEffect(() => {
-    if (!hasStarted || !document) return
-    useDocumentStore.getState().setSaveStatus('saving')
-    debouncedSave(document)
-  }, [document, hasStarted])
+    if (!controller) {
+      controller = startDraftPersistence({
+        getCurrent: () => useDocumentStore.getState().document,
+        onStatus: (status, error = null) =>
+          useDocumentStore.getState().setSaveStatus(status, error),
+        onExternalChange: (doc) => useDocumentStore.getState().importExternalDocument(doc),
+      })
+    }
+  }, [])
+
+  useEffect(() => {
+    if (!document) return
+    controller?.schedule(document)
+  }, [document])
 }

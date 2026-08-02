@@ -119,21 +119,27 @@ export function IdrizzChat({ open, onOpen, onClose }: IdrizzChatProps) {
     setMessages((prev) => prev.map((m, i) => (i === index ? { ...m, plan: undefined } : m)))
   }
 
-  if (!open) {
-    return (
+  return (
+    <>
       <button
         type="button"
-        onClick={onOpen}
-        aria-label="Chat with Idrizz"
-        title="Chat with Idrizz"
-        className="fixed bottom-5 right-5 z-40 flex h-12 w-12 animate-pop-in items-center justify-center rounded-full bg-primary text-primary-foreground shadow-[var(--shadow-modal)] transition-all duration-[var(--duration-state)] hover:scale-105 active:scale-95"
+        onClick={open ? onClose : onOpen}
+        aria-label={open ? 'Close chat' : 'Chat with Idrizz'}
+        title={open ? 'Close chat' : 'Chat with Idrizz'}
+        className={`fixed bottom-5 right-5 z-50 flex h-12 w-12 animate-pop-in items-center justify-center rounded-full text-primary-foreground shadow-[var(--shadow-modal)] transition-all duration-[var(--duration-state)] hover:scale-105 active:scale-95 ${
+          open ? 'bg-foreground' : 'bg-primary'
+        }`}
       >
-        <SparkleIcon />
+        {open ? (
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+            <path d="M18 6L6 18M6 6l12 12" />
+          </svg>
+        ) : (
+          <SparkleIcon />
+        )}
       </button>
-    )
-  }
 
-  return (
+      {open && (
     <div
       role="dialog"
       aria-modal="true"
@@ -284,5 +290,7 @@ export function IdrizzChat({ open, onOpen, onClose }: IdrizzChatProps) {
         </div>
       </footer>
     </div>
+      )}
+    </>
   )
 }

@@ -17,6 +17,8 @@ import { DocumentSettings } from '@/components/editor/DocumentSettings'
 import { IdrizzIconButton } from '@/components/ai/IdrizzIconButton'
 import { FormSection } from '@/components/ui/FormSection'
 import { Button } from '@/components/ui/Button'
+import { filledSectionIds } from '@/lib/sectionStatus'
+import { scrollToFormSection } from '@/lib/scrollToSection'
 
 const SECTION_FORMS: Record<SectionId, ComponentType> = {
   contact: ContactForm,
@@ -69,10 +71,43 @@ export function EditorPanel({ onAskIdrizz }: EditorPanelProps) {
 
   const hidden = new Set(document.meta.hiddenSections)
   const preset = getPreset(document.meta.presetId)
+  const visibleSections = document.meta.sectionOrder.filter(
+    (sectionId) => sectionId === 'contact' || !hidden.has(sectionId),
+  )
+  const filled = filledSectionIds(document, visibleSections)
 
   return (
     <div className="space-y-5">
       <DocumentSettings />
+
+      <nav
+        aria-label="Sections"
+        className="sticky top-0 z-10 -mx-4 flex flex-wrap gap-1.5 bg-sidebar px-4 py-2 lg:-mx-5 lg:px-5"
+      >
+        {visibleSections.map((sectionId) => {
+          const label = getSectionLabel(sectionId, preset.labels)
+          return (
+            <button
+              key={sectionId}
+              type="button"
+              onClick={() => scrollToFormSection(sectionId)}
+              className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs transition-colors duration-[var(--duration-state)] ${
+                filled.has(sectionId)
+                  ? 'border-border bg-card text-foreground hover:border-foreground/30'
+                  : 'border-border/60 bg-transparent text-muted-foreground hover:border-foreground/30 hover:text-foreground'
+              }`}
+            >
+              <span
+                aria-hidden
+                className={`h-1.5 w-1.5 shrink-0 rounded-full ${
+                  filled.has(sectionId) ? 'bg-status-success' : 'bg-foreground/20'
+                }`}
+              />
+              {label}
+            </button>
+          )
+        })}
+      </nav>
 
       {showOnboarding && (
         <div className="rounded-md border border-status-info/30 bg-badge-info p-4 text-sm text-status-info-foreground">
@@ -117,6 +152,7 @@ export function EditorPanel({ onAskIdrizz }: EditorPanelProps) {
               title={getSectionLabel(sectionId, preset.labels)}
               hint={SECTION_HINTS[sectionId]}
               defaultOpen={sectionId === 'contact' || sectionId === 'summary'}
+              filled={filled.has(sectionId)}
               action={
                 <IdrizzIconButton
                   label={`Ask Idrizz about ${getSectionLabel(sectionId, preset.labels)}`}

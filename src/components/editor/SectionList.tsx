@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import {
   DndContext,
   closestCenter,
@@ -19,6 +20,7 @@ import { useDocumentStore } from '@/app/store/documentStore'
 import { getSectionLabel } from '@rb/core/selectors/getSectionLabel'
 import type { SectionId } from '@rb/core/types/document'
 import { getPreset } from '@rb/presets/registry'
+import { filledSectionIds } from '@/lib/sectionStatus'
 import { scrollToFormSection } from '@/lib/scrollToSection'
 import { Button } from '@/components/ui/Button'
 
@@ -26,10 +28,12 @@ function SortableSectionRow({
   sectionId,
   index,
   total,
+  filled,
 }: {
   sectionId: SectionId
   index: number
   total: number
+  filled: boolean
 }) {
   const document = useDocumentStore((s) => s.document)
   const hiddenSections = useDocumentStore((s) => s.document?.meta.hiddenSections ?? [])
@@ -86,11 +90,17 @@ function SortableSectionRow({
       )}
       <button
         type="button"
-        className="min-w-0 flex-1 truncate text-left text-sm font-medium text-foreground hover:text-primary"
+        className="flex min-w-0 flex-1 items-center gap-2 truncate text-left text-sm font-medium text-foreground hover:text-primary"
         onClick={() => scrollToFormSection(sectionId)}
         title={`Jump to ${label}`}
       >
-        {label}
+        <span
+          aria-hidden
+          className={`h-1.5 w-1.5 shrink-0 rounded-full ${
+            filled ? 'bg-status-success' : 'bg-foreground/20'
+          }`}
+        />
+        <span className="truncate">{label}</span>
       </button>
       {!isContact && (
         <>
@@ -134,7 +144,9 @@ function SortableSectionRow({
 
 export function SectionList() {
   const sectionOrder = useDocumentStore((s) => s.document?.meta.sectionOrder ?? [])
+  const document = useDocumentStore((s) => s.document)
   const reorderSections = useDocumentStore((s) => s.reorderSections)
+  const [open, setOpen] = useState(false)
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
@@ -151,29 +163,51 @@ export function SectionList() {
     reorderSections(arrayMove(sectionOrder, oldIndex, newIndex))
   }
 
+  const filled = document ? filledSectionIds(document, sectionOrder) : new Set<SectionId>()
+
   return (
-    <div className="space-y-2 rounded-md border border-border bg-card p-4 shadow-[var(--shadow-raised)]">
-      <div>
-        <h3 className="text-sm font-semibold text-foreground">Sections</h3>
-        <p className="mt-0.5 text-xs text-muted-foreground">
-          Click a name to jump to it. Drag or use the arrows to reorder. Untick
-          Show to leave a section out of the PDF.
-        </p>
-      </div>
-      <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={onDragEnd}>
-        <SortableContext items={sectionOrder} strategy={verticalListSortingStrategy}>
-          <ul className="space-y-2">
-            {sectionOrder.map((sectionId, index) => (
-              <SortableSectionRow
-                key={sectionId}
-                sectionId={sectionId}
-                index={index}
-                total={sectionOrder.length}
-              />
-            ))}
-          </ul>
-        </SortableContext>
-      </DndContext>
+    <div className="rounded-md border border-border bg-card shadow-[var(--shadow-raised)]">
+      <button
+        type="button"
+        aria-expanded={open}
+        onClick={() => setOpen((v) => !v)}
+        className="flex w-full items-center justify-between gap-3 px-4 py-3 text-left hover:bg-muted/50"
+      >
+        <span className="min-w-0">
+          <span className="text-sm font-semibold text-foreground">Sections</span>
+          <span className="ml-2 text-xs text-muted-foreground">Reorder and hide</span>
+        </span>
+        <span
+          aria-hidden
+          className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-sm bg-muted text-sm font-medium text-muted-foreground transition-transform duration-[var(--duration-state)] ${
+            open ? 'rotate-180' : ''
+          }`}
+        >
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M6 9l6 6 6-6" />
+          </svg>
+        </span>
+      </button>
+
+      {open && (
+        <div className="border-t border-border p-4">
+          <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={onDragEnd}>
+            <SortableContext items={sectionOrder} strategy={verticalListSortingStrategy}>
+              <ul className="space-y-2">
+                {sectionOrder.map((sectionId, index) => (
+                  <SortableSectionRow
+                    key={sectionId}
+                    sectionId={sectionId}
+                    index={index}
+                    total={sectionOrder.length}
+                    filled={filled.has(sectionId)}
+                  />
+                ))}
+              </ul>
+            </SortableContext>
+          </DndContext>
+        </div>
+      )}
     </div>
   )
 }

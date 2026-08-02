@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useDocumentStore } from '@/app/store/documentStore'
 import { useAi } from '@/hooks/useAi'
+import { useResizablePanel } from '@/hooks/useResizablePanel'
 import { buildDocumentContext, parseAiEditPlan, type AiEditPlan } from '@/lib/ai/edits'
 import { IdrizzIconButton } from '@/components/ai/IdrizzIconButton'
 import { AiEditReview } from '@/components/ai/AiEditReview'
@@ -57,6 +58,14 @@ export function IdrizzChat({
 }: IdrizzChatProps) {
   const document = useDocumentStore((s) => s.document)
   const { result, busy, error, consentOpen, run, acceptConsent, declineConsent } = useAi('ai-edit')
+  const { size, onPointerDown } = useResizablePanel({
+    defaultSize: { width: 384, height: 512 },
+    minWidth: 288,
+    maxWidth: 448,
+    minHeight: 320,
+    maxHeight: 640,
+    storageKey: 'rizzume-idrizz-size',
+  })
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [input, setInput] = useState('')
   const [started, setStarted] = useState(false)
@@ -137,9 +146,16 @@ export function IdrizzChat({
 
   return (
     <div
-      className="fixed bottom-20 right-5 z-40 flex max-h-[min(34rem,calc(100dvh-7rem))] w-[min(22rem,calc(100vw-2.5rem))] flex-col overflow-hidden rounded-lg border border-border bg-card shadow-[var(--shadow-modal)]"
       role="dialog"
+      aria-modal="true"
       aria-label="Chat with Idrizz"
+      className="fixed bottom-20 right-5 z-40 flex flex-col overflow-hidden rounded-lg border border-border bg-card shadow-[var(--shadow-modal)]"
+      style={{
+        width: size.width,
+        height: size.height,
+        maxWidth: 'calc(100vw - 2rem)',
+        maxHeight: 'calc(100dvh - 7rem)',
+      }}
     >
       <header className="flex shrink-0 items-center gap-2.5 border-b border-border bg-header px-3 py-2.5">
         <IdrizzIconButton size="md" onClick={() => inputRef.current?.focus()} label="Idrizz" />
@@ -268,6 +284,19 @@ export function IdrizzChat({
           </button>
         </div>
       </footer>
+
+      <div
+        role="separator"
+        aria-label="Resize chat"
+        aria-orientation="horizontal"
+        onPointerDown={onPointerDown}
+        className="absolute bottom-0 right-0 flex h-5 w-5 cursor-nwse-resize touch-none items-end justify-end p-1 text-muted-foreground/60 transition-colors duration-[var(--duration-state)] hover:text-muted-foreground"
+      >
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+          <path d="M22 14v8h-8l8-8z" />
+          <path d="M22 2v6L16 2h6zM2 22v-8l8 8H2z" />
+        </svg>
+      </div>
     </div>
   )
 }

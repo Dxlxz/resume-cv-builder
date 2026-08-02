@@ -13,9 +13,12 @@ import { Brand } from '@/components/ui/Brand'
 
 interface ToolbarProps {
   onHome: () => void
+  /** Preview pane is currently visible (desktop). */
+  previewVisible: boolean
+  onTogglePreview: () => void
 }
 
-export function Toolbar({ onHome }: ToolbarProps) {
+export function Toolbar({ onHome, previewVisible, onTogglePreview }: ToolbarProps) {
   const document = useDocumentStore((s) => s.document)
   const saveStatus = useDocumentStore((s) => s.saveStatus)
   const saveError = useDocumentStore((s) => s.saveError)
@@ -236,6 +239,16 @@ export function Toolbar({ onHome }: ToolbarProps) {
                   disabled={previewing || exporting}
                 >
                   Open fullscreen PDF
+                </button>
+                <button
+                  type="button"
+                  className="flex w-full items-center gap-2 rounded-sm px-3 py-2 text-left text-sm text-foreground transition-colors duration-[var(--duration-state)] hover:bg-muted"
+                  onClick={() => {
+                    setMenuOpen(false)
+                    onTogglePreview()
+                  }}
+                >
+                  {previewVisible ? 'Hide preview' : 'Show preview'}
                 </button>
                 <button
                   type="button"

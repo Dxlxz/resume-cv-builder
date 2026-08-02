@@ -13,6 +13,7 @@ interface BuilderLayoutProps {
 
 export function BuilderLayout({ onHome }: BuilderLayoutProps) {
   const [mobileTab, setMobileTab] = useState<MobileTab>('edit')
+  const [previewHidden, setPreviewHidden] = useState(false)
   const [idrizzOpen, setIdrizzOpen] = useState(false)
   const [idrizzAsk, setIdrizzAsk] = useState<{ instruction: string; nonce: number } | null>(null)
 
@@ -21,9 +22,15 @@ export function BuilderLayout({ onHome }: BuilderLayoutProps) {
     setIdrizzOpen(true)
   }
 
+  const effectiveTab: MobileTab = previewHidden ? 'edit' : mobileTab
+
   return (
     <div className="flex h-dvh flex-col overflow-hidden bg-background">
-      <Toolbar onHome={onHome} />
+      <Toolbar
+        onHome={onHome}
+        previewVisible={!previewHidden}
+        onTogglePreview={() => setPreviewHidden((v) => !v)}
+      />
       <RecoveryBanner />
 
       <div className="shrink-0 border-b border-border bg-card px-4 py-2 lg:hidden">
@@ -31,9 +38,9 @@ export function BuilderLayout({ onHome }: BuilderLayoutProps) {
           <button
             type="button"
             role="tab"
-            aria-selected={mobileTab === 'edit'}
+            aria-selected={effectiveTab === 'edit'}
             className={`flex-1 rounded-sm px-3 py-2.5 text-sm font-medium transition-colors duration-[var(--duration-state)] ${
-              mobileTab === 'edit'
+              effectiveTab === 'edit'
                 ? 'bg-primary text-primary-foreground'
                 : 'bg-muted text-foreground'
             }`}
@@ -41,43 +48,49 @@ export function BuilderLayout({ onHome }: BuilderLayoutProps) {
           >
             Edit content
           </button>
-          <button
-            type="button"
-            role="tab"
-            aria-selected={mobileTab === 'preview'}
-            className={`flex-1 rounded-sm px-3 py-2.5 text-sm font-medium transition-colors duration-[var(--duration-state)] ${
-              mobileTab === 'preview'
-                ? 'bg-primary text-primary-foreground'
-                : 'bg-muted text-foreground'
-            }`}
-            onClick={() => setMobileTab('preview')}
-          >
-            Preview
-          </button>
+          {!previewHidden && (
+            <button
+              type="button"
+              role="tab"
+              aria-selected={effectiveTab === 'preview'}
+              className={`flex-1 rounded-sm px-3 py-2.5 text-sm font-medium transition-colors duration-[var(--duration-state)] ${
+                effectiveTab === 'preview'
+                  ? 'bg-primary text-primary-foreground'
+                  : 'bg-muted text-foreground'
+              }`}
+              onClick={() => setMobileTab('preview')}
+            >
+              Preview
+            </button>
+          )}
         </div>
       </div>
 
       <main
         id="main-content"
         tabIndex={-1}
-        className="grid min-h-0 flex-1 grid-cols-1 outline-none lg:grid-cols-[minmax(280px,30%)_minmax(0,70%)]"
+        className={`grid min-h-0 flex-1 grid-cols-1 outline-none ${
+          previewHidden ? '' : 'lg:grid-cols-[minmax(340px,36%)_minmax(0,64%)]'
+        }`}
       >
         <section
-          className={`min-h-0 overflow-y-auto border-border bg-sidebar p-4 lg:border-r lg:p-5 ${
-            mobileTab === 'edit' ? 'block' : 'hidden lg:block'
-          }`}
+          className={`min-h-0 overflow-y-auto border-border bg-sidebar p-4 lg:p-5 ${
+            effectiveTab === 'edit' ? 'block' : 'hidden lg:block'
+          } ${previewHidden ? '' : 'lg:border-r'}`}
           aria-label="Document editor"
         >
           <EditorPanel onAskIdrizz={askIdrizz} />
         </section>
-        <section
-          className={`flex min-h-0 flex-col overflow-hidden bg-muted p-4 lg:p-5 ${
-            mobileTab === 'preview' ? 'flex' : 'hidden lg:flex'
-          }`}
-          aria-label="Document preview"
-        >
-          <PreviewPanel />
-        </section>
+        {!previewHidden && (
+          <section
+            className={`flex min-h-0 flex-col overflow-hidden bg-muted p-4 lg:p-4 ${
+              effectiveTab === 'preview' ? 'flex' : 'hidden lg:flex'
+            }`}
+            aria-label="Document preview"
+          >
+            <PreviewPanel />
+          </section>
+        )}
       </main>
 
       <IdrizzChat

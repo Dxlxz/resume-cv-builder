@@ -9,6 +9,8 @@ interface FormSectionProps {
   hint?: string
   /** Trailing control shown next to the header (e.g. the Idrizz icon). */
   action?: ReactNode
+  /** Section has content: shows a status dot in the header. */
+  filled?: boolean
 }
 
 export function FormSection({
@@ -18,6 +20,7 @@ export function FormSection({
   defaultOpen = true,
   hint,
   action,
+  filled,
 }: FormSectionProps) {
   const [open, setOpen] = useState(defaultOpen)
   const panelId = `form-section-panel-${sectionId}`
@@ -36,7 +39,17 @@ export function FormSection({
           onClick={() => setOpen((v) => !v)}
         >
           <div className="min-w-0">
-            <span className="font-semibold text-foreground">{title}</span>
+            <span className="flex items-center gap-2 font-semibold text-foreground">
+              {filled !== undefined && (
+                <span
+                  aria-hidden
+                  className={`h-1.5 w-1.5 shrink-0 rounded-full ${
+                    filled ? 'bg-status-success' : 'bg-foreground/20'
+                  }`}
+                />
+              )}
+              {title}
+            </span>
             {hint && !open && (
               <p className="mt-0.5 truncate text-xs text-muted-foreground">{hint}</p>
             )}

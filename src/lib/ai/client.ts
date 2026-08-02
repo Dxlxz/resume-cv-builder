@@ -1,4 +1,4 @@
-import type { AiFeature } from './prompts'
+import type { AiFeature } from './types'
 
 export type AiErrorKind = 'network' | 'rate' | 'server'
 

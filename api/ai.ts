@@ -2,12 +2,14 @@
  * Vercel serverless function: POST /api/ai
  * Body: { feature: 'ai-edit', payload: { instruction, context } }
  *
- * Thin handler over the canonical proxy in api/ai-impl.ts (shared with the
- * Vite dev middleware). The API key is read from the
- * OPENCODE_GO_API_KEY environment variable only - it never ships in the
- * client bundle. Stateless: no logging of payloads, no storage.
+ * Thin handler over the canonical proxy in ai-impl.ts (shared with the
+ * Vite dev middleware). Extension-less relative import - Vercel compiles
+ * each api/*.ts file standalone, so .ts specifiers would not resolve.
+ * The API key is read from the OPENCODE_GO_API_KEY environment variable
+ * only - it never ships in the client bundle. Stateless: no logging of
+ * payloads, no storage.
  */
-import { runAiProxy } from './ai-impl.ts'
+import { runAiProxy } from './ai-impl'
 
 interface AiRequest {
   method?: string

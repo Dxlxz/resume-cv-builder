@@ -187,20 +187,15 @@ export function Toolbar({ onHome }: ToolbarProps) {
 
   return (
     <>
-      <header className="border-b border-border bg-header px-4 py-3 shadow-[var(--shadow-raised)]">
-        <div className="mx-auto max-w-[1600px] space-y-3">
-          <div className="flex flex-wrap items-center gap-3">
+      <header className="border-b border-border bg-header px-4 py-2 shadow-[var(--shadow-raised)]">
+        <div className="mx-auto max-w-[1600px]">
+          <div className="flex flex-wrap items-center gap-2">
             <Brand onClick={onHome} />
-            <span aria-hidden className="h-7 w-px bg-border" />
-            <div className="min-w-0">
-              <h1 className="truncate text-[15px] font-semibold tracking-tight text-foreground">
-                {document.meta.documentType === 'cv' ? 'CV' : 'Resume'}
-              </h1>
-              <p className="truncate text-xs text-muted-foreground">
-                {preset.name} · {document.meta.pageSize === 'a4' ? 'A4' : 'US Letter'} ·{' '}
-                {previewPageCount} page{previewPageCount === 1 ? '' : 's'}
-              </p>
-            </div>
+            <span aria-hidden className="h-6 w-px bg-border" />
+            <h1 className="min-w-0 truncate text-sm font-semibold tracking-tight text-foreground">
+              {document.meta.documentType === 'cv' ? 'CV' : 'Resume'}
+              <span className="font-normal text-muted-foreground"> · {preset.name}</span>
+            </h1>
             <span
               className={`ml-auto inline-flex shrink-0 items-center gap-1.5 rounded-full border border-border bg-card px-2.5 py-1 text-xs ${saveTone}`}
               aria-live="polite"
@@ -209,10 +204,11 @@ export function Toolbar({ onHome }: ToolbarProps) {
               <span aria-hidden className={`h-1.5 w-1.5 rounded-full ${saveTone}`} />
               {saveLabel}
             </span>
-            <Button variant="secondary" onClick={runAtsCheck} className="shrink-0">
+            <Button variant="secondary" size="sm" onClick={runAtsCheck} className="shrink-0">
               ATS Check
             </Button>
             <Button
+              size="sm"
               onClick={handleExportPdf}
               disabled={exporting}
               className="shrink-0 font-semibold"

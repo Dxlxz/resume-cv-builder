@@ -52,10 +52,6 @@ export function PreviewShell({ document, contentKey }: PreviewShellProps) {
           {pageDrift ? ` · export expected ${plannedPages}` : ''}
         </span>
       </div>
-      <p className="mb-3 shrink-0 text-xs text-muted-foreground">
-        The preview is the exported PDF in your browser's viewer. Select,
-        copy, and zoom to check it.
-      </p>
 
       {isResume && previewPageCount > 2 && (
         <p className="mb-3 shrink-0 rounded-md border border-status-warning/30 bg-badge-warning px-3 py-2 text-xs text-status-warning-foreground">

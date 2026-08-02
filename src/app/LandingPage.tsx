@@ -1,11 +1,13 @@
 import type { ReactNode } from 'react'
 import { navigateToAdmin } from '@/hooks/useAppRoute'
+import { Button } from '@/components/ui/Button'
+import { Brand } from '@/components/ui/Brand'
 
 /**
- * Marketing landing — ChatGPT-style premium hero, rendered with UDS tokens.
- * The `.dark` class on the root wrapper switches the vendored token set to
- * dark mode (the app itself stays light; the landing is a deliberate
- * marketing surface that transitions into the product).
+ * Marketing landing, editorial persona (see UDS taste-and-feel.md). The one
+ * deliberate marketing surface in the product: large type, asymmetric hero,
+ * concrete copy. Stays on UDS semantic tokens: no dark flip, no glow orbs,
+ * no glass, no pill buttons, no raw primitives.
  */
 
 interface LandingPageProps {
@@ -15,23 +17,9 @@ interface LandingPageProps {
   personalProfileAvailable?: boolean
 }
 
-function Orb({ className, color, size }: { className: string; color: string; size: string }) {
-  return (
-    <div
-      aria-hidden
-      className={`pointer-events-none absolute rounded-full blur-3xl ${className}`}
-      style={{
-        width: size,
-        height: size,
-        background: `radial-gradient(closest-side, ${color}, transparent)`,
-      }}
-    />
-  )
-}
-
 function FeatureIcon({ children }: { children: ReactNode }) {
   return (
-    <span className="flex h-9 w-9 items-center justify-center rounded-md border border-[var(--gray-alpha-200)] bg-[var(--gray-alpha-100)] text-[var(--brand-500)]">
+    <span className="flex h-9 w-9 items-center justify-center rounded-md border border-border bg-muted text-primary">
       {children}
     </span>
   )
@@ -39,20 +27,9 @@ function FeatureIcon({ children }: { children: ReactNode }) {
 
 const FEATURES: { title: string; description: string; icon: ReactNode }[] = [
   {
-    title: 'ATS-ready checks',
-    description:
-      'Lint your resume before export — contact validation, template hints, and Malaysia-specific warnings like NRIC exposure.',
-    icon: (
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-        <path d="M12 3l7 3v5c0 4.5-3 8-7 10-4-2-7-5.5-7-10V6l7-3z" />
-        <path d="M9 12l2 2 4-4" />
-      </svg>
-    ),
-  },
-  {
     title: 'Live PDF preview',
     description:
-      'The preview is the real PDF — rendered by the same engine that exports. Select, copy, zoom, and verify every pixel before downloading.',
+      'The preview is the exported PDF. Select, copy, and zoom to check every page before you send it.',
     icon: (
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
         <path d="M2 8l10-5 10 5v8l-10 5L2 16V8z" />
@@ -61,9 +38,20 @@ const FEATURES: { title: string; description: string; icon: ReactNode }[] = [
     ),
   },
   {
+    title: 'ATS check before export',
+    description:
+      'Contact validation, template hints, and Malaysia warnings such as IC numbers in your draft.',
+    icon: (
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+        <path d="M12 3l7 3v5c0 4.5-3 8-7 10-4-2-7-5.5-7-10V6l7-3z" />
+        <path d="M9 12l2 2 4-4" />
+      </svg>
+    ),
+  },
+  {
     title: 'Malaysia corporate presets',
     description:
-      'Start from an ATS-strict, A4 layout tuned for Malaysian hiring — or an international generic profile for roles abroad.',
+      'JobStreet-ready defaults: A4, ATS-strict layout, British English norms, with a one to two page goal.',
     icon: (
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
         <path d="M12 21s-7-5.5-7-11a7 7 0 0 1 14 0c0 5.5-7 11-7 11z" />
@@ -72,33 +60,20 @@ const FEATURES: { title: string; description: string; icon: ReactNode }[] = [
     ),
   },
   {
-    title: 'Local-first privacy',
+    title: 'AI assistance, opt-in',
     description:
-      'No account, no server, no tracking. Drafts and catalogs live in your browser - your data never leaves your machine. AI assistance is opt-in: it sends your text to an external service, and nothing is stored or used for training.',
+      'Improve a summary, rewrite bullets, or tailor to a job description. Suggestions are reviewed before applying; nothing is stored or used for training.',
     icon: (
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-        <rect x="5" y="10" width="14" height="10" rx="2" />
-        <path d="M8 10V7a4 4 0 0 1 8 0v3" />
+        <path d="M12 2a3 3 0 0 1 3 3v2h3a3 3 0 0 1 3 3v3a3 3 0 0 1-2 2.83V19a3 3 0 0 1-3 3H8a3 3 0 0 1-3-3v-4.17A3 3 0 0 1 3 13v-3a3 3 0 0 1 3-3h3V5a3 3 0 0 1 3-3z" />
+        <path d="M9 13h6M9 17h4" />
       </svg>
     ),
   },
   {
-    title: 'Smart catalog pickers',
+    title: 'JSON backup and import',
     description:
-      'Searchable skill, occupation, institution, and language lists with canonical labels — fully customizable in admin mode.',
-    icon: (
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-        <path d="M11 5h9M11 12h9M11 19h9" />
-        <circle cx="5" cy="5" r="1.6" />
-        <circle cx="5" cy="12" r="1.6" />
-        <circle cx="5" cy="19" r="1.6" />
-      </svg>
-    ),
-  },
-  {
-    title: 'JSON backup & import',
-    description:
-      'Export your document as JSON for backup or portability, and import it anywhere. Auto-save keeps every keystroke safe.',
+      'Export your document as JSON and import it anywhere. Auto-save keeps every keystroke in this browser.',
     icon: (
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
         <path d="M12 3v12m0 0l-4-4m4 4l4-4" />
@@ -106,22 +81,48 @@ const FEATURES: { title: string; description: string; icon: ReactNode }[] = [
       </svg>
     ),
   },
+  {
+    title: 'Local-first privacy',
+    description:
+      'No account, no server, no tracking. Drafts and catalog choices live in your browser and never leave your machine.',
+    icon: (
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+        <rect x="5" y="10" width="14" height="10" rx="2" />
+        <path d="M8 10V7a4 4 0 0 1 8 0v3" />
+      </svg>
+    ),
+  },
 ]
 
-/** Abstract resume mock — skeleton bars, reads like a real page without fake text. */
+const STEPS: { title: string; description: string }[] = [
+  {
+    title: 'Choose a preset',
+    description: 'Malaysia Corporate or International. Template, page size, and writing norms are set for you.',
+  },
+  {
+    title: 'Fill in your details',
+    description: 'The preview on the right is the real PDF, updating as you type.',
+  },
+  {
+    title: 'Check and export',
+    description: 'Run the ATS check, fix what it flags, then download the PDF.',
+  },
+]
+
+/** Abstract resume mock. Skeleton bars that read like a real page without fake text. */
 function ResumeMock() {
   const bar = (w: string, tone: 'fg' | 'muted' | 'faint') =>
     `h-2 rounded-full ${w} ${
       tone === 'fg'
-        ? 'bg-gray-1000'
+        ? 'bg-foreground/70'
         : tone === 'muted'
-          ? 'bg-[var(--gray-alpha-700)]'
-          : 'bg-[var(--gray-alpha-500)]'
+          ? 'bg-foreground/40'
+          : 'bg-foreground/20'
     }`
   return (
-    <div className="w-full max-w-md rounded-lg border border-[var(--gray-alpha-200)] bg-card p-6 shadow-[var(--shadow-modal)]">
+    <div className="w-full max-w-md rounded-lg border border-border bg-card p-6 shadow-[var(--shadow-raised)]">
       <div className="flex items-center gap-3">
-        <div className="h-10 w-10 rounded-full bg-[var(--brand-700)]/70" />
+        <div className="h-10 w-10 rounded-full bg-primary/20" />
         <div className="flex-1 space-y-1.5">
           <div className={bar('w-2/3', 'fg')} />
           <div className={bar('w-2/5', 'muted')} />
@@ -154,147 +155,121 @@ export function LandingPage({
   personalProfileAvailable = false,
 }: LandingPageProps) {
   return (
-    <div className="dark min-h-screen bg-background text-foreground">
-      {/* ————— Nav ————— */}
-      <header className="sticky top-0 z-40 border-b border-[var(--gray-alpha-300)]/60 bg-background/80 backdrop-blur-md">
+    <div className="min-h-screen bg-background text-foreground">
+      {/* --- Nav --- */}
+      <header className="sticky top-0 z-40 border-b border-border bg-header">
         <div className="mx-auto flex max-w-6xl items-center gap-3 px-5 py-3.5">
-          <div className="flex items-center gap-2.5">
-            <span className="flex h-7 w-7 items-center justify-center rounded-md bg-[var(--brand-700)] text-primary-foreground">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-                <path d="M6 2h9l5 5v13a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2z" />
-                <path d="M14 2v5h5M9 12h6M9 16h6" />
-              </svg>
-            </span>
-            <span className="text-[15px] font-semibold tracking-tight">Resume &amp; CV Builder</span>
-          </div>
+          <Brand />
           <nav className="ml-auto flex items-center gap-2">
-            <button
+            <Button
               type="button"
+              variant="ghost"
+              size="sm"
               onClick={navigateToAdmin}
-              className="rounded-full px-3.5 py-1.5 text-sm text-muted-foreground transition-colors duration-[var(--duration-state)] hover:text-foreground"
             >
               Manage catalogs
-            </button>
-            <button
-              type="button"
-              onClick={onStart}
-              className="rounded-full bg-foreground px-4 py-1.5 text-sm font-medium text-background transition-opacity duration-[var(--duration-state)] hover:opacity-85"
-            >
+            </Button>
+            <Button type="button" onClick={onStart}>
               Start building
-            </button>
+            </Button>
           </nav>
         </div>
       </header>
 
-      {/* ————— Hero ————— */}
-      <section className="relative overflow-hidden">
-        <Orb
-          className="-top-24 left-1/2 -translate-x-[70%]"
-          color="color-mix(in oklch, var(--brand-500) 45%, transparent)"
-          size="34rem"
-        />
-        <Orb
-          className="top-40 right-[-8rem]"
-          color="color-mix(in oklch, var(--teal-600) 30%, transparent)"
-          size="28rem"
-        />
-        <Orb
-          className="bottom-[-10rem] left-[-6rem]"
-          color="color-mix(in oklch, var(--gray-1000) 50%, transparent)"
-          size="26rem"
-        />
+      {/* --- Hero --- */}
+      <section className="border-b border-border">
+        <div className="mx-auto grid max-w-6xl items-center gap-12 px-5 py-20 lg:grid-cols-[1.05fr_0.95fr] lg:py-28">
+          <div>
+            <span className="inline-flex items-center gap-2 rounded-full border border-border bg-muted px-3.5 py-1.5 text-xs font-medium text-muted-foreground">
+              <span className="h-1.5 w-1.5 rounded-full bg-status-success" aria-hidden />
+              Local-first. No account required.
+            </span>
 
-        <div className="relative mx-auto max-w-3xl px-5 pb-16 pt-20 text-center sm:pt-28">
-          <span className="inline-flex items-center gap-2 rounded-full border border-[var(--gray-alpha-300)] bg-[var(--gray-alpha-100)] px-3.5 py-1.5 text-xs font-medium text-muted-foreground">
-            <span className="h-1.5 w-1.5 rounded-full bg-status-success" aria-hidden />
-            Local-first · No account required
-          </span>
+            <h1 className="mt-6 text-4xl font-semibold leading-[1.08] tracking-tight sm:text-5xl">
+              Resumes that clear ATS.
+            </h1>
 
-          <h1 className="mt-7 text-4xl font-semibold leading-[1.08] tracking-tight sm:text-6xl">
-            Resumes that get read.
-            <br />
-            <span className="text-muted-foreground">CVs that clear ATS.</span>
-          </h1>
+            <p className="mt-5 max-w-xl text-base leading-relaxed text-muted-foreground sm:text-lg">
+              A local-first builder with a live PDF preview, ATS checks, and
+              presets tuned for Malaysia. Your data stays in your browser.
+            </p>
 
-          <p className="mx-auto mt-6 max-w-xl text-base leading-relaxed text-muted-foreground sm:text-lg">
-            A browser-based resume &amp; CV builder with live PDF preview, ATS checks, and
-            regional presets for Malaysia. Your data never leaves your browser.
-          </p>
+            <div className="mt-8 flex flex-wrap items-center gap-3">
+              <Button type="button" onClick={onStart}>
+                Start building
+              </Button>
+              {personalProfileAvailable && (
+                <Button type="button" variant="secondary" onClick={onLoadProfile}>
+                  Start with my profile
+                </Button>
+              )}
+            </div>
 
-          <div className="mt-9 flex flex-wrap items-center justify-center gap-3">
-            <button
-              type="button"
-              onClick={onStart}
-              className="rounded-full bg-foreground px-7 py-3 text-[15px] font-medium text-background transition-opacity duration-[var(--duration-state)] hover:opacity-85"
-            >
-              Start building — free
-            </button>
-            {personalProfileAvailable && (
-              <button
-                type="button"
-                onClick={onLoadProfile}
-                className="rounded-full border border-[var(--gray-alpha-400)] px-7 py-3 text-[15px] font-medium text-foreground transition-colors duration-[var(--duration-state)] hover:bg-[var(--gray-alpha-200)]"
-              >
-                Start with my profile
-              </button>
-            )}
+            <p className="mt-6 text-sm text-muted-foreground">
+              Free. No account. Export a PDF you can check before sending.
+            </p>
           </div>
 
-          <p className="mt-7 text-xs tracking-wide text-muted-foreground/80">
-            PDF export · ATS check · Auto-save · JSON backup
-          </p>
-        </div>
-
-        {/* ————— Product mock ————— */}
-        <div className="relative mx-auto max-w-4xl px-5 pb-24">
-          <div
-            aria-hidden
-            className="pointer-events-none absolute inset-x-8 top-8 h-64 rounded-full bg-[var(--brand-700)]/15 blur-3xl"
-          />
-          <div className="relative overflow-hidden rounded-lg border border-[var(--gray-alpha-300)] bg-card shadow-[var(--shadow-modal)]">
-            <div className="flex items-center gap-1.5 border-b border-[var(--gray-alpha-300)] bg-[var(--gray-alpha-100)] px-4 py-3">
-              <span className="h-2.5 w-2.5 rounded-full bg-[var(--gray-alpha-500)]" />
-              <span className="h-2.5 w-2.5 rounded-full bg-[var(--gray-alpha-500)]" />
-              <span className="h-2.5 w-2.5 rounded-full bg-[var(--gray-alpha-500)]" />
-              <span className="ml-3 rounded-full bg-[var(--gray-alpha-200)] px-2.5 py-0.5 text-[10px] text-muted-foreground">
-                resume-dale.pdf
-              </span>
-            </div>
-            <div className="flex items-stretch justify-center gap-8 px-6 py-10 sm:px-12">
-              <ResumeMock />
-              <div className="hidden flex-col items-start justify-center gap-4 sm:flex">
-                <span className="inline-flex items-center gap-2 rounded-full border border-status-success/30 bg-badge-success px-3 py-1.5 text-xs font-medium text-status-success-foreground">
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-                    <path d="M20 6L9 17l-5-5" />
-                  </svg>
-                  ATS check passed
+          <div className="relative">
+            <div className="overflow-hidden rounded-lg border border-border bg-card shadow-[var(--shadow-raised)]">
+              <div className="flex items-center gap-1.5 border-b border-border bg-muted px-4 py-3">
+                <span className="h-2.5 w-2.5 rounded-full bg-foreground/25" />
+                <span className="h-2.5 w-2.5 rounded-full bg-foreground/25" />
+                <span className="h-2.5 w-2.5 rounded-full bg-foreground/25" />
+                <span className="ml-3 rounded-full bg-card px-2.5 py-0.5 text-[10px] text-muted-foreground">
+                  resume-dale.pdf
                 </span>
-                <span className="text-xs text-muted-foreground">
-                  A4 · 2 pages · Malaysia Corporate
-                </span>
+              </div>
+              <div className="flex items-stretch justify-center gap-8 px-6 py-10 sm:px-12">
+                <ResumeMock />
+                <div className="hidden flex-col items-start justify-center gap-4 sm:flex">
+                  <span className="inline-flex items-center gap-2 rounded-full border border-status-success/30 bg-badge-success px-3 py-1.5 text-xs font-medium text-status-success-foreground">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                      <path d="M20 6L9 17l-5-5" />
+                    </svg>
+                    ATS check passed
+                  </span>
+                  <span className="text-xs text-muted-foreground">
+                    A4 · 2 pages · Malaysia Corporate
+                  </span>
+                </div>
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* ————— Features ————— */}
-      <section className="border-t border-[var(--gray-alpha-300)]/60 bg-[var(--background-200)]/40">
-        <div className="mx-auto max-w-6xl px-5 py-20">
-          <div className="mx-auto max-w-2xl text-center">
-            <h2 className="text-3xl font-semibold tracking-tight">
-              Everything you need to apply with confidence
-            </h2>
-            <p className="mt-3 text-muted-foreground">
-              A small tool with an unusual standard: the preview is the exact PDF you export.
-            </p>
+      {/* --- How it works --- */}
+      <section className="border-b border-border bg-muted">
+        <div className="mx-auto max-w-6xl px-5 py-16">
+          <h2 className="text-2xl font-semibold tracking-tight">How it works</h2>
+          <div className="mt-8 grid gap-6 md:grid-cols-3">
+            {STEPS.map((step, index) => (
+              <div key={step.title}>
+                <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                  Step {index + 1}
+                </p>
+                <h3 className="mt-2 text-[15px] font-semibold text-foreground">{step.title}</h3>
+                <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">
+                  {step.description}
+                </p>
+              </div>
+            ))}
           </div>
+        </div>
+      </section>
 
-          <div className="mt-14 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      {/* --- Features --- */}
+      <section>
+        <div className="mx-auto max-w-6xl px-5 py-16">
+          <h2 className="max-w-2xl text-2xl font-semibold tracking-tight">
+            Everything you need to apply with confidence
+          </h2>
+          <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {FEATURES.map((feature) => (
               <article
                 key={feature.title}
-                className="rounded-lg border border-[var(--gray-alpha-300)] bg-card p-6 transition-colors duration-[var(--duration-state)] hover:border-[var(--gray-alpha-500)]"
+                className="rounded-md border border-border bg-card p-6 transition-colors duration-[var(--duration-state)] hover:border-foreground/25"
               >
                 <FeatureIcon>{feature.icon}</FeatureIcon>
                 <h3 className="mt-4 text-[15px] font-semibold tracking-tight">{feature.title}</h3>
@@ -307,54 +282,40 @@ export function LandingPage({
         </div>
       </section>
 
-      {/* ————— Bottom CTA ————— */}
-      <section className="border-t border-[var(--gray-alpha-300)]/60">
-        <div className="relative mx-auto max-w-3xl px-5 py-24 text-center">
-          <Orb
-            className="left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
-            color="color-mix(in oklch, var(--brand-500) 30%, transparent)"
-            size="26rem"
-          />
-          <div className="relative">
-            <h2 className="text-3xl font-semibold tracking-tight sm:text-4xl">
-              Your next application starts here
-            </h2>
-            <p className="mx-auto mt-4 max-w-md text-muted-foreground">
-              Pick a preset, fill in your details, and export an ATS-ready PDF in minutes.
-            </p>
-            <div className="mt-9 flex flex-wrap items-center justify-center gap-3">
-              <button
-                type="button"
-                onClick={onStart}
-                className="rounded-full bg-foreground px-7 py-3 text-[15px] font-medium text-background transition-opacity duration-[var(--duration-state)] hover:opacity-85"
-              >
-                Start building
-              </button>
-              <button
-                type="button"
-                onClick={navigateToAdmin}
-                className="rounded-full border border-[var(--gray-alpha-400)] px-7 py-3 text-[15px] font-medium text-foreground transition-colors duration-[var(--duration-state)] hover:bg-[var(--gray-alpha-200)]"
-              >
-                Browse catalogs
-              </button>
-            </div>
+      {/* --- Bottom CTA --- */}
+      <section className="border-t border-border bg-muted">
+        <div className="mx-auto max-w-3xl px-5 py-20 text-center">
+          <h2 className="text-3xl font-semibold tracking-tight sm:text-4xl">
+            Your next application starts here
+          </h2>
+          <p className="mx-auto mt-4 max-w-md text-muted-foreground">
+            Pick a preset, fill in your details, and export an ATS-ready PDF in minutes.
+          </p>
+          <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
+            <Button type="button" onClick={onStart}>
+              Start building
+            </Button>
+            <Button type="button" variant="secondary" onClick={navigateToAdmin}>
+              Browse catalogs
+            </Button>
           </div>
         </div>
       </section>
 
-      {/* ————— Footer ————— */}
-      <footer className="border-t border-[var(--gray-alpha-300)]/60">
+      {/* --- Footer --- */}
+      <footer className="border-t border-border">
         <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3 px-5 py-6 text-xs text-muted-foreground">
-          <p>© 2026 Resume &amp; CV Builder · Local only — drafts stay in your browser</p>
-          <div className="flex items-center gap-4">
-            <button
-              type="button"
-              onClick={navigateToAdmin}
-              className="transition-colors duration-[var(--duration-state)] hover:text-foreground"
-            >
-              Manage catalogs
-            </button>
-          </div>
+          <p>
+            © 2026 Resume &amp; CV Builder. Drafts stay in your browser. AI assistance
+            is opt-in and sends text to an external service that stores nothing.
+          </p>
+          <button
+            type="button"
+            onClick={navigateToAdmin}
+            className="transition-colors duration-[var(--duration-state)] hover:text-foreground"
+          >
+            Manage catalogs
+          </button>
         </div>
       </footer>
     </div>

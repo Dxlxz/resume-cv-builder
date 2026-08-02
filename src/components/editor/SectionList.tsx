@@ -28,11 +28,13 @@ function SortableSectionRow({
   index,
   total,
   filled,
+  onNavigate,
 }: {
   sectionId: SectionId
   index: number
   total: number
   filled: boolean
+  onNavigate?: () => void
 }) {
   const document = useDocumentStore((s) => s.document)
   const hiddenSections = useDocumentStore((s) => s.document?.meta.hiddenSections ?? [])
@@ -90,7 +92,10 @@ function SortableSectionRow({
       <button
         type="button"
         className="flex min-w-0 flex-1 items-center gap-2 truncate text-left text-sm font-medium text-foreground hover:text-primary"
-        onClick={() => scrollToFormSection(sectionId)}
+        onClick={() => {
+          scrollToFormSection(sectionId)
+          onNavigate?.()
+        }}
         title={`Jump to ${label}`}
       >
         <span
@@ -143,9 +148,9 @@ function SortableSectionRow({
 
 /**
  * Sections management content, hosted in the editor panel's popover:
- * reorder (drag or arrows) and show/hide per section.
+ * click a row to jump, drag or use the arrows to reorder, untick to hide.
  */
-export function SectionListContent() {
+export function SectionListContent({ onNavigate }: { onNavigate?: () => void }) {
   const sectionOrder = useDocumentStore((s) => s.document?.meta.sectionOrder ?? [])
   const document = useDocumentStore((s) => s.document)
   const reorderSections = useDocumentStore((s) => s.reorderSections)
@@ -181,7 +186,8 @@ export function SectionListContent() {
                 index={index}
                 total={sectionOrder.length}
                 filled={filled.has(sectionId)}
-              />
+              onNavigate={onNavigate}
+            />
             ))}
           </ul>
         </SortableContext>

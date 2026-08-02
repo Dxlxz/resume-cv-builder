@@ -1,4 +1,5 @@
 import type { ComponentType } from 'react'
+import { useState } from 'react'
 import { useDocumentStore } from '@/app/store/documentStore'
 import { type SectionId } from '@rb/core/types/document'
 import { getSectionLabel } from '@rb/core/selectors/getSectionLabel'
@@ -20,7 +21,6 @@ import { Popover } from '@/components/ui/Popover'
 import { Tooltip } from '@/components/ui/Tooltip'
 import { Button } from '@/components/ui/Button'
 import { filledSectionIds } from '@/lib/sectionStatus'
-import { scrollToFormSection } from '@/lib/scrollToSection'
 
 const SECTION_FORMS: Record<SectionId, ComponentType> = {
   contact: ContactForm,
@@ -69,6 +69,7 @@ export function EditorPanel({ onAskIdrizz }: EditorPanelProps) {
   const dismissOnboarding = useDocumentStore((s) => s.dismissOnboarding)
   const startFromSample = useDocumentStore((s) => s.startFromSample)
   const updateSectionGuide = useDocumentStore((s) => s.updateSectionGuide)
+  const [sectionsOpen, setSectionsOpen] = useState(false)
 
   if (!document) return null
 
@@ -135,9 +136,11 @@ export function EditorPanel({ onAskIdrizz }: EditorPanelProps) {
                   </Tooltip>
                 }
                 className="w-80 max-w-[calc(100vw-2rem)]"
+                open={sectionsOpen}
+                onOpenChange={setSectionsOpen}
               >
                 <div className="max-h-[min(24rem,70vh)] overflow-y-auto">
-                  <SectionListContent />
+                  <SectionListContent onNavigate={() => setSectionsOpen(false)} />
                 </div>
               </Popover>
             </div>
@@ -150,35 +153,6 @@ export function EditorPanel({ onAskIdrizz }: EditorPanelProps) {
           />
         </div>
       </div>
-
-      <nav
-        aria-label="Sections"
-        className="sticky top-0 z-10 -mx-4 flex items-center gap-1.5 overflow-x-auto border-b border-border bg-sidebar px-4 py-2 lg:-mx-5 lg:px-5"
-      >
-        {visibleSections.map((sectionId) => {
-          const label = getSectionLabel(sectionId, preset.labels)
-          return (
-            <button
-              key={sectionId}
-              type="button"
-              onClick={() => scrollToFormSection(sectionId)}
-              className={`inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full border px-2.5 py-1 text-xs transition-colors duration-[var(--duration-state)] ${
-                filled.has(sectionId)
-                  ? 'border-border bg-card text-foreground hover:border-foreground/30'
-                  : 'border-border/60 bg-transparent text-muted-foreground hover:border-foreground/30 hover:text-foreground'
-              }`}
-            >
-              <span
-                aria-hidden
-                className={`h-1.5 w-1.5 shrink-0 rounded-full ${
-                  filled.has(sectionId) ? 'bg-status-success' : 'bg-foreground/20'
-                }`}
-              />
-              {label}
-            </button>
-          )
-        })}
-      </nav>
 
       {showOnboarding && (
         <div className="rounded-md border border-status-info/30 bg-badge-info p-4 text-sm text-status-info-foreground">

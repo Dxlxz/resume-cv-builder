@@ -74,7 +74,7 @@ export function BuilderLayout({ onHome }: BuilderLayoutProps) {
         }`}
       >
         <section
-          className={`min-h-0 overflow-y-auto border-border bg-sidebar p-4 lg:p-5 ${
+          className={`min-h-0 overflow-x-hidden overflow-y-auto border-border bg-sidebar p-4 lg:p-5 ${
             effectiveTab === 'edit' ? 'block' : 'hidden lg:block'
           } ${previewHidden ? '' : 'lg:border-r'}`}
           aria-label="Document editor"

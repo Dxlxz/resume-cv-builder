@@ -14,6 +14,9 @@ interface PopoverProps {
   align?: 'start' | 'center' | 'end'
   sideOffset?: number
   className?: string
+  /** Controlled open state (e.g. to close after a navigation). */
+  open?: boolean
+  onOpenChange?: (open: boolean) => void
 }
 
 export function Popover({
@@ -23,9 +26,11 @@ export function Popover({
   align = 'end',
   sideOffset = 6,
   className = '',
+  open,
+  onOpenChange,
 }: PopoverProps) {
   return (
-    <PopoverPrimitive.Root>
+    <PopoverPrimitive.Root open={open} onOpenChange={onOpenChange}>
       <PopoverPrimitive.Trigger asChild>{trigger}</PopoverPrimitive.Trigger>
       <PopoverPrimitive.Portal>
         <PopoverPrimitive.Content

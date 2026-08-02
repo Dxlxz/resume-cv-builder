@@ -1,6 +1,7 @@
-import { useState, type ReactNode } from 'react'
+import { useEffect, useRef, useState, type ReactNode } from 'react'
 import type { SectionId } from '@rb/core/types/document'
 import { IdrizzIconButton } from '@/components/ai/IdrizzIconButton'
+import { Button } from '@/components/ui/Button'
 
 interface FormSectionProps {
   sectionId: SectionId
@@ -28,8 +29,47 @@ export function FormSection({
 }: FormSectionProps) {
   const [open, setOpen] = useState(defaultOpen)
   const [guideOpen, setGuideOpen] = useState(false)
+  const [draft, setDraft] = useState(guide ?? '')
+  const [savedFlash, setSavedFlash] = useState(false)
   const panelId = `form-section-panel-${sectionId}`
   const guideId = `form-section-guide-${sectionId}`
+  const guideInputRef = useRef<HTMLTextAreaElement>(null)
+  const savedTimerRef = useRef<number | null>(null)
+
+  const openGuide = () => {
+    setDraft(guide ?? '')
+    setGuideOpen(true)
+  }
+
+  useEffect(() => {
+    if (guideOpen) {
+      guideInputRef.current?.focus()
+      guideInputRef.current?.select()
+    }
+  }, [guideOpen])
+
+  useEffect(() => {
+    return () => {
+      if (savedTimerRef.current !== null) window.clearTimeout(savedTimerRef.current)
+    }
+  }, [])
+
+  const saveGuide = () => {
+    onGuideChange?.(draft.trim())
+    setSavedFlash(true)
+    if (savedTimerRef.current !== null) window.clearTimeout(savedTimerRef.current)
+    savedTimerRef.current = window.setTimeout(() => {
+      setSavedFlash(false)
+      setGuideOpen(false)
+      savedTimerRef.current = null
+    }, 650)
+  }
+
+  const cancelGuide = () => {
+    if (savedTimerRef.current !== null) window.clearTimeout(savedTimerRef.current)
+    setGuideOpen(false)
+    setSavedFlash(false)
+  }
 
   return (
     <section
@@ -74,7 +114,13 @@ export function FormSection({
         {onGuideChange && (
           <IdrizzIconButton
             label={guide ? 'Edit Idrizz guide' : 'Set how Idrizz writes this section'}
-            onClick={() => setGuideOpen((v) => !v)}
+            onClick={() => {
+              if (guideOpen) {
+                cancelGuide()
+              } else {
+                openGuide()
+              }
+            }}
           />
         )}
       </div>
@@ -85,16 +131,43 @@ export function FormSection({
             How should Idrizz write this section?
           </label>
           <textarea
+            ref={guideInputRef}
             id={guideId}
             rows={2}
-            value={guide ?? ''}
-            onChange={(e) => onGuideChange(e.target.value)}
+            value={draft}
+            onChange={(e) => setDraft(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault()
+                saveGuide()
+              } else if (e.key === 'Escape') {
+                e.preventDefault()
+                cancelGuide()
+              }
+            }}
             placeholder="e.g. British English, 2-4 sentences, lead with impact."
+            aria-describedby={`${guideId}-hint`}
             className="w-full rounded-sm border border-border bg-card px-3 py-2 text-sm text-foreground transition-colors duration-[var(--duration-state)] focus:border-[var(--ring)]"
           />
-          <p className="text-xs text-muted-foreground">
-            Saved in your document. Empty means Idrizz uses its default style.
-          </p>
+          <div className="flex items-center justify-between gap-2">
+            <p id={`${guideId}-hint`} className="text-xs text-muted-foreground">
+              Enter to save · Shift+Enter for a new line · Esc to cancel. Empty means Idrizz uses
+              its default style.
+            </p>
+            <div className="flex shrink-0 items-center gap-1.5">
+              {savedFlash && (
+                <span className="text-xs font-medium text-status-success" role="status">
+                  Saved ✓
+                </span>
+              )}
+              <Button type="button" variant="ghost" size="sm" onClick={cancelGuide}>
+                Cancel
+              </Button>
+              <Button type="button" size="sm" onClick={saveGuide}>
+                Save
+              </Button>
+            </div>
+          </div>
         </div>
       )}
 

@@ -79,6 +79,12 @@ export function IdrizzChat({ open, onOpen, onClose }: IdrizzChatProps) {
   const hasUserMessage = messages.some((m) => m.role === 'user')
 
   useEffect(() => {
+    if (open) {
+      inputRef.current?.focus()
+    }
+  }, [open])
+
+  useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: 'smooth' })
   }, [messages, busy, consentOpen])
 

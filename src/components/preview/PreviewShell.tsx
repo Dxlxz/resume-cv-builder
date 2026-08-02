@@ -1,6 +1,5 @@
 import type { ResumeDocument } from '@rb/core/types/document'
-import { PdfJsPreview } from '@/components/preview/PdfJsPreview'
-import { LayoutBoxesView } from '@/components/preview/LayoutBoxesView'
+import { PdfCanvasPreview } from '@/components/preview/PdfCanvasPreview'
 import { useDocumentStore } from '@/app/store/documentStore'
 
 interface PreviewShellProps {
@@ -15,8 +14,8 @@ export function PreviewShell({ document, contentKey }: PreviewShellProps) {
   const plannedPages = layoutPlan?.plan.pageCount
   const pageDrift =
     plannedPages !== undefined && plannedPages > 0 && plannedPages !== previewPageCount
-  const layer = useDocumentStore((s) => s.previewLayer)
-  const setPreviewLayer = useDocumentStore((s) => s.setPreviewLayer)
+  const showLayoutBoxes = useDocumentStore((s) => s.showLayoutBoxes)
+  const setShowLayoutBoxes = useDocumentStore((s) => s.setShowLayoutBoxes)
 
   return (
     <div className="flex h-full min-h-0 min-w-0 flex-col">
@@ -25,32 +24,15 @@ export function PreviewShell({ document, contentKey }: PreviewShellProps) {
           <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
             Preview
           </h2>
-          <div className="flex rounded-sm border border-border p-0.5" role="group" aria-label="Preview layer">
-            <button
-              type="button"
-              onClick={() => setPreviewLayer('pdf')}
-              aria-pressed={layer === 'pdf'}
-              className={`rounded-sm px-2.5 py-0.5 text-xs transition-colors duration-[var(--duration-state)] ${
-                layer === 'pdf'
-                  ? 'bg-card text-foreground shadow-[var(--shadow-raised)]'
-                  : 'text-muted-foreground hover:text-foreground'
-              }`}
-            >
-              PDF
-            </button>
-            <button
-              type="button"
-              onClick={() => setPreviewLayer('layout')}
-              aria-pressed={layer === 'layout'}
-              className={`rounded-sm px-2.5 py-0.5 text-xs transition-colors duration-[var(--duration-state)] ${
-                layer === 'layout'
-                  ? 'bg-card text-foreground shadow-[var(--shadow-raised)]'
-                  : 'text-muted-foreground hover:text-foreground'
-              }`}
-            >
-              Layout
-            </button>
-          </div>
+          <label className="flex cursor-pointer items-center gap-1.5 text-xs text-muted-foreground">
+            <input
+              type="checkbox"
+              checked={showLayoutBoxes}
+              onChange={(e) => setShowLayoutBoxes(e.target.checked)}
+              className="h-3.5 w-3.5 accent-[var(--primary)]"
+            />
+            Show boxes
+          </label>
         </div>
         <span className="text-xs text-muted-foreground">
           {document.meta.pageSize === 'letter' ? 'US Letter' : 'A4'} · {previewPageCount} page
@@ -59,7 +41,7 @@ export function PreviewShell({ document, contentKey }: PreviewShellProps) {
         </span>
       </div>
 
-      {isResume && layer === 'pdf' && previewPageCount > 2 && (
+      {isResume && !showLayoutBoxes && previewPageCount > 2 && (
         <p className="mb-3 shrink-0 rounded-md border border-status-warning/30 bg-badge-warning px-3 py-2 text-xs text-status-warning-foreground">
           This resume is {previewPageCount} pages. Most roles expect 1 to 2
           pages. Trim bullets or remove a section.
@@ -67,11 +49,7 @@ export function PreviewShell({ document, contentKey }: PreviewShellProps) {
       )}
 
       <div className="relative min-h-0 min-w-0 flex-1 overflow-hidden rounded-md border border-border bg-muted">
-        {layer === 'pdf' ? (
-          <PdfJsPreview document={document} contentKey={contentKey} />
-        ) : (
-          <LayoutBoxesView />
-        )}
+        <PdfCanvasPreview document={document} contentKey={contentKey} />
       </div>
     </div>
   )

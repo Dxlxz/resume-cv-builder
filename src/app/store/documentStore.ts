@@ -57,8 +57,8 @@ interface DocumentState {
   showLintPanel: boolean
   focusedSection: SectionId | null
   setFocusedSection: (sectionId: SectionId | null) => void
-  previewLayer: 'pdf' | 'layout'
-  setPreviewLayer: (layer: 'pdf' | 'layout') => void
+  showLayoutBoxes: boolean
+  setShowLayoutBoxes: (show: boolean) => void
   showOnboarding: boolean
   previewPageCount: number
   setPreviewPageCount: (count: number) => void
@@ -161,7 +161,7 @@ export const useDocumentStore = create<DocumentState>((set, get) => {
     lintIssues: [],
     showLintPanel: false,
     focusedSection: null,
-    previewLayer: 'pdf',
+    showLayoutBoxes: false,
     showOnboarding: true,
     previewPageCount: 1,
     previewPdfBlob: null,
@@ -522,7 +522,7 @@ export const useDocumentStore = create<DocumentState>((set, get) => {
 
   setFocusedSection: (sectionId) => set({ focusedSection: sectionId }),
 
-  setPreviewLayer: (layer) => set({ previewLayer: layer }),
+  setShowLayoutBoxes: (show) => set({ showLayoutBoxes: show }),
 
   dismissOnboarding: () => set({ showOnboarding: false }),
 

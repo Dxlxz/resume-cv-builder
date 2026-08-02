@@ -53,7 +53,7 @@ export function LintPanel({ onClose, onProceed, showProceed }: LintPanelProps) {
   const lintIssues = useDocumentStore((s) => s.lintIssues)
   const setLintIssues = useDocumentStore((s) => s.setLintIssues)
   const setFocusedSection = useDocumentStore((s) => s.setFocusedSection)
-  const setPreviewLayer = useDocumentStore((s) => s.setPreviewLayer)
+  const setShowLayoutBoxes = useDocumentStore((s) => s.setShowLayoutBoxes)
   const setShowLintPanel = useDocumentStore((s) => s.setShowLintPanel)
 
   const [filter, setFilter] = useState<SectionId | 'all'>('all')
@@ -118,7 +118,7 @@ export function LintPanel({ onClose, onProceed, showProceed }: LintPanelProps) {
 
   const viewOnLayout = (section: SectionId) => {
     setShowLintPanel(false)
-    setPreviewLayer('layout')
+    setShowLayoutBoxes(true)
     setFocusedSection(section)
   }
 

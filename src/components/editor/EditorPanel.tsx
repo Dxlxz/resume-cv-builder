@@ -1,5 +1,4 @@
 import type { ComponentType } from 'react'
-import { useState } from 'react'
 import { useDocumentStore } from '@/app/store/documentStore'
 import { type SectionId } from '@rb/core/types/document'
 import { getSectionLabel } from '@rb/core/selectors/getSectionLabel'
@@ -15,7 +14,6 @@ import { CertificationsForm } from '@/components/editor/CertificationsForm'
 import { VolunteerForm } from '@/components/editor/VolunteerForm'
 import { ReferencesForm } from '@/components/editor/ReferencesForm'
 import { DocumentSettings } from '@/components/editor/DocumentSettings'
-import { AskIdrizz } from '@/components/ai/AskIdrizz'
 import { IdrizzIconButton } from '@/components/ai/IdrizzIconButton'
 import { FormSection } from '@/components/ui/FormSection'
 import { Button } from '@/components/ui/Button'
@@ -30,6 +28,11 @@ const SECTION_FORMS: Record<SectionId, ComponentType> = {
   projects: ProjectsForm,
   volunteer: VolunteerForm,
   references: ReferencesForm,
+}
+
+interface EditorPanelProps {
+  /** Opens the floating Idrizz chat with a prefilled instruction. */
+  onAskIdrizz: (instruction: string) => void
 }
 
 const SECTION_HINTS: Partial<Record<SectionId, string>> = {
@@ -56,12 +59,11 @@ const SECTION_AI_HINTS: Partial<Record<SectionId, string>> = {
   contact: 'Review my contact section for anything missing.',
 }
 
-export function EditorPanel() {
+export function EditorPanel({ onAskIdrizz }: EditorPanelProps) {
   const document = useDocumentStore((s) => s.document)
   const showOnboarding = useDocumentStore((s) => s.showOnboarding)
   const dismissOnboarding = useDocumentStore((s) => s.dismissOnboarding)
   const startFromSample = useDocumentStore((s) => s.startFromSample)
-  const [sectionFocus, setSectionFocus] = useState<SectionId | null>(null)
 
   if (!document) return null
 
@@ -71,11 +73,6 @@ export function EditorPanel() {
   return (
     <div className="space-y-5">
       <DocumentSettings />
-
-      <AskIdrizz
-        key={sectionFocus ?? 'ask'}
-        initialInstruction={sectionFocus ? (SECTION_AI_HINTS[sectionFocus] ?? '') : ''}
-      />
 
       {showOnboarding && (
         <div className="rounded-md border border-status-info/30 bg-badge-info p-4 text-sm text-status-info-foreground">
@@ -123,7 +120,7 @@ export function EditorPanel() {
               action={
                 <IdrizzIconButton
                   label={`Ask Idrizz about ${getSectionLabel(sectionId, preset.labels)}`}
-                  onClick={() => setSectionFocus(sectionId)}
+                  onClick={() => onAskIdrizz(SECTION_AI_HINTS[sectionId] ?? '')}
                 />
               }
             >

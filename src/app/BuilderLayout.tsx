@@ -3,6 +3,7 @@ import { Toolbar } from '@/components/toolbar/Toolbar'
 import { EditorPanel } from '@/components/editor/EditorPanel'
 import { PreviewPanel } from '@/components/preview/PreviewPanel'
 import { RecoveryBanner } from '@/components/RecoveryBanner'
+import { IdrizzChat } from '@/components/ai/IdrizzChat'
 
 type MobileTab = 'edit' | 'preview'
 
@@ -12,6 +13,13 @@ interface BuilderLayoutProps {
 
 export function BuilderLayout({ onHome }: BuilderLayoutProps) {
   const [mobileTab, setMobileTab] = useState<MobileTab>('edit')
+  const [idrizzOpen, setIdrizzOpen] = useState(false)
+  const [idrizzAsk, setIdrizzAsk] = useState<{ instruction: string; nonce: number } | null>(null)
+
+  const askIdrizz = (instruction: string) => {
+    setIdrizzAsk({ instruction, nonce: Date.now() })
+    setIdrizzOpen(true)
+  }
 
   return (
     <div className="flex h-dvh flex-col overflow-hidden bg-background">
@@ -60,7 +68,7 @@ export function BuilderLayout({ onHome }: BuilderLayoutProps) {
           }`}
           aria-label="Document editor"
         >
-          <EditorPanel />
+          <EditorPanel onAskIdrizz={askIdrizz} />
         </section>
         <section
           className={`flex min-h-0 flex-col overflow-hidden bg-muted p-4 lg:p-5 ${
@@ -71,6 +79,14 @@ export function BuilderLayout({ onHome }: BuilderLayoutProps) {
           <PreviewPanel />
         </section>
       </main>
+
+      <IdrizzChat
+        open={idrizzOpen}
+        onOpen={() => setIdrizzOpen(true)}
+        onClose={() => setIdrizzOpen(false)}
+        prefillInstruction={idrizzAsk?.instruction}
+        prefillNonce={idrizzAsk?.nonce}
+      />
     </div>
   )
 }

@@ -17,6 +17,7 @@ import { ReferencesForm } from '@/components/editor/ReferencesForm'
 import { IdrizzIconButton } from '@/components/ai/IdrizzIconButton'
 import { FormSection } from '@/components/ui/FormSection'
 import { Popover } from '@/components/ui/Popover'
+import { Tooltip } from '@/components/ui/Tooltip'
 import { Button } from '@/components/ui/Button'
 import { filledSectionIds } from '@/lib/sectionStatus'
 import { scrollToFormSection } from '@/lib/scrollToSection'
@@ -85,42 +86,68 @@ export function EditorPanel({ onAskIdrizz }: EditorPanelProps) {
     <div className="space-y-5">
       <div className="rounded-md border border-border bg-card shadow-[var(--shadow-raised)]">
         <div className="flex items-center gap-3 px-4 py-3">
-          <div className="min-w-0 flex-1">
-            <p className="text-sm font-semibold text-foreground">
+          <div className="flex min-w-0 items-center gap-2">
+            <span
+              aria-hidden
+              className={`h-2 w-2 shrink-0 rounded-full ${
+                done === total ? 'bg-status-success' : 'bg-status-warning'
+              }`}
+            />
+            <p className="truncate text-sm font-semibold text-foreground">
               {done} of {total} sections done
             </p>
-            <div
-              aria-hidden
-              className="mt-1.5 h-1 w-full overflow-hidden rounded-full bg-muted"
-            >
-              <div
-                className="h-full rounded-full bg-status-success transition-all duration-[var(--duration-state)]"
-                style={{ width: `${progress}%` }}
-              />
+            <div className="ml-auto flex shrink-0 items-center gap-1">
+              <Popover
+                ariaLabel="Document settings"
+                trigger={
+                  <Tooltip label="Document settings">
+                    <button
+                      type="button"
+                      aria-label="Document settings"
+                      className="flex h-8 w-8 items-center justify-center rounded-sm text-muted-foreground transition-colors duration-[var(--duration-state)] hover:bg-muted hover:text-foreground"
+                    >
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                        <circle cx="12" cy="12" r="3" />
+                        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h.01a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51h.01a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v.01a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
+                      </svg>
+                    </button>
+                  </Tooltip>
+                }
+                className="w-72 max-w-[calc(100vw-2rem)]"
+              >
+                <div className="max-h-[min(24rem,70vh)] overflow-y-auto">
+                  <DocumentSettingsContent />
+                </div>
+              </Popover>
+              <Popover
+                ariaLabel="Sections management"
+                trigger={
+                  <Tooltip label="Sections - reorder and hide">
+                    <button
+                      type="button"
+                      aria-label="Sections - reorder and hide"
+                      className="flex h-8 w-8 items-center justify-center rounded-sm text-muted-foreground transition-colors duration-[var(--duration-state)] hover:bg-muted hover:text-foreground"
+                    >
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                        <path d="M4 6h16M4 12h16M4 18h16" />
+                      </svg>
+                    </button>
+                  </Tooltip>
+                }
+                className="w-80 max-w-[calc(100vw-2rem)]"
+              >
+                <div className="max-h-[min(24rem,70vh)] overflow-y-auto">
+                  <SectionListContent />
+                </div>
+              </Popover>
             </div>
           </div>
-          <Popover
-            ariaLabel="Document settings"
-            trigger={
-              <Button type="button" variant="secondary" size="sm">
-                Document
-              </Button>
-            }
-            className="w-72"
-          >
-            <DocumentSettingsContent />
-          </Popover>
-          <Popover
-            ariaLabel="Sections management"
-            trigger={
-              <Button type="button" variant="secondary" size="sm">
-                Sections
-              </Button>
-            }
-            className="w-80"
-          >
-            <SectionListContent />
-          </Popover>
+        </div>
+        <div aria-hidden className="h-0.5 w-full overflow-hidden bg-muted">
+          <div
+            className="h-full bg-status-success transition-all duration-[var(--duration-state)]"
+            style={{ width: `${Math.min(100, Math.max(0, progress))}%` }}
+          />
         </div>
       </div>
 

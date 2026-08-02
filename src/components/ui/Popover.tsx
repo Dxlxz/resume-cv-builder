@@ -32,7 +32,7 @@ export function Popover({
           align={align}
           sideOffset={sideOffset}
           aria-label={ariaLabel}
-          className={`z-50 animate-pop-in rounded-md border border-border bg-card p-4 shadow-[var(--shadow-menu)] outline-none ${className}`}
+          className={`z-50 max-w-[calc(100vw-2rem)] animate-pop-in rounded-md border border-border bg-card p-4 shadow-[var(--shadow-menu)] outline-none ${className}`}
         >
           {children}
         </PopoverPrimitive.Content>

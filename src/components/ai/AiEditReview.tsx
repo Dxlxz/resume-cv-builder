@@ -1,16 +1,19 @@
 import { useState } from 'react'
 import { useDocumentStore } from '@/app/store/documentStore'
 import { getSectionLabel } from '@rb/core/selectors/getSectionLabel'
+import type { ResumeDocument } from '@rb/core/types/document'
 import type { AiEditPlan } from '@/lib/ai/edits'
 import { Button } from '@/components/ui/Button'
 
 /**
  * Review panel for an Idrizz edit plan: changes grouped by section, each
  * with its own Apply/Discard, plus Apply all. Nothing is applied until the
- * user clicks.
+ * user clicks. Every apply reports what changed and the pre-apply document
+ * snapshot so the chat can offer Undo. Plans with no real effects show a
+ * "Nothing to review" card instead of silently rendering nothing.
  */
 
-type PlanKey = keyof AiEditPlan
+export type PlanKey = keyof AiEditPlan
 
 const GROUP_ORDER: PlanKey[] = [
   'summary',
@@ -91,12 +94,21 @@ function describePlan(key: PlanKey, plan: AiEditPlan, document: ReturnType<typeo
   return lines
 }
 
+export interface AiAppliedInfo {
+  /** Which group was applied ('all' for Apply all). */
+  key: PlanKey | 'all'
+  /** Human summary of what was applied. */
+  summary: string
+  /** Document snapshot taken before this apply (first apply of the plan). */
+  snapshot: ResumeDocument | null
+}
+
 interface AiEditReviewProps {
   plan: AiEditPlan
   /** Discards the whole suggestion. */
   onDiscard: () => void
   /** Called after any successful apply. */
-  onApplied: () => void
+  onApplied: (info: AiAppliedInfo) => void
 }
 
 export function AiEditReview({ plan, onDiscard, onApplied }: AiEditReviewProps) {
@@ -108,21 +120,30 @@ export function AiEditReview({ plan, onDiscard, onApplied }: AiEditReviewProps) 
     (key) => plan[key] !== undefined && !dismissed.has(key),
   )
 
-  if (groups.length === 0) return null
+  if (groups.length === 0) {
+    return (
+      <p className="rounded-md border border-border bg-muted px-3 py-2 text-sm text-muted-foreground">
+        No changes left to review.
+      </p>
+    )
+  }
 
   const applyGroup = (key: PlanKey) => {
     const partial = { [key]: plan[key] } as AiEditPlan
+    const snapshot = useDocumentStore.getState().document
     applyAiEditPlan(partial)
     setDismissed((prev) => new Set(prev).add(key))
-    onApplied()
+    onApplied({ key, summary: GROUP_LABELS[key], snapshot })
   }
 
   const applyAll = () => {
     const remaining = Object.fromEntries(
       groups.map((key) => [key, plan[key]]),
     ) as AiEditPlan
+    const snapshot = useDocumentStore.getState().document
     applyAiEditPlan(remaining)
-    onApplied()
+    setDismissed(new Set(GROUP_ORDER))
+    onApplied({ key: 'all', summary: 'All suggestions', snapshot })
     onDiscard()
   }
 

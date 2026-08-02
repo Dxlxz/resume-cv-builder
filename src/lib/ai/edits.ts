@@ -143,6 +143,35 @@ export const aiEditPlanSchema = z
 
 export type AiEditPlan = z.infer<typeof aiEditPlanSchema>
 
+/**
+ * True when the plan would actually change something: non-empty summary,
+ * any non-empty add/edit/remove array, or any section hide/show. Empty
+ * plans ({} or only empty ops) are treated as "no effects" - the chat
+ * shows a helpful message instead of an empty review card.
+ */
+export function aiEditPlanHasEffects(plan: AiEditPlan): boolean {
+  if (plan.summary !== undefined && plan.summary.trim().length > 0) return true
+  if (plan.sections && (plan.sections.hide?.length || plan.sections.show?.length)) return true
+  const sections: (keyof Omit<AiEditPlan, 'summary' | 'sections'>)[] = [
+    'experience',
+    'education',
+    'certifications',
+    'skills',
+    'projects',
+    'volunteer',
+    'references',
+  ]
+  return sections.some((key) => {
+    const ops = plan[key]
+    if (!ops) return false
+    return Boolean(
+      (ops.add !== undefined && ops.add.length > 0) ||
+        (ops.edit !== undefined && ops.edit.length > 0) ||
+        (ops.remove !== undefined && ops.remove.length > 0),
+    )
+  })
+}
+
 const KNOWN_EXPERIENCE_KEYS = [
   'title',
   'company',

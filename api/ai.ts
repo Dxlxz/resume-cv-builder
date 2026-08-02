@@ -59,7 +59,8 @@ Rules for the plan:
 - Use the exact ids from the document JSON when editing or removing items. Never invent ids.
 - "patch" may only contain fields that exist on that item in the document schema.
 - Only include operations that genuinely satisfy the instruction. If nothing needs to change for a section, omit that section entirely.
-- Keep every array that you keep in the document (bullets, items) intact unless the edit changes it.`
+- Keep every array that you keep in the document (bullets, items) intact unless the edit changes it.
+- NEVER return an empty plan {}. If the request cannot be satisfied exactly, make the closest honest edit instead - for example, tighten the summary when it exists, or improve the bullets of the most relevant role.`
 
 export function buildAiEditMessages(input: {
   instruction: string

@@ -1,11 +1,30 @@
 import { describe, expect, it } from 'vitest'
 import {
+  aiEditPlanHasEffects,
   applyAiEditPlan,
   buildDocumentContext,
   parseAiEditPlan,
 } from '@/lib/ai/edits'
 import { sampleResumeDocument } from '@rb/fixtures'
 import type { ResumeDocument } from '@rb/core/types/document'
+
+describe('aiEditPlanHasEffects', () => {
+  it('treats empty and empty-op plans as no effects', () => {
+    expect(aiEditPlanHasEffects({})).toBe(false)
+    expect(aiEditPlanHasEffects({ summary: '   ' })).toBe(false)
+    expect(aiEditPlanHasEffects({ experience: { add: [] } })).toBe(false)
+    expect(aiEditPlanHasEffects({ skills: { add: [], edit: [], remove: [] } })).toBe(false)
+  })
+
+  it('detects real changes', () => {
+    expect(aiEditPlanHasEffects({ summary: 'New summary.' })).toBe(true)
+    expect(aiEditPlanHasEffects({ experience: { add: [{ title: 'R', bullets: [] }] } })).toBe(true)
+    expect(aiEditPlanHasEffects({ experience: { edit: [{ id: 'x', patch: { bullets: ['b'] } }] } })).toBe(true)
+    expect(aiEditPlanHasEffects({ experience: { remove: ['x'] } })).toBe(true)
+    expect(aiEditPlanHasEffects({ sections: { hide: ['summary'] } })).toBe(true)
+    expect(aiEditPlanHasEffects({ sections: { show: ['skills'] } })).toBe(true)
+  })
+})
 
 describe('parseAiEditPlan', () => {
   it('parses plain JSON', () => {

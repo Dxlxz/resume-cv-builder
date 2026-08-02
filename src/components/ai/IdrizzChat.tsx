@@ -1,36 +1,45 @@
 import { useEffect, useRef, useState } from 'react'
+import type { SectionId } from '@rb/core/types/document'
 import { useDocumentStore } from '@/app/store/documentStore'
 import { useAi } from '@/hooks/useAi'
 import { useMediaQuery } from '@/hooks/useMediaQuery'
-import { buildDocumentContext, parseAiEditPlan, type AiEditPlan } from '@/lib/ai/edits'
-import { AiEditReview } from '@/components/ai/AiEditReview'
+import {
+  aiEditPlanHasEffects,
+  buildDocumentContext,
+  parseAiEditPlan,
+} from '@/lib/ai/edits'
+import {
+  clearChatHistory,
+  loadChatHistory,
+  saveChatHistory,
+  type ChatHistoryMessage,
+} from '@/lib/ai/history'
+import { scrollToFormSection } from '@/lib/scrollToSection'
+import { getSectionLabel } from '@rb/core/selectors/getSectionLabel'
+import { AiEditReview, type AiAppliedInfo } from '@/components/ai/AiEditReview'
 import { Button } from '@/components/ui/Button'
 
 /**
  * Idrizz, the floating chatbot. A round bubble sits at the bottom-right of
  * the builder; it opens a chat panel with a persona: a warm, direct resume
  * wingman. Edit requests come back as typed JSON plans, reviewed inline
- * (Apply/Discard per group). Size adapts automatically to the viewport:
- * a bottom sheet on mobile, a floating panel sized to the screen on
- * desktop - no user options.
+ * (Apply/Discard per group). Applied plans become "Applied" cards with
+ * Undo, and the thread persists across reloads (localStorage, capped).
+ * Size adapts automatically to the viewport: a bottom sheet on mobile, a
+ * floating panel sized to the screen on desktop - no user options.
  */
 
-/**
- * Idrizz, the floating chatbot. A round bubble sits at the bottom-right of
- * the builder; it opens a chat panel with a persona: a warm, direct resume
- * wingman. Edit requests come back as typed JSON plans, reviewed inline
- * (Apply/Discard per group).
- */
-
-const PRESETS: { label: string; instruction: string }[] = [
+const PRESETS: { label: string; instruction: string; instant?: boolean }[] = [
   {
     label: 'Rewrite my summary',
     instruction: 'Rewrite my professional summary to be tighter and more persuasive.',
+    instant: true,
   },
   {
     label: 'Improve my bullets',
     instruction:
       'Improve the bullet points across my experience: stronger verbs, measurable outcomes, no invented facts.',
+    instant: true,
   },
   {
     label: 'Tailor to a job',
@@ -53,11 +62,7 @@ function SparkleIcon({ size = 22 }: { size?: number }) {
   )
 }
 
-interface ChatMessage {
-  role: 'user' | 'idrizz'
-  text: string
-  plan?: AiEditPlan
-}
+type ChatMessage = ChatHistoryMessage
 
 interface IdrizzChatProps {
   open: boolean
@@ -69,7 +74,7 @@ export function IdrizzChat({ open, onOpen, onClose }: IdrizzChatProps) {
   const document = useDocumentStore((s) => s.document)
   const isMobile = useMediaQuery('(max-width: 767px)')
   const { result, busy, error, consentOpen, run, acceptConsent, declineConsent } = useAi('ai-edit')
-  const [messages, setMessages] = useState<ChatMessage[]>([])
+  const [messages, setMessages] = useState<ChatMessage[]>(() => loadChatHistory())
   const [input, setInput] = useState('')
   const inputRef = useRef<HTMLTextAreaElement>(null)
   const scrollRef = useRef<HTMLDivElement>(null)
@@ -127,11 +132,31 @@ export function IdrizzChat({ open, onOpen, onClose }: IdrizzChatProps) {
     if (result === null || result === lastResultRef.current) return
     lastResultRef.current = result
     const plan = parseAiEditPlan(result)
+    if (plan && aiEditPlanHasEffects(plan)) {
+      // The AI result is an external-system event; appending it to the
+      // thread is the only way to reflect it.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setMessages((prev) => [
+        ...prev,
+        {
+          role: 'idrizz',
+          text: 'Nih cadangan saya. Check dulu, apply mana yang ok:',
+          plan,
+        },
+      ])
+      return
+    }
     setMessages((prev) => [
       ...prev,
       plan
-        ? { role: 'idrizz', text: 'Nih cadangan saya. Check dulu, apply mana yang ok:', plan }
-        : { role: 'idrizz', text: 'Hmm, tak jadi nak jadikan edits. Cuba ayat lain, atau bagi lebih detail.' },
+        ? {
+            role: 'idrizz',
+            text: 'Idrizz tak jumpa apa-apa yang patut diubah untuk permintaan tu. Cuba lebih spesifik, contohnya "Kemas summary aku jadi 3 ayat".',
+          }
+        : {
+            role: 'idrizz',
+            text: 'Hmm, tak jadi nak jadikan edits. Cuba ayat lain, atau bagi lebih detail.',
+          },
     ])
   }, [result])
 
@@ -141,10 +166,15 @@ export function IdrizzChat({ open, onOpen, onClose }: IdrizzChatProps) {
     setMessages((prev) => [...prev, { role: 'idrizz', text: `${error} Try lagi?` }])
   }, [error])
 
+  // Persist the thread so reloads keep full session context.
+  useEffect(() => {
+    saveChatHistory(messages)
+  }, [messages])
+
   if (!document) return null
 
-  const send = () => {
-    const text = input.trim()
+  const send = (textOverride?: string) => {
+    const text = (textOverride ?? input).trim()
     if (!text || busy) return
     setMessages((prev) => [...prev, { role: 'user', text }])
     setInput('')
@@ -166,6 +196,71 @@ export function IdrizzChat({ open, onOpen, onClose }: IdrizzChatProps) {
 
   const clearPlan = (index: number) => {
     setMessages((prev) => prev.map((m, i) => (i === index ? { ...m, plan: undefined } : m)))
+  }
+
+  const handleApplied = (index: number, info: AiAppliedInfo) => {
+    setMessages((prev) =>
+      prev.map((m, i) => {
+        if (i !== index || !m.plan) return m
+        const first = !m.applied
+        const snapshot =
+          first && info.snapshot
+            ? info.snapshot
+            : m.applied?.snapshot ?? useDocumentStore.getState().document
+        if (!snapshot) return m
+        const summary = m.applied
+          ? `${m.applied.summary} · ${info.summary}`
+          : info.key === 'all'
+            ? 'All suggestions applied'
+            : info.summary
+        return { ...m, applied: { summary, snapshot, undone: false } }
+      }),
+    )
+  }
+
+  const undoApplied = (index: number) => {
+    const message = messages[index]
+    if (!message?.applied || message.applied.undone || !message.applied.snapshot) return
+    useDocumentStore.getState().setDocument(message.applied.snapshot)
+    setMessages((prev) =>
+      prev.map((m, i) =>
+        i === index && m.applied ? { ...m, applied: { ...m.applied, undone: true } } : m,
+      ),
+    )
+  }
+
+  const newChat = () => {
+    clearChatHistory()
+    setMessages([])
+    setInput('')
+  }
+
+  const firstSectionOf = (message: ChatMessage): SectionId | null => {
+    if (!message.plan) return null
+    const plan = message.plan
+    const order: (keyof typeof plan)[] = [
+      'summary',
+      'experience',
+      'education',
+      'certifications',
+      'skills',
+      'projects',
+      'volunteer',
+      'references',
+      'sections',
+    ]
+    for (const key of order) {
+      if (plan[key] !== undefined) {
+        if (key === 'sections') return 'summary'
+        return key as SectionId
+      }
+    }
+    return null
+  }
+
+  const sectionLabelOf = (message: ChatMessage): string => {
+    const section = firstSectionOf(message)
+    return section ? getSectionLabel(section, {}) : 'section'
   }
 
   return (
@@ -210,6 +305,19 @@ export function IdrizzChat({ open, onOpen, onClose }: IdrizzChatProps) {
             {hasUserMessage ? 'Your resume wingman' : 'Starting conversation…'}
           </p>
         </div>
+        {hasUserMessage && (
+          <button
+            type="button"
+            onClick={newChat}
+            title="Start a new chat (clears this thread)"
+            aria-label="Start a new chat"
+            className="rounded-sm px-2 py-1 text-muted-foreground transition-colors duration-[var(--duration-state)] hover:bg-muted hover:text-foreground"
+          >
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+              <path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1" />
+            </svg>
+          </button>
+        )}
         <button
           type="button"
           onClick={onClose}
@@ -265,8 +373,12 @@ export function IdrizzChat({ open, onOpen, onClose }: IdrizzChatProps) {
                   type="button"
                   className="rounded-full border border-border bg-card px-2.5 py-0.5 text-xs text-foreground transition-colors duration-[var(--duration-state)] hover:text-primary"
                   onClick={() => {
-                    setInput(preset.instruction)
-                    inputRef.current?.focus()
+                    if (preset.instant) {
+                      send(preset.instruction)
+                    } else {
+                      setInput(preset.instruction)
+                      inputRef.current?.focus()
+                    }
                   }}
                 >
                   {preset.label}
@@ -277,16 +389,54 @@ export function IdrizzChat({ open, onOpen, onClose }: IdrizzChatProps) {
         )}
 
         {messages.map((message, index) =>
-          message.plan ? (
-            <div key={index} className="animate-slide-up">
+          message.plan || message.applied ? (
+            <div key={index} className="animate-slide-up space-y-2">
               <p className="text-sm font-medium text-foreground">{message.text}</p>
-              <div className="mt-2">
-                <AiEditReview
-                  plan={message.plan}
-                  onDiscard={() => clearPlan(index)}
-                  onApplied={() => clearPlan(index)}
-                />
-              </div>
+              {message.applied && (
+                <div
+                  className={`rounded-md border px-3 py-2 text-sm ${
+                    message.applied.undone
+                      ? 'border-border bg-muted text-muted-foreground'
+                      : 'border-status-success/30 bg-badge-success text-status-success-foreground'
+                  }`}
+                >
+                  <p className="font-medium">
+                    {message.applied.undone ? 'Undone — changes reverted' : `✓ Applied — ${message.applied.summary}`}
+                  </p>
+                  <div className="mt-1.5 flex flex-wrap gap-2">
+                    {!message.applied.undone && (
+                      <button
+                        type="button"
+                        onClick={() => undoApplied(index)}
+                        className="rounded-full border border-border/60 px-2 py-0.5 text-xs transition-colors duration-[var(--duration-state)] hover:bg-card/60"
+                      >
+                        Undo
+                      </button>
+                    )}
+                    {!message.applied.undone && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const section = firstSectionOf(message)
+                          if (section) scrollToFormSection(section)
+                        }}
+                        className="rounded-full border border-border/60 px-2 py-0.5 text-xs transition-colors duration-[var(--duration-state)] hover:bg-card/60"
+                      >
+                        Go to {sectionLabelOf(message)}
+                      </button>
+                    )}
+                  </div>
+                </div>
+              )}
+              {message.plan && (
+                <div>
+                  <AiEditReview
+                    plan={message.plan}
+                    onDiscard={() => clearPlan(index)}
+                    onApplied={(info) => handleApplied(index, info)}
+                  />
+                </div>
+              )}
             </div>
           ) : (
             <div
@@ -362,7 +512,7 @@ export function IdrizzChat({ open, onOpen, onClose }: IdrizzChatProps) {
           />
           <button
             type="button"
-            onClick={send}
+            onClick={() => send()}
             disabled={busy || !input.trim()}
             aria-label="Send to Idrizz"
             className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground transition-opacity duration-[var(--duration-state)] hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"

@@ -3,7 +3,6 @@ import { useDocumentStore } from '@/app/store/documentStore'
 import { useAi } from '@/hooks/useAi'
 import { useResizablePanel } from '@/hooks/useResizablePanel'
 import { buildDocumentContext, parseAiEditPlan, type AiEditPlan } from '@/lib/ai/edits'
-import { IdrizzIconButton } from '@/components/ai/IdrizzIconButton'
 import { AiEditReview } from '@/components/ai/AiEditReview'
 import { Button } from '@/components/ui/Button'
 
@@ -33,6 +32,15 @@ const PRESETS: { label: string; instruction: string }[] = [
 const WELCOME =
   'Hi! I am Idrizz, your resume wingman. Tell me what to edit, add, or remove, or pick a shortcut below. English atau Bahasa Melayu pun boleh.'
 
+function SparkleIcon({ size = 22 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+      <path d="M12 2l1.9 6.1L20 10l-6.1 1.9L12 18l-1.9-6.1L4 10l6.1-1.9L12 2z" />
+      <path d="M19 15l.9 2.6L22.5 18.5l-2.6.9L19 22l-.9-2.6-2.6-.9 2.6-.9L19 15z" />
+    </svg>
+  )
+}
+
 interface ChatMessage {
   role: 'user' | 'idrizz'
   text: string
@@ -43,19 +51,9 @@ interface IdrizzChatProps {
   open: boolean
   onOpen: () => void
   onClose: () => void
-  /** Instruction to prefill (from a section's Idrizz icon). */
-  prefillInstruction?: string
-  /** Changes every time a new prefill is requested. */
-  prefillNonce?: number
 }
 
-export function IdrizzChat({
-  open,
-  onOpen,
-  onClose,
-  prefillInstruction = '',
-  prefillNonce = 0,
-}: IdrizzChatProps) {
+export function IdrizzChat({ open, onOpen, onClose }: IdrizzChatProps) {
   const document = useDocumentStore((s) => s.document)
   const { result, busy, error, consentOpen, run, acceptConsent, declineConsent } = useAi('ai-edit')
   const { size, onPointerDown } = useResizablePanel({
@@ -81,18 +79,6 @@ export function IdrizzChat({
       setMessages([{ role: 'idrizz', text: WELCOME }])
     }
   }, [open])
-
-  // New prefill request: load it into the input (render-time adjustment,
-  // own state only, keyed by nonce).
-  const [prevNonce, setPrevNonce] = useState(prefillNonce)
-  if (open && prefillInstruction && prefillNonce !== prevNonce) {
-    setPrevNonce(prefillNonce)
-    setInput(prefillInstruction)
-  }
-
-  useEffect(() => {
-    if (open && prefillInstruction) inputRef.current?.focus()
-  }, [open, prefillInstruction])
 
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: 'smooth' })
@@ -127,6 +113,10 @@ export function IdrizzChat({
     run({ instruction: text, context: buildDocumentContext(document) })
   }
 
+  const clearPlan = (index: number) => {
+    setMessages((prev) => prev.map((m, i) => (i === index ? { ...m, plan: undefined } : m)))
+  }
+
   if (!open) {
     return (
       <button
@@ -136,10 +126,7 @@ export function IdrizzChat({
         title="Chat with Idrizz"
         className="fixed bottom-5 right-5 z-40 flex h-12 w-12 animate-pop-in items-center justify-center rounded-full bg-primary text-primary-foreground shadow-[var(--shadow-modal)] transition-all duration-[var(--duration-state)] hover:scale-105 active:scale-95"
       >
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
-          <path d="M12 2l1.9 6.1L20 10l-6.1 1.9L12 18l-1.9-6.1L4 10l6.1-1.9L12 2z" />
-          <path d="M19 15l.9 2.6L22.5 18.5l-2.6.9L19 22l-.9-2.6-2.6-.9 2.6-.9L19 15z" />
-        </svg>
+        <SparkleIcon />
       </button>
     )
   }
@@ -158,7 +145,10 @@ export function IdrizzChat({
       }}
     >
       <header className="flex shrink-0 items-center gap-2.5 border-b border-border bg-header px-3 py-2.5">
-        <IdrizzIconButton size="md" onClick={() => inputRef.current?.focus()} label="Idrizz" />
+        <span className="relative flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary" aria-hidden>
+          <SparkleIcon size={16} />
+          <span className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border-2 border-header bg-status-success" />
+        </span>
         <div className="min-w-0 flex-1">
           <p className="text-sm font-semibold leading-tight text-foreground">Idrizz</p>
           <p className="text-xs text-muted-foreground">Your resume wingman</p>
@@ -176,43 +166,41 @@ export function IdrizzChat({
       </header>
 
       <div ref={scrollRef} className="min-h-0 flex-1 space-y-3 overflow-y-auto p-3">
-        {messages.map((message, index) => (
-          <div
-            key={index}
-            className={`animate-slide-up ${message.role === 'user' ? 'flex justify-end' : 'flex justify-start'}`}
-          >
+        {messages.map((message, index) =>
+          message.plan ? (
+            <div key={index} className="animate-slide-up">
+              <p className="text-sm font-medium text-foreground">{message.text}</p>
+              <div className="mt-2">
+                <AiEditReview
+                  plan={message.plan}
+                  onDiscard={() => clearPlan(index)}
+                  onApplied={() => clearPlan(index)}
+                />
+              </div>
+            </div>
+          ) : (
             <div
-              className={`max-w-[85%] rounded-md px-3 py-2 text-sm ${
-                message.role === 'user'
-                  ? 'bg-primary text-primary-foreground'
-                  : 'bg-muted text-foreground'
+              key={index}
+              className={`animate-slide-up ${
+                message.role === 'user' ? 'flex justify-end' : 'flex justify-start'
               }`}
             >
-              <p className="whitespace-pre-wrap leading-relaxed">{message.text}</p>
-              {message.plan && (
-                <div className="mt-3">
-                  <AiEditReview
-                    plan={message.plan}
-                    onDiscard={() =>
-                      setMessages((prev) =>
-                        prev.map((m, i) => (i === index ? { ...m, plan: undefined } : m)),
-                      )
-                    }
-                    onApplied={() =>
-                      setMessages((prev) =>
-                        prev.map((m, i) => (i === index ? { ...m, plan: undefined } : m)),
-                      )
-                    }
-                  />
-                </div>
-              )}
+              <div
+                className={`max-w-[85%] rounded-lg px-3 py-2 text-sm ${
+                  message.role === 'user'
+                    ? 'bg-primary text-primary-foreground'
+                    : 'border border-border bg-muted text-foreground'
+                }`}
+              >
+                <p className="whitespace-pre-wrap leading-relaxed">{message.text}</p>
+              </div>
             </div>
-          </div>
-        ))}
+          ),
+        )}
 
         {busy && (
           <div className="flex animate-slide-up justify-start">
-            <div className="flex items-center gap-1.5 rounded-md bg-muted px-3 py-2.5 text-sm text-muted-foreground">
+            <div className="flex items-center gap-1.5 rounded-lg border border-border bg-muted px-3 py-2.5 text-sm text-muted-foreground">
               <span className="rb-typing-dot h-1.5 w-1.5 rounded-full bg-foreground/60" />
               <span
                 className="rb-typing-dot h-1.5 w-1.5 rounded-full bg-foreground/60"
@@ -228,7 +216,7 @@ export function IdrizzChat({
         )}
 
         {consentOpen && (
-          <div className="rounded-md bg-muted px-3 py-2 text-sm text-foreground">
+          <div className="animate-slide-up rounded-lg border border-border bg-muted px-3 py-2 text-sm text-foreground">
             <p className="font-semibold">Sebelum Idrizz mula</p>
             <p className="mt-1 leading-relaxed text-muted-foreground">
               Instruction dan teks dokumen kau akan dihantar ke servis AI luar (OpenCode Go,
@@ -301,7 +289,7 @@ export function IdrizzChat({
         aria-label="Resize chat"
         aria-orientation="horizontal"
         onPointerDown={onPointerDown}
-        className="absolute bottom-0 right-0 flex h-5 w-5 cursor-nwse-resize touch-none items-end justify-end p-1 text-muted-foreground/60 transition-colors duration-[var(--duration-state)] hover:text-muted-foreground"
+        className="absolute bottom-0 left-0 flex h-5 w-5 cursor-nesw-resize touch-none items-start justify-start p-1 text-muted-foreground/60 transition-colors duration-[var(--duration-state)] hover:text-muted-foreground"
       >
         <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
           <path d="M22 14v8h-8l8-8z" />

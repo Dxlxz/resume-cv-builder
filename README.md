@@ -70,6 +70,30 @@ Vite + pnpm are auto-detected (`build: pnpm run build`, output `dist/`),
 and the site redeploys on every push to `main`. The same `pnpm run build`
 output also serves statically on Netlify, GitHub Pages, or any static host.
 
+## AI assistance (optional)
+
+Three opt-in features: improve the summary, improve a role's bullets, and
+tailor the document to a job description (paste the JD, get a summary
+rewrite, keywords to add, and bullet suggestions). Nothing is applied
+automatically — every suggestion is reviewed, and the first use shows a
+consent notice.
+
+AI calls go through a small serverless proxy (`api/ai.ts`) so the API key
+never ships in the client bundle. The upstream is OpenCode Go
+(`deepseek-v4-flash`); per their policy, inputs are not used for training
+and are retained for zero days.
+
+Setup:
+
+```bash
+# local dev: copy the example and add your key
+Copy-Item .env.example .env.local
+```
+
+For production, set `OPENCODE_GO_API_KEY` as a Vercel environment variable.
+The key is only ever read server-side; the CI leak check fails any commit
+that contains an `sk-` key.
+
 ## Personal dev scripts
 
 Scripts that regenerate Dale's actual CV/PDFs live in `personal/scripts/`

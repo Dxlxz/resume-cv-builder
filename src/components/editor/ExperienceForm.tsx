@@ -1,18 +1,149 @@
 import { useDocumentStore } from '@/app/store/documentStore'
 import { createEmptyExperience } from '@rb/core/schema'
+import type { ResumeDocument } from '@rb/core/types/document'
 import { Button } from '@/components/ui/Button'
 import { TextField } from '@/components/ui/TextField'
 import { CatalogPicker } from '@/components/catalog/CatalogPicker'
 import { MonthField } from '@/components/ui/MonthField'
 import { BulletListEditor } from '@/components/ui/BulletListEditor'
 import { EmptyHint } from '@/components/ui/EmptyHint'
+import { AiReview } from '@/components/ai/AiReview'
+import { useAi } from '@/hooks/useAi'
 import { FORM_PLACEHOLDERS } from '@/lib/formPlaceholders'
+
+type ExperienceItem = ResumeDocument['experience'][number]
+
+interface RoleCardProps {
+  item: ExperienceItem
+  index: number
+  updateItem: (id: string, patch: Partial<ExperienceItem>) => void
+  removeItem: (id: string) => void
+}
+
+function ExperienceRoleCard({ item, index, updateItem, removeItem }: RoleCardProps) {
+  const { result, busy, error, consentOpen, run, acceptConsent, declineConsent, discard } =
+    useAi('improve-bullets')
+
+  const runImprove = () =>
+    run({
+      role: { title: item.title, company: item.company, bullets: item.bullets },
+    })
+
+  return (
+    <div className="space-y-4 rounded-md border border-border bg-muted/50 p-4">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <h4 className="font-medium text-foreground">
+          Role {index + 1}
+          {item.title ? ` - ${item.title}` : ''}
+        </h4>
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          className="text-status-danger hover:bg-badge-danger"
+          onClick={() => removeItem(item.id)}
+        >
+          Remove role
+        </Button>
+      </div>
+      <div className="grid gap-4 sm:grid-cols-2">
+        <CatalogPicker
+          catalogType="occupation"
+          label="Job title"
+          placeholder={FORM_PLACEHOLDERS.experience.title}
+          value={item.title}
+          onChange={(title) => updateItem(item.id, { title })}
+        />
+        <TextField
+          label="Company"
+          placeholder={FORM_PLACEHOLDERS.experience.company}
+          value={item.company}
+          onChange={(e) => updateItem(item.id, { company: e.target.value })}
+        />
+        <CatalogPicker
+          catalogType="location"
+          label="Location"
+          placeholder={FORM_PLACEHOLDERS.experience.location}
+          value={item.location ?? ''}
+          onChange={(location) => updateItem(item.id, { location })}
+        />
+        <MonthField
+          label="Start date"
+          value={item.startDate}
+          onChange={(e) => updateItem(item.id, { startDate: e.target.value })}
+        />
+        <MonthField
+          label="End date"
+          value={item.endDate ?? ''}
+          disabled={item.present}
+          onChange={(e) => updateItem(item.id, { endDate: e.target.value })}
+        />
+        <label className="flex min-h-10 items-center gap-2 self-end pb-1 text-sm text-foreground">
+          <input
+            type="checkbox"
+            className="h-4 w-4 rounded border-border"
+            checked={item.present}
+            onChange={(e) =>
+              updateItem(item.id, {
+                present: e.target.checked,
+                endDate: e.target.checked ? '' : item.endDate,
+              })
+            }
+          />
+          I currently work here
+        </label>
+      </div>
+      <div className="space-y-2">
+        <div className="flex flex-wrap items-end justify-between gap-2">
+          <div className="min-w-0 flex-1">
+            <BulletListEditor
+              label="Achievements"
+              bullets={item.bullets}
+              placeholder={FORM_PLACEHOLDERS.experience.bullet}
+              onChange={(bullets) => updateItem(item.id, { bullets })}
+            />
+          </div>
+          <Button
+            type="button"
+            variant="secondary"
+            size="sm"
+            onClick={runImprove}
+            disabled={busy}
+          >
+            Improve bullets with AI
+          </Button>
+        </div>
+        <AiReview
+          label="Bullets"
+          busy={busy}
+          error={error}
+          result={result}
+          consentOpen={consentOpen}
+          onAcceptConsent={acceptConsent}
+          onDeclineConsent={declineConsent}
+          onApply={() => {
+            if (result) {
+              const lines = result
+                .split('\n')
+                .map((line) => line.trim())
+                .filter(Boolean)
+              if (lines.length) updateItem(item.id, { bullets: lines })
+            }
+            discard()
+          }}
+          onRegenerate={runImprove}
+          onDiscard={discard}
+        />
+      </div>
+    </div>
+  )
+}
 
 export function ExperienceForm() {
   const experience = useDocumentStore((s) => s.document?.experience ?? [])
   const updateExperience = useDocumentStore((s) => s.updateExperience)
 
-  const updateItem = (id: string, patch: Partial<(typeof experience)[0]>) => {
+  const updateItem = (id: string, patch: Partial<ExperienceItem>) => {
     updateExperience(
       experience.map((item) => (item.id === id ? { ...item, ...patch } : item)),
     )
@@ -39,79 +170,13 @@ export function ExperienceForm() {
         />
       ) : (
         experience.map((item, index) => (
-          <div
+          <ExperienceRoleCard
             key={item.id}
-            className="space-y-4 rounded-md border border-border bg-muted/50 p-4"
-          >
-            <div className="flex flex-wrap items-center justify-between gap-2">
-              <h4 className="font-medium text-foreground">
-                Role {index + 1}
-                {item.title ? ` — ${item.title}` : ''}
-              </h4>
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                className="text-status-danger hover:bg-badge-danger"
-                onClick={() => removeItem(item.id)}
-              >
-                Remove role
-              </Button>
-            </div>
-            <div className="grid gap-4 sm:grid-cols-2">
-              <CatalogPicker
-                catalogType="occupation"
-                label="Job title"
-                placeholder={FORM_PLACEHOLDERS.experience.title}
-                value={item.title}
-                onChange={(title) => updateItem(item.id, { title })}
-              />
-              <TextField
-                label="Company"
-                placeholder={FORM_PLACEHOLDERS.experience.company}
-                value={item.company}
-                onChange={(e) => updateItem(item.id, { company: e.target.value })}
-              />
-              <CatalogPicker
-                catalogType="location"
-                label="Location"
-                placeholder={FORM_PLACEHOLDERS.experience.location}
-                value={item.location ?? ''}
-                onChange={(location) => updateItem(item.id, { location })}
-              />
-              <MonthField
-                label="Start date"
-                value={item.startDate}
-                onChange={(e) => updateItem(item.id, { startDate: e.target.value })}
-              />
-              <MonthField
-                label="End date"
-                value={item.endDate ?? ''}
-                disabled={item.present}
-                onChange={(e) => updateItem(item.id, { endDate: e.target.value })}
-              />
-              <label className="flex min-h-10 items-center gap-2 self-end pb-1 text-sm text-foreground">
-                <input
-                  type="checkbox"
-                  className="h-4 w-4 rounded border-border"
-                  checked={item.present}
-                  onChange={(e) =>
-                    updateItem(item.id, {
-                      present: e.target.checked,
-                      endDate: e.target.checked ? '' : item.endDate,
-                    })
-                  }
-                />
-                I currently work here
-              </label>
-            </div>
-            <BulletListEditor
-              label="Achievements"
-              bullets={item.bullets}
-              placeholder={FORM_PLACEHOLDERS.experience.bullet}
-              onChange={(bullets) => updateItem(item.id, { bullets })}
-            />
-          </div>
+            item={item}
+            index={index}
+            updateItem={updateItem}
+            removeItem={removeItem}
+          />
         ))
       )}
       {experience.length > 0 && (

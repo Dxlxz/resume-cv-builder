@@ -74,7 +74,7 @@ const FEATURES: { title: string; description: string; icon: ReactNode }[] = [
   {
     title: 'Local-first privacy',
     description:
-      'No account, no server, no tracking. Drafts and catalogs live in your browser — your data never leaves your machine.',
+      'No account, no server, no tracking. Drafts and catalogs live in your browser - your data never leaves your machine. AI assistance is opt-in: it sends your text to an external service, and nothing is stored or used for training.',
     icon: (
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
         <rect x="5" y="10" width="14" height="10" rx="2" />

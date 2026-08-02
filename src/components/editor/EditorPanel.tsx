@@ -1,4 +1,5 @@
 import type { ComponentType } from 'react'
+import { useState } from 'react'
 import { useDocumentStore } from '@/app/store/documentStore'
 import { type SectionId } from '@rb/core/types/document'
 import { getSectionLabel } from '@rb/core/selectors/getSectionLabel'
@@ -13,6 +14,7 @@ import { ProjectsForm } from '@/components/editor/ProjectsForm'
 import { CertificationsForm } from '@/components/editor/CertificationsForm'
 import { VolunteerForm } from '@/components/editor/VolunteerForm'
 import { ReferencesForm } from '@/components/editor/ReferencesForm'
+import { TailorToJob } from '@/components/ai/TailorToJob'
 import { FormSection } from '@/components/ui/FormSection'
 import { Button } from '@/components/ui/Button'
 
@@ -45,6 +47,7 @@ export function EditorPanel() {
   const showOnboarding = useDocumentStore((s) => s.showOnboarding)
   const dismissOnboarding = useDocumentStore((s) => s.dismissOnboarding)
   const startFromSample = useDocumentStore((s) => s.startFromSample)
+  const [showTailor, setShowTailor] = useState(false)
 
   if (!document) return null
 
@@ -53,6 +56,23 @@ export function EditorPanel() {
 
   return (
     <div className="space-y-5">
+      <div className="rounded-md border border-border bg-card p-4 shadow-[var(--shadow-raised)]">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <h3 className="text-sm font-semibold text-foreground">Applying for a specific job?</h3>
+            <p className="mt-0.5 text-xs text-muted-foreground">
+              Paste the job description and get a tailored summary, keywords to add, and bullet
+              suggestions. Nothing changes until you apply it.
+            </p>
+          </div>
+          <Button type="button" variant="secondary" size="sm" onClick={() => setShowTailor(true)}>
+            Tailor to job
+          </Button>
+        </div>
+      </div>
+
+      {showTailor && <TailorToJob onClose={() => setShowTailor(false)} />}
+
       {showOnboarding && (
         <div className="rounded-md border border-status-info/30 bg-badge-info p-4 text-sm text-status-info-foreground">
           <p className="font-semibold">Welcome to {preset.name}</p>

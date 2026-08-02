@@ -33,15 +33,15 @@ jobs:
       - name: Build
         run: pnpm run build
 
-      - name: Leak check — no personal data in repo or bundle
+      - name: Leak check — no personal data or secrets in repo or bundle
         run: |
-          markers='dalejgm01|644 8821|Dxlxz|pembina_resume|Dale_Jeffrey_Gilimon'
+          markers='dalejgm01|644 8821|Dxlxz|pembina_resume|Dale_Jeffrey_Gilimon|sk-[A-Za-z0-9]'
           if grep -rInE "$markers" --exclude-dir=node_modules --exclude-dir=.git --exclude-dir=dist --exclude-dir=personal --exclude-dir=.github .; then
-            echo "::error::Personal data found in the repository tree"
+            echo "::error::Personal data or an API key found in the repository tree"
             exit 1
           fi
           if grep -rInE "$markers" dist/; then
-            echo "::error::Personal data found in the production bundle"
+            echo "::error::Personal data or an API key found in the production bundle"
             exit 1
           fi
-          echo "Clean — no personal data shipped."
+          echo "Clean — no personal data or secrets shipped."

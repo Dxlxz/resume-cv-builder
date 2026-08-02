@@ -1,8 +1,10 @@
 import fs from 'node:fs'
 import path from 'node:path'
 import { defineConfig, defaultExclude } from 'vitest/config'
+import { loadEnv } from 'vite'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
+import { runAiProxy } from './src/lib/ai/server.ts'
 
 // Private personal pack (Dale's profile) — dev/test only. Shipping builds
 // apply no alias: `@personal/profile` stays an external dynamic import that
@@ -14,21 +16,48 @@ const hasPersonal = fs.existsSync(personalEntry)
 // keeps vite/vitest in sync with tsconfig paths; subpaths are prefix-matched.
 const rbAliases = Object.fromEntries(
   ['core', 'layout', 'render', 'styles', 'templates', 'themes', 'validators', 'presets', 'catalog', 'fixtures'].map(
-    (pkg) => [`@rb/${pkg}`, path.resolve(__dirname, `./packages/${pkg}/src`)],
+    (pkg) => [`@rb/${pkg}`, path.resolve(import.meta.dirname, `./packages/${pkg}/src`)],
   ),
 )
 
-export default defineConfig(({ command }) => {
+export default defineConfig(({ command, mode }) => {
   const isBuild = command === 'build'
+  const env = loadEnv(mode, import.meta.dirname, '')
 
   return {
-    plugins: [react(), tailwindcss()],
+    plugins: [
+      react(),
+      tailwindcss(),
+      {
+        // Serves /api/ai in dev so the AI feature works without Vercel CLI.
+        name: 'ai-proxy-dev',
+        configureServer(server) {
+          server.middlewares.use('/api/ai', async (req, res) => {
+            let raw = ''
+            for await (const chunk of req) raw += chunk
+            let body: unknown
+            try {
+              body = raw ? JSON.parse(raw) : {}
+            } catch {
+              body = {}
+            }
+            const result = await runAiProxy(
+              body,
+              env.OPENCODE_GO_API_KEY ?? process.env.OPENCODE_GO_API_KEY,
+            )
+            res.statusCode = result.status
+            res.setHeader('Content-Type', 'application/json')
+            res.end(JSON.stringify(result.json))
+          })
+        },
+      },
+    ],
     optimizeDeps: {
       exclude: ['pdfjs-dist'],
     },
     resolve: {
       alias: {
-        '@': path.resolve(__dirname, './src'),
+        '@': path.resolve(import.meta.dirname, './src'),
         ...rbAliases,
         ...(hasPersonal && !isBuild ? { '@personal/profile': personalEntry } : {}),
       },

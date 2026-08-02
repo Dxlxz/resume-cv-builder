@@ -25,10 +25,7 @@ export function PdfCanvasPreview({ document, contentKey }: PdfCanvasPreviewProps
   const layoutPlan = useDocumentStore((s) => s.layoutPlan)
   const showLayoutBoxes = useDocumentStore((s) => s.showLayoutBoxes)
 
-  const { loading, refreshing, error, pageCount, blob, revision } = usePdfPreview(
-    document,
-    contentKey,
-  )
+  const { loading, refreshing, error, pageCount, blob } = usePdfPreview(document, contentKey)
   const [hoveredSection, setHoveredSection] = useState<SectionId | null>(null)
 
   useEffect(() => {
@@ -78,7 +75,6 @@ export function PdfCanvasPreview({ document, contentKey }: PdfCanvasPreviewProps
       )}
 
       <PdfCanvasPages
-        key={revision}
         blob={blob}
         zoomMode="fit"
         overlay={

@@ -28,11 +28,19 @@ export function PdfCanvasPages({ blob, zoomMode, overlay, footer }: PdfCanvasPag
   const [containerWidth, setContainerWidth] = useState(0)
   const [scale, setScale] = useState(1)
   const [pageSizes, setPageSizes] = useState<PageSize[]>([])
+  const lastWidthRef = useRef(0)
+  const inFlightRef = useRef(false)
 
   useEffect(() => {
     const container = containerRef.current
     if (!container || typeof ResizeObserver === 'undefined') return
-    const measure = () => setContainerWidth(container.clientWidth)
+    const measure = () => {
+      if (inFlightRef.current) return
+      const next = container.clientWidth
+      if (Math.abs(next - lastWidthRef.current) < 1) return
+      lastWidthRef.current = next
+      setContainerWidth(next)
+    }
     measure()
     const observer = new ResizeObserver(measure)
     observer.observe(container)
@@ -41,10 +49,11 @@ export function PdfCanvasPages({ blob, zoomMode, overlay, footer }: PdfCanvasPag
 
   useEffect(() => {
     let cancelled = false
+    inFlightRef.current = true
 
     const run = async () => {
-      if (containerWidth <= 0) return
       try {
+        if (containerWidth <= 0) return
         const layout = await loadPdfPreviewLayout(blob, {
           zoomMode,
           containerWidth,
@@ -57,6 +66,15 @@ export function PdfCanvasPages({ blob, zoomMode, overlay, footer }: PdfCanvasPag
         if (!cancelled) {
           proxyRef.current = null
           setPageSizes([])
+        }
+      } finally {
+        if (!cancelled) {
+          inFlightRef.current = false
+          const next = containerRef.current?.clientWidth
+          if (next !== undefined && Math.abs(next - lastWidthRef.current) >= 1) {
+            lastWidthRef.current = next
+            setContainerWidth(next)
+          }
         }
       }
     }
@@ -77,6 +95,7 @@ export function PdfCanvasPages({ blob, zoomMode, overlay, footer }: PdfCanvasPag
     if (!proxyRef.current || pageSizes.length === 0) return
 
     const run = async () => {
+      inFlightRef.current = true
       try {
         const dpr = Math.min(2, window.devicePixelRatio || 1)
         const pdf = proxyRef.current!.pdf
@@ -97,6 +116,8 @@ export function PdfCanvasPages({ blob, zoomMode, overlay, footer }: PdfCanvasPag
         }
       } catch {
         // The proxy can be torn down between loads - the next run redraws.
+      } finally {
+        inFlightRef.current = false
       }
     }
 
@@ -119,6 +140,7 @@ export function PdfCanvasPages({ blob, zoomMode, overlay, footer }: PdfCanvasPag
     <div
       ref={containerRef}
       className="flex h-full min-h-0 flex-col items-center gap-4 overflow-y-auto p-3"
+      style={{ scrollbarGutter: 'stable' }}
     >
       {pageSizes.map((size, index) => (
         <div key={`${index}-${pageSizes.length}`} className="relative w-full">

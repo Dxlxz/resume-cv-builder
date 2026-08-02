@@ -22,12 +22,12 @@ export function HeroPdfCard() {
             resume.pdf
           </span>
         </div>
-        <div className="flex items-stretch justify-center gap-6 bg-muted/60 px-6 py-8 sm:px-10">
+        <div className="flex items-stretch justify-center gap-6 bg-muted/60 px-5 py-6 sm:px-8">
           {dataUrl && !failed ? (
             <img
               src={dataUrl}
               alt="Sample resume exported as a PDF"
-              className="w-full max-w-sm rounded-sm border border-border bg-card shadow-[var(--shadow-raised)]"
+              className="mx-auto block max-h-[24rem] w-auto max-w-full rounded-sm border border-border bg-card shadow-[var(--shadow-raised)]"
             />
           ) : (
             <PdfSkeleton />

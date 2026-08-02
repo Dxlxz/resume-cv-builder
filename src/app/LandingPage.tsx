@@ -183,23 +183,23 @@ export function LandingPage({
       <section className="relative overflow-hidden border-b border-border">
         <HeroBackground />
 
-        <div className="relative mx-auto grid max-w-6xl items-center gap-12 px-5 py-20 lg:grid-cols-[1.05fr_0.95fr] lg:py-28">
+        <div className="relative mx-auto grid max-w-6xl items-center gap-10 px-5 py-16 lg:grid-cols-[1.05fr_0.95fr] lg:py-24">
           <div>
             <span className="inline-flex items-center gap-2 rounded-full border border-background/25 bg-background/10 px-3.5 py-1.5 text-xs font-medium text-background">
               <span className="h-1.5 w-1.5 rounded-full bg-status-success" aria-hidden />
               Local-first. No account required.
             </span>
 
-            <h1 className="mt-6 text-4xl font-semibold leading-[1.08] tracking-tight text-background sm:text-5xl">
+            <h1 className="mt-5 text-4xl font-semibold leading-[1.08] tracking-tight text-background sm:text-5xl">
               Resumes that clear ATS.
             </h1>
 
-            <p className="mt-5 max-w-xl text-base leading-relaxed text-background/80 sm:text-lg">
+            <p className="mt-4 max-w-xl text-base leading-relaxed text-background/80 sm:text-lg">
               A local-first builder with a live PDF preview, ATS checks, and
               presets tuned for Malaysia. Your data stays in your browser.
             </p>
 
-            <div className="mt-8 flex flex-wrap items-center gap-3">
+            <div className="mt-7 flex flex-wrap items-center gap-3">
               <Button type="button" onClick={onStart}>
                 Start building
               </Button>
@@ -210,7 +210,7 @@ export function LandingPage({
               )}
             </div>
 
-            <p className="mt-6 text-sm text-background/70">
+            <p className="mt-5 text-sm text-background/70">
               Free. No account. Export a PDF you can check before sending.
             </p>
           </div>

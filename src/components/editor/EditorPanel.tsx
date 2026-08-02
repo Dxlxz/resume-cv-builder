@@ -15,10 +15,8 @@ import { ProjectsForm } from '@/components/editor/ProjectsForm'
 import { CertificationsForm } from '@/components/editor/CertificationsForm'
 import { VolunteerForm } from '@/components/editor/VolunteerForm'
 import { ReferencesForm } from '@/components/editor/ReferencesForm'
-import { IdrizzIconButton } from '@/components/ai/IdrizzIconButton'
 import { FormSection } from '@/components/ui/FormSection'
 import { Popover } from '@/components/ui/Popover'
-import { Tooltip } from '@/components/ui/Tooltip'
 import { Button } from '@/components/ui/Button'
 import { filledSectionIds } from '@/lib/sectionStatus'
 
@@ -46,24 +44,15 @@ const SECTION_HINTS: Partial<Record<SectionId, string>> = {
   references: 'Professional referees (usually listed last)',
 }
 
-const SECTION_AI_HINTS: Partial<Record<SectionId, string>> = {
-  summary: 'Rewrite the professional summary to be tighter and more persuasive.',
-  experience: 'Improve the bullet points for every role: stronger verbs, measurable outcomes, no invented facts.',
-  education: 'Improve my education entries.',
-  skills: 'Add or reorganise my skill groups so they match my experience.',
-  certifications: 'Improve my certifications section.',
-  projects: 'Improve my projects section.',
-  volunteer: 'Improve my volunteer and leadership section.',
-  references: 'Improve my references section.',
-  contact: 'Review my contact section for anything missing.',
+function Chevron() {
+  return (
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+      <path d="M6 9l6 6 6-6" />
+    </svg>
+  )
 }
 
-interface EditorPanelProps {
-  /** Opens the floating Idrizz chat with a prefilled instruction. */
-  onAskIdrizz: (instruction: string) => void
-}
-
-export function EditorPanel({ onAskIdrizz }: EditorPanelProps) {
+export function EditorPanel() {
   const document = useDocumentStore((s) => s.document)
   const showOnboarding = useDocumentStore((s) => s.showOnboarding)
   const dismissOnboarding = useDocumentStore((s) => s.dismissOnboarding)
@@ -97,53 +86,38 @@ export function EditorPanel({ onAskIdrizz }: EditorPanelProps) {
             <p className="truncate text-sm font-semibold text-foreground">
               {done} of {total} sections done
             </p>
-            <div className="ml-auto flex shrink-0 items-center gap-1">
-              <Popover
-                ariaLabel="Document settings"
-                trigger={
-                  <Tooltip label="Document settings">
-                    <button
-                      type="button"
-                      aria-label="Document settings"
-                      className="flex h-8 w-8 items-center justify-center rounded-sm text-muted-foreground transition-colors duration-[var(--duration-state)] hover:bg-muted hover:text-foreground"
-                    >
-                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-                        <circle cx="12" cy="12" r="3" />
-                        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h.01a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51h.01a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v.01a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
-                      </svg>
-                    </button>
-                  </Tooltip>
-                }
-                className="w-72 max-w-[calc(100vw-2rem)]"
-              >
-                <div className="max-h-[min(24rem,70vh)] overflow-y-auto">
-                  <DocumentSettingsContent />
-                </div>
-              </Popover>
-              <Popover
-                ariaLabel="Sections management"
-                trigger={
-                  <Tooltip label="Sections - reorder and hide">
-                    <button
-                      type="button"
-                      aria-label="Sections - reorder and hide"
-                      className="flex h-8 w-8 items-center justify-center rounded-sm text-muted-foreground transition-colors duration-[var(--duration-state)] hover:bg-muted hover:text-foreground"
-                    >
-                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-                        <path d="M4 6h16M4 12h16M4 18h16" />
-                      </svg>
-                    </button>
-                  </Tooltip>
-                }
-                className="w-80 max-w-[calc(100vw-2rem)]"
-                open={sectionsOpen}
-                onOpenChange={setSectionsOpen}
-              >
-                <div className="max-h-[min(24rem,70vh)] overflow-y-auto">
-                  <SectionListContent onNavigate={() => setSectionsOpen(false)} />
-                </div>
-              </Popover>
-            </div>
+          </div>
+          <div className="ml-auto flex shrink-0 items-center gap-2">
+            <Popover
+              ariaLabel="Document settings"
+              trigger={
+                <Button type="button" variant="secondary" size="sm" className="gap-1.5">
+                  Document
+                  <Chevron />
+                </Button>
+              }
+              className="w-72 max-w-[calc(100vw-2rem)]"
+            >
+              <div className="max-h-[min(24rem,70vh)] overflow-y-auto">
+                <DocumentSettingsContent />
+              </div>
+            </Popover>
+            <Popover
+              ariaLabel="Sections management"
+              trigger={
+                <Button type="button" variant="secondary" size="sm" className="gap-1.5">
+                  Sections
+                  <Chevron />
+                </Button>
+              }
+              className="w-80 max-w-[calc(100vw-2rem)]"
+              open={sectionsOpen}
+              onOpenChange={setSectionsOpen}
+            >
+              <div className="max-h-[min(24rem,70vh)] overflow-y-auto">
+                <SectionListContent onNavigate={() => setSectionsOpen(false)} />
+              </div>
+            </Popover>
           </div>
         </div>
         <div aria-hidden className="h-0.5 w-full overflow-hidden bg-muted">
@@ -198,12 +172,6 @@ export function EditorPanel({ onAskIdrizz }: EditorPanelProps) {
               filled={filled.has(sectionId)}
               guide={document.meta.sectionGuides[sectionId]}
               onGuideChange={(text) => updateSectionGuide(sectionId, text)}
-              action={
-                <IdrizzIconButton
-                  label={`Ask Idrizz about ${getSectionLabel(sectionId, preset.labels)}`}
-                  onClick={() => onAskIdrizz(SECTION_AI_HINTS[sectionId] ?? '')}
-                />
-              }
             >
               <Form />
             </FormSection>

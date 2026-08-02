@@ -15,12 +15,6 @@ export function BuilderLayout({ onHome }: BuilderLayoutProps) {
   const [mobileTab, setMobileTab] = useState<MobileTab>('edit')
   const [previewHidden, setPreviewHidden] = useState(false)
   const [idrizzOpen, setIdrizzOpen] = useState(false)
-  const [idrizzAsk, setIdrizzAsk] = useState<{ instruction: string; nonce: number } | null>(null)
-
-  const askIdrizz = (instruction: string) => {
-    setIdrizzAsk({ instruction, nonce: Date.now() })
-    setIdrizzOpen(true)
-  }
 
   const effectiveTab: MobileTab = previewHidden ? 'edit' : mobileTab
 
@@ -79,7 +73,7 @@ export function BuilderLayout({ onHome }: BuilderLayoutProps) {
           } ${previewHidden ? '' : 'lg:border-r'}`}
           aria-label="Document editor"
         >
-          <EditorPanel onAskIdrizz={askIdrizz} />
+          <EditorPanel />
         </section>
         {!previewHidden && (
           <section
@@ -97,8 +91,6 @@ export function BuilderLayout({ onHome }: BuilderLayoutProps) {
         open={idrizzOpen}
         onOpen={() => setIdrizzOpen(true)}
         onClose={() => setIdrizzOpen(false)}
-        prefillInstruction={idrizzAsk?.instruction}
-        prefillNonce={idrizzAsk?.nonce}
       />
     </div>
   )

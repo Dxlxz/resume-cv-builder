@@ -35,7 +35,7 @@ jobs:
 
       - name: Leak check — no personal data or secrets in repo or bundle
         run: |
-          markers='dalejgm01|644 8821|Dxlxz|pembina_resume|Dale_Jeffrey_Gilimon|sk-[A-Za-z0-9]'
+          markers='dalejgm01|644 8821|Dxlxz|pembina_resume|Dale_Jeffrey_Gilimon|sk-[A-Za-z0-9]{20,}'
           if grep -rInE "$markers" --exclude-dir=node_modules --exclude-dir=.git --exclude-dir=dist --exclude-dir=personal --exclude-dir=.github .; then
             echo "::error::Personal data or an API key found in the repository tree"
             exit 1

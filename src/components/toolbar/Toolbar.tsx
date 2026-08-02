@@ -12,7 +12,7 @@ import { LintPanel } from '@/components/toolbar/LintPanel'
 import { PdfPreviewModal } from '@/components/toolbar/PdfPreviewModal'
 import { Button } from '@/components/ui/Button'
 import { Brand } from '@/components/ui/Brand'
-import { navigateToAdmin } from '@/hooks/useAppRoute'
+import { navigateTo } from '@/hooks/useAppRoute'
 import type { DocumentType, ExportProfile, PresetId } from '@rb/core/types/document'
 
 interface ToolbarProps {
@@ -416,7 +416,7 @@ export function Toolbar({ onHome }: ToolbarProps) {
                   className="flex w-full items-center gap-2 rounded-sm px-3 py-2 text-left text-sm text-foreground transition-colors duration-[var(--duration-state)] hover:bg-muted"
                   onClick={() => {
                     setMenuOpen(false)
-                    navigateToAdmin()
+                    navigateTo('admin')
                   }}
                 >
                   Manage catalogs

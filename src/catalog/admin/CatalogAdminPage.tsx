@@ -2,7 +2,8 @@ import { getBundledCatalog, BUNDLE_LIST } from '@rb/catalog/bundles'
 import { useCatalogStore } from '@rb/catalog/store/catalogStore'
 import { CatalogImportExport } from '@/catalog/admin/CatalogImportExport'
 import { CatalogVocabularyTabs } from '@/catalog/admin/CatalogVocabularyTabs'
-import { navigateToBuilder } from '@/hooks/useAppRoute'
+import { navigateTo } from '@/hooks/useAppRoute'
+import { useDocumentStore } from '@/app/store/documentStore'
 import { AppShell } from '@/app/AppShell'
 import { Button } from '@/components/ui/Button'
 
@@ -10,12 +11,15 @@ export function CatalogAdminPage() {
   const activeBundleId = useCatalogStore((s) => s.activeBundleId)
   const setActiveBundle = useCatalogStore((s) => s.setActiveBundle)
   const resetAll = useCatalogStore((s) => s.resetAll)
+  const hasStarted = useDocumentStore((s) => s.hasStarted)
   const bundle = getBundledCatalog(activeBundleId)
+
+  const goBack = () => navigateTo(hasStarted ? 'builder' : 'landing')
 
   return (
     <AppShell
-      backLabel="Builder"
-      onBack={navigateToBuilder}
+      backLabel="Back"
+      onBack={goBack}
       rightSlot={
         <>
           <label className="flex items-center gap-2 text-sm text-muted-foreground">

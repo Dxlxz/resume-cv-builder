@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react'
 import { useEffect, useState } from 'react'
-import { navigateToAdmin } from '@/hooks/useAppRoute'
+import { navigateTo } from '@/hooks/useAppRoute'
 import { Button } from '@/components/ui/Button'
 import { Brand } from '@/components/ui/Brand'
 import { HeroPdfCard } from '@/components/landing/HeroPdfPreview'
@@ -158,17 +158,17 @@ export function LandingPage({
   personalProfileAvailable = false,
 }: LandingPageProps) {
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div id="main-content" tabIndex={-1} className="min-h-screen bg-background text-foreground outline-none">
       {/* --- Nav --- */}
       <header className="sticky top-0 z-40 border-b border-border bg-header">
         <div className="mx-auto flex max-w-6xl items-center gap-3 px-5 py-3.5">
           <Brand />
-          <nav className="ml-auto flex items-center gap-2">
+          <nav aria-label="Primary" className="ml-auto flex items-center gap-2">
             <Button
               type="button"
               variant="ghost"
               size="sm"
-              onClick={navigateToAdmin}
+              onClick={() => navigateTo('admin')}
             >
               Manage catalogs
             </Button>
@@ -280,7 +280,7 @@ export function LandingPage({
             <Button type="button" onClick={onStart}>
               Start building
             </Button>
-            <Button type="button" variant="secondary" onClick={navigateToAdmin}>
+            <Button type="button" variant="secondary" onClick={() => navigateTo('admin')}>
               Browse catalogs
             </Button>
           </div>
@@ -296,7 +296,7 @@ export function LandingPage({
           </p>
           <button
             type="button"
-            onClick={navigateToAdmin}
+            onClick={() => navigateTo('admin')}
             className="transition-colors duration-[var(--duration-state)] hover:text-foreground"
           >
             Manage catalogs

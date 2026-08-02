@@ -1,14 +1,20 @@
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import { bundleIdForPreset } from '@rb/catalog/bundleForPreset'
 import { useCatalogStore } from '@rb/catalog/store/catalogStore'
 import { CatalogAdminPage } from '@/catalog/admin/CatalogAdminPage'
 import { useDocumentStore } from '@/app/store/documentStore'
 import { usePersistence } from '@/hooks/usePersistence'
-import { useAppRoute } from '@/hooks/useAppRoute'
+import { navigateTo, useAppRoute } from '@/hooks/useAppRoute'
 import { BrowserGuard } from '@/app/BrowserGuard'
 import { LandingPage } from '@/app/LandingPage'
 import { DocTypeSelector } from '@/app/DocTypeSelector'
 import { BuilderLayout } from '@/app/BuilderLayout'
+
+const ROUTE_TITLES: Record<string, string> = {
+  '/': 'Rizzume - ATS-ready resumes, built locally',
+  '/builder': 'Rizzume - Build your resume',
+  '/admin': 'Rizzume - Manage catalogs',
+}
 
 export default function App() {
   const route = useAppRoute()
@@ -19,19 +25,6 @@ export default function App() {
   const syncBundleForPreset = useCatalogStore((s) => s.syncBundleForPreset)
   const loadPersonalProfile = useDocumentStore((s) => s.loadPersonalProfile)
   const personalProfileAvailable = useDocumentStore((s) => s.personalProfileAvailable)
-  // View state for the pre-builder flow (landing → chooser) plus a mid-session
-  // "home" override so a started user can always get back to the landing page.
-  const [view, setView] = useState<'landing' | 'choose'>('landing')
-  const [homeVisible, setHomeVisible] = useState(false)
-
-  // Entering admin resets any mid-session home view, so its "Back to builder"
-  // returns to the builder (or the landing for first-time users). Adjusted in
-  // render (previous-route comparison) — no effect needed for state sync.
-  const [prevRoute, setPrevRoute] = useState(route)
-  if (route !== prevRoute) {
-    setPrevRoute(route)
-    if (route === 'admin') setHomeVisible(false)
-  }
 
   useEffect(() => {
     init()
@@ -43,54 +36,53 @@ export default function App() {
     if (presetId) syncBundleForPreset(presetId)
   }, [presetId, syncBundleForPreset])
 
+  useEffect(() => {
+    window.document.title = ROUTE_TITLES[window.location.pathname] ?? ROUTE_TITLES['/']
+  }, [route])
+
   usePersistence()
 
-  if (route === 'admin') {
-    return (
-      <BrowserGuard>
-        <CatalogAdminPage />
-      </BrowserGuard>
-    )
-  }
+  const startFromLanding = () => navigateTo('builder')
 
-  if (homeVisible) {
-    return (
-      <BrowserGuard>
-        <LandingPage
-          onStart={() => {
-            setHomeVisible(false)
-            if (!hasStarted) setView('choose')
-          }}
-          onLoadProfile={() => loadPersonalProfile()}
-          personalProfileAvailable={personalProfileAvailable}
-        />
-      </BrowserGuard>
-    )
-  }
-
-  if (hasStarted) {
-    return (
-      <BrowserGuard>
-        <BuilderLayout onHome={() => setHomeVisible(true)} />
-      </BrowserGuard>
-    )
-  }
-
-  if (view === 'choose') {
-    return (
-      <BrowserGuard>
-        <DocTypeSelector onBack={() => setView('landing')} />
-      </BrowserGuard>
-    )
+  const loadProfile = () => {
+    loadPersonalProfile()
+    navigateTo('builder')
   }
 
   return (
-    <BrowserGuard>
-      <LandingPage
-        onStart={() => setView('choose')}
-        onLoadProfile={() => loadPersonalProfile()}
-        personalProfileAvailable={personalProfileAvailable}
-      />
-    </BrowserGuard>
+    <>
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-sm focus:bg-primary focus:px-3 focus:py-2 focus:text-sm focus:font-medium focus:text-primary-foreground"
+      >
+        Skip to content
+      </a>
+
+      {route === 'admin' && (
+        <BrowserGuard>
+          <CatalogAdminPage />
+        </BrowserGuard>
+      )}
+
+      {route === 'builder' && (
+        <BrowserGuard>
+          {hasStarted ? (
+            <BuilderLayout onHome={() => navigateTo('landing')} />
+          ) : (
+            <DocTypeSelector onBack={() => navigateTo('landing')} />
+          )}
+        </BrowserGuard>
+      )}
+
+      {route === 'landing' && (
+        <BrowserGuard>
+          <LandingPage
+            onStart={startFromLanding}
+            onLoadProfile={loadProfile}
+            personalProfileAvailable={personalProfileAvailable}
+          />
+        </BrowserGuard>
+      )}
+    </>
   )
 }

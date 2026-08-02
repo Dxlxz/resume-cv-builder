@@ -1,23 +1,43 @@
 import { useEffect, useState } from 'react'
 
-export type AppRoute = 'builder' | 'admin'
+/**
+ * Minimal path router for the app's three routes. Uses the History API and
+ * popstate (no dependency, no hash). Routes:
+ *   /         landing (marketing)
+ *   /builder  the builder (onboarding wizard when no draft yet)
+ *   /admin    catalog management
+ */
+
+export type AppRoute = 'landing' | 'builder' | 'admin'
+
+export const ROUTE_PATHS: Record<AppRoute, string> = {
+  landing: '/',
+  builder: '/builder',
+  admin: '/admin',
+}
+
+export function routeFromPath(path: string): AppRoute {
+  if (path === ROUTE_PATHS.admin) return 'admin'
+  if (path === ROUTE_PATHS.builder) return 'builder'
+  return 'landing'
+}
+
+/** Programmatic navigation; dispatches popstate so listeners stay in sync. */
+export function navigateTo(route: AppRoute): void {
+  const path = ROUTE_PATHS[route]
+  if (window.location.pathname === path) return
+  window.history.pushState({}, '', path)
+  window.dispatchEvent(new PopStateEvent('popstate'))
+}
 
 export function useAppRoute(): AppRoute {
-  const [hash, setHash] = useState(() => window.location.hash)
+  const [route, setRoute] = useState<AppRoute>(() => routeFromPath(window.location.pathname))
 
   useEffect(() => {
-    const onHash = () => setHash(window.location.hash)
-    window.addEventListener('hashchange', onHash)
-    return () => window.removeEventListener('hashchange', onHash)
+    const onPop = () => setRoute(routeFromPath(window.location.pathname))
+    window.addEventListener('popstate', onPop)
+    return () => window.removeEventListener('popstate', onPop)
   }, [])
 
-  return hash === '#/admin' ? 'admin' : 'builder'
-}
-
-export function navigateToAdmin(): void {
-  window.location.hash = '#/admin'
-}
-
-export function navigateToBuilder(): void {
-  window.location.hash = ''
+  return route
 }

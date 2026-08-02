@@ -51,7 +51,9 @@ export function AppShell({ children, backLabel = 'Home', onBack, rightSlot }: Ap
           {rightSlot && <div className="ml-auto flex flex-wrap items-center gap-2">{rightSlot}</div>}
         </div>
       </header>
-      <main className="flex flex-1 flex-col">{children}</main>
+      <main id="main-content" tabIndex={-1} className="flex flex-1 flex-col outline-none">
+        {children}
+      </main>
     </div>
   )
 }

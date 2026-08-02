@@ -49,7 +49,11 @@ export function BuilderLayout({ onHome }: BuilderLayoutProps) {
         </div>
       </div>
 
-      <main className="grid min-h-0 flex-1 grid-cols-1 lg:grid-cols-[minmax(280px,30%)_minmax(0,70%)]">
+      <main
+        id="main-content"
+        tabIndex={-1}
+        className="grid min-h-0 flex-1 grid-cols-1 outline-none lg:grid-cols-[minmax(280px,30%)_minmax(0,70%)]"
+      >
         <section
           className={`min-h-0 overflow-y-auto border-border bg-sidebar p-4 lg:border-r lg:p-5 ${
             mobileTab === 'edit' ? 'block' : 'hidden lg:block'

@@ -1,11 +1,15 @@
 {
   "name": "@rb/styles",
-  "description": "resolveDocumentStyles, page specs, shared style types",
-  "type": "module",
-  "private": true,
   "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "resolveDocumentStyles, page specs, shared style types, UDS CSS tokens",
   "exports": {
-    "./*": "./src/*",
-    ".": "./src/index.ts"
+    ".": "./src/index.ts",
+    "./*": "./src/*"
+  },
+  "dependencies": {
+    "@react-pdf/types": "^2.11.1",
+    "react": "^19.2.6"
   }
 }

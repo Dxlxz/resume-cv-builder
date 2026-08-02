@@ -1,11 +1,15 @@
 {
   "name": "@rb/catalog",
-  "description": "Versioned vocabulary bundles, registry, store, admin logic",
-  "type": "module",
-  "private": true,
   "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Versioned vocabulary bundles, registry, store, admin logic",
   "exports": {
-    "./*": "./src/*",
-    ".": "./src/index.ts"
+    ".": "./src/index.ts",
+    "./*": "./src/*"
+  },
+  "dependencies": {
+    "zod": "^4.4.3",
+    "zustand": "^5.0.14"
   }
 }

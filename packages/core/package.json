@@ -1,11 +1,14 @@
 {
   "name": "@rb/core",
-  "description": "ResumeDocument, zod schema, migration, selectors",
-  "type": "module",
-  "private": true,
   "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "ResumeDocument, zod schema, migration, selectors",
   "exports": {
-    "./*": "./src/*",
-    ".": "./src/index.ts"
+    ".": "./src/index.ts",
+    "./*": "./src/*"
+  },
+  "dependencies": {
+    "zod": "^4.4.3"
   }
 }

@@ -1,11 +1,15 @@
 {
   "name": "@rb/templates",
-  "description": "Template contract + built-ins (classic, academic, ats-strict)",
-  "type": "module",
-  "private": true,
   "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Template contract + built-ins (classic, academic, ats-strict)",
   "exports": {
-    "./*": "./src/*",
-    ".": "./src/index.ts"
+    ".": "./src/index.ts",
+    "./*": "./src/*"
+  },
+  "dependencies": {
+    "@react-pdf/renderer": "^4.5.1",
+    "react": "^19.2.6"
   }
 }

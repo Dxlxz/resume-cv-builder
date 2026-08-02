@@ -1,3 +1,5 @@
+import type { SectionId } from '@rb/core/types/document'
+
 export type BreakPolicy = 'auto' | 'keep' | 'keepWithNext'
 
 export type LayoutBlockType =
@@ -65,6 +67,8 @@ export type LayoutBlockContent =
 
 export interface LayoutBlock {
   id: string
+  /** Section this block belongs to (the document header maps to contact). */
+  sectionId: SectionId
   type: LayoutBlockType
   breakPolicy: BreakPolicy
   spacingBeforePt: number

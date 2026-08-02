@@ -15,6 +15,7 @@ function fakeBlock(
 ): MeasuredBlock {
   return {
     id,
+    sectionId: 'experience',
     type: breakPolicy === 'keepWithNext' ? 'sectionTitle' : 'paragraph',
     breakPolicy,
     spacingBeforePt,

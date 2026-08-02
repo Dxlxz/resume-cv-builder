@@ -14,7 +14,7 @@ function titleBlock(
   text: string,
   isFirst: boolean,
   spacingBeforePt: number,
-): LayoutBlock {
+): Omit<LayoutBlock, 'sectionId'> {
   return {
     id,
     type: 'sectionTitle',
@@ -27,7 +27,8 @@ function titleBlock(
 
 interface CompileContext {
   document: ResumeDocument
-  blocks: LayoutBlock[]
+  /** Blocks are tagged with their section after the section's emitter runs. */
+  blocks: Omit<LayoutBlock, 'sectionId'>[]
   layout: LayoutProfile
   typography: TypographyScale
   contentHeightPt: number
@@ -315,7 +316,7 @@ export function compileStandardLayout(
   const pageSpec = getPageSpec(document)
   const { layout, typography } = resolved
   const { contact } = document
-  const blocks: LayoutBlock[] = []
+  const blocks: Omit<LayoutBlock, 'sectionId'>[] = []
 
   // Links display without protocol/www — shorter header lines, no wrapping.
   const displayUrl = (url?: string) =>
@@ -341,6 +342,7 @@ export function compileStandardLayout(
       metaLines,
     },
   })
+  ;(blocks[0] as LayoutBlock).sectionId = 'contact'
 
   const ctx: CompileContext = {
     document,
@@ -355,12 +357,16 @@ export function compileStandardLayout(
 
   for (const sectionId of sections) {
     if (sectionId === 'contact') continue
+    const start = blocks.length
     SECTION_EMITTERS[sectionId]?.(ctx)
+    for (let i = start; i < blocks.length; i++) {
+      ;(blocks[i] as LayoutBlock).sectionId = sectionId
+    }
   }
 
   return {
     templateId: document.meta.templateId,
-    blocks,
+    blocks: blocks as LayoutBlock[],
     contentWidthPt: pageSpec.widthMm * (72 / 25.4) - layout.pageMarginPt * 2,
     contentHeightPt: pageSpec.contentHeightPt,
   }

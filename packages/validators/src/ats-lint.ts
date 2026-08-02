@@ -12,6 +12,7 @@ import { runCatalogRules } from '@rb/catalog/lint/catalog-lint'
 import { runPaginateRules } from '@rb/validators/paginate-lint'
 import { runSpacingRules } from '@rb/validators/spacing-lint'
 import { runLayoutRules } from '@rb/validators/layout-lint'
+import { runLengthRules } from '@rb/validators/length-lint'
 
 export function runValidation(
   document: ResumeDocument,
@@ -94,6 +95,7 @@ export function runValidation(
   issues.push(...runPaginateRules(document, previewPageCount))
   issues.push(...runSpacingRules(document, layoutPlan))
   issues.push(...runLayoutRules(document, layoutPlan))
+  issues.push(...runLengthRules(document, layoutPlan, previewPageCount))
 
   return issues
 }

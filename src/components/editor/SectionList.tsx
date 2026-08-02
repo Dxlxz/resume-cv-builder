@@ -190,7 +190,7 @@ export function SectionList() {
       </button>
 
       {open && (
-        <div className="border-t border-border p-4">
+        <div className="animate-slide-up border-t border-border p-4">
           <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={onDragEnd}>
             <SortableContext items={sectionOrder} strategy={verticalListSortingStrategy}>
               <ul className="space-y-2">

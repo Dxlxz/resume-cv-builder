@@ -134,7 +134,7 @@ export function IdrizzChat({
         onClick={onOpen}
         aria-label="Chat with Idrizz"
         title="Chat with Idrizz"
-        className="fixed bottom-5 right-5 z-40 flex h-12 w-12 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-[var(--shadow-modal)] transition-transform duration-[var(--duration-state)] hover:scale-105"
+        className="fixed bottom-5 right-5 z-40 flex h-12 w-12 animate-pop-in items-center justify-center rounded-full bg-primary text-primary-foreground shadow-[var(--shadow-modal)] transition-all duration-[var(--duration-state)] hover:scale-105 active:scale-95"
       >
         <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
           <path d="M12 2l1.9 6.1L20 10l-6.1 1.9L12 18l-1.9-6.1L4 10l6.1-1.9L12 2z" />
@@ -149,7 +149,7 @@ export function IdrizzChat({
       role="dialog"
       aria-modal="true"
       aria-label="Chat with Idrizz"
-      className="fixed bottom-20 right-5 z-40 flex flex-col overflow-hidden rounded-lg border border-border bg-card shadow-[var(--shadow-modal)]"
+      className="fixed bottom-20 right-5 z-40 flex animate-chat-in flex-col overflow-hidden rounded-lg border border-border bg-card shadow-[var(--shadow-modal)]"
       style={{
         width: size.width,
         height: size.height,
@@ -177,7 +177,10 @@ export function IdrizzChat({
 
       <div ref={scrollRef} className="min-h-0 flex-1 space-y-3 overflow-y-auto p-3">
         {messages.map((message, index) => (
-          <div key={index} className={message.role === 'user' ? 'flex justify-end' : 'flex justify-start'}>
+          <div
+            key={index}
+            className={`animate-slide-up ${message.role === 'user' ? 'flex justify-end' : 'flex justify-start'}`}
+          >
             <div
               className={`max-w-[85%] rounded-md px-3 py-2 text-sm ${
                 message.role === 'user'
@@ -208,10 +211,18 @@ export function IdrizzChat({
         ))}
 
         {busy && (
-          <div className="flex justify-start">
-            <div className="flex items-center gap-2 rounded-md bg-muted px-3 py-2 text-sm text-muted-foreground">
-              <span className="h-3 w-3 animate-spin rounded-full border-2 border-border border-t-primary" aria-hidden />
-              Idrizz tengah fikir...
+          <div className="flex animate-slide-up justify-start">
+            <div className="flex items-center gap-1.5 rounded-md bg-muted px-3 py-2.5 text-sm text-muted-foreground">
+              <span className="rb-typing-dot h-1.5 w-1.5 rounded-full bg-foreground/60" />
+              <span
+                className="rb-typing-dot h-1.5 w-1.5 rounded-full bg-foreground/60"
+                style={{ animationDelay: '0.2s' }}
+              />
+              <span
+                className="rb-typing-dot h-1.5 w-1.5 rounded-full bg-foreground/60"
+                style={{ animationDelay: '0.4s' }}
+              />
+              <span className="ml-1.5">Idrizz tengah fikir...</span>
             </div>
           </div>
         )}

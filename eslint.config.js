@@ -20,6 +20,14 @@ export default defineConfig([
     },
   },
   {
+    // The ui/ facade is a component library (Radix aliases + primitives);
+    // fast-refresh's only-export-components rule does not apply.
+    files: ['src/components/ui/**/*.tsx'],
+    rules: {
+      'react-refresh/only-export-components': 'off',
+    },
+  },
+  {
     files: ['packages/core/src/**/*.{ts,tsx}'],
     ignores: ['**/*.test.*'],
     rules: {

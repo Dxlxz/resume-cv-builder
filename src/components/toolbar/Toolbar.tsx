@@ -10,6 +10,13 @@ import { LintPanel } from '@/components/toolbar/LintPanel'
 import { PdfPreviewModal } from '@/components/toolbar/PdfPreviewModal'
 import { Button } from '@/components/ui/Button'
 import { Brand } from '@/components/ui/Brand'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/DropdownMenu'
 
 interface ToolbarProps {
   onHome: () => void
@@ -53,25 +60,6 @@ export function Toolbar({ onHome, previewVisible, onTogglePreview }: ToolbarProp
       if (pdfPreview?.url) URL.revokeObjectURL(pdfPreview.url)
     }
   }, [pdfPreview?.url])
-
-  // "More" menu: close on outside click or Escape.
-  const menuRef = useRef<HTMLDetailsElement>(null)
-  const [menuOpen, setMenuOpen] = useState(false)
-  useEffect(() => {
-    if (!menuOpen) return
-    const onDocClick = (e: MouseEvent) => {
-      if (menuRef.current && !menuRef.current.contains(e.target as Node)) setMenuOpen(false)
-    }
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setMenuOpen(false)
-    }
-    window.document.addEventListener('mousedown', onDocClick)
-    window.document.addEventListener('keydown', onKey)
-    return () => {
-      window.document.removeEventListener('mousedown', onDocClick)
-      window.document.removeEventListener('keydown', onKey)
-    }
-  }, [menuOpen])
 
   if (!document) return null
 
@@ -216,66 +204,36 @@ export function Toolbar({ onHome, previewVisible, onTogglePreview }: ToolbarProp
               {exporting ? 'Exporting…' : 'Export PDF'}
             </Button>
 
-            <details
-              ref={menuRef}
-              className="relative"
-              open={menuOpen}
-              onToggle={(e) => setMenuOpen(e.currentTarget.open)}
-            >
-              <summary className="flex cursor-pointer list-none items-center gap-1.5 rounded-sm border border-border bg-card px-3 py-1.5 text-sm text-foreground transition-colors duration-[var(--duration-state)] hover:bg-muted [&::-webkit-details-marker]:hidden">
-                More
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-                  <path d="M6 9l6 6 6-6" />
-                </svg>
-              </summary>
-              <div className="absolute right-0 z-50 mt-2 w-60 rounded-md border border-border bg-card p-1.5 shadow-[var(--shadow-menu)]">
-                <button
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
                   type="button"
-                  className="flex w-full items-center gap-2 rounded-sm px-3 py-2 text-left text-sm text-foreground transition-colors duration-[var(--duration-state)] hover:bg-muted"
-                  onClick={() => {
-                    setMenuOpen(false)
-                    void handlePreviewPdf()
-                  }}
-                  disabled={previewing || exporting}
+                  variant="secondary"
+                  size="sm"
+                  className="shrink-0 gap-1.5"
                 >
+                  More
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                    <path d="M6 9l6 6 6-6" />
+                  </svg>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent>
+                <DropdownMenuItem onSelect={() => void handlePreviewPdf()} disabled={previewing || exporting}>
                   Open fullscreen PDF
-                </button>
-                <button
-                  type="button"
-                  className="flex w-full items-center gap-2 rounded-sm px-3 py-2 text-left text-sm text-foreground transition-colors duration-[var(--duration-state)] hover:bg-muted"
-                  onClick={() => {
-                    setMenuOpen(false)
-                    onTogglePreview()
-                  }}
-                >
+                </DropdownMenuItem>
+                <DropdownMenuItem onSelect={onTogglePreview}>
                   {previewVisible ? 'Hide preview' : 'Show preview'}
-                </button>
-                <button
-                  type="button"
-                  className="flex w-full items-center gap-2 rounded-sm px-3 py-2 text-left text-sm text-foreground transition-colors duration-[var(--duration-state)] hover:bg-muted"
-                  onClick={() => {
-                    setMenuOpen(false)
-                    exportDocumentJson(document)
-                  }}
-                >
+                </DropdownMenuItem>
+                <DropdownMenuItem onSelect={() => exportDocumentJson(document)}>
                   Export JSON
-                </button>
-                <button
-                  type="button"
-                  className="flex w-full items-center gap-2 rounded-sm px-3 py-2 text-left text-sm text-foreground transition-colors duration-[var(--duration-state)] hover:bg-muted"
-                  onClick={() => {
-                    setMenuOpen(false)
-                    fileInputRef.current?.click()
-                  }}
-                >
+                </DropdownMenuItem>
+                <DropdownMenuItem onSelect={() => fileInputRef.current?.click()}>
                   Import JSON
-                </button>
+                </DropdownMenuItem>
                 {personalProfileAvailable && (
-                  <button
-                    type="button"
-                    className="flex w-full items-center gap-2 rounded-sm px-3 py-2 text-left text-sm text-foreground transition-colors duration-[var(--duration-state)] hover:bg-muted"
-                    onClick={() => {
-                      setMenuOpen(false)
+                  <DropdownMenuItem
+                    onSelect={() => {
                       if (
                         confirm(
                           'Replace your current draft with your personal profile? Your current edits will be replaced.',
@@ -286,21 +244,14 @@ export function Toolbar({ onHome, previewVisible, onTogglePreview }: ToolbarProp
                     }}
                   >
                     Load my profile
-                  </button>
+                  </DropdownMenuItem>
                 )}
-                <div className="my-1 h-px bg-border" />
-                <button
-                  type="button"
-                  className="flex w-full items-center gap-2 rounded-sm px-3 py-2 text-left text-sm text-status-danger transition-colors duration-[var(--duration-state)] hover:bg-badge-danger"
-                  onClick={() => {
-                    setMenuOpen(false)
-                    handleStartFresh()
-                  }}
-                >
+                <DropdownMenuSeparator className="my-1 h-px bg-border" />
+                <DropdownMenuItem danger onSelect={handleStartFresh}>
                   Start fresh
-                </button>
-              </div>
-            </details>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
 
           <input

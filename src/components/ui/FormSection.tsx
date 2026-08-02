@@ -64,7 +64,7 @@ export function FormSection({
         {action}
       </div>
       {open && (
-        <div id={panelId} className="space-y-4 border-t border-border px-4 py-4">
+        <div id={panelId} className="animate-slide-up space-y-4 border-t border-border px-4 py-4">
           {children}
         </div>
       )}

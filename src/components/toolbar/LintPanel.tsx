@@ -1,6 +1,6 @@
-import { useEffect } from 'react'
 import type { LintIssue } from '@rb/validators/types'
 import { Button } from '@/components/ui/Button'
+import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@/components/ui/Dialog'
 
 const LEVEL_STYLES: Record<LintIssue['level'], string> = {
   error: 'border-status-danger/30 bg-badge-danger text-status-danger-foreground',
@@ -16,15 +16,6 @@ interface LintPanelProps {
 }
 
 export function LintPanel({ issues, onClose, onProceed, showProceed }: LintPanelProps) {
-  // Esc closes the panel (consistent with the PDF preview modal).
-  useEffect(() => {
-    const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose()
-    }
-    window.addEventListener('keydown', onKeyDown)
-    return () => window.removeEventListener('keydown', onKeyDown)
-  }, [onClose])
-
   const errors = issues.filter((i) => i.level === 'error')
   const warnings = issues.filter((i) => i.level === 'warning')
   const infos = issues.filter((i) => i.level === 'info')
@@ -60,21 +51,14 @@ export function LintPanel({ issues, onClose, onProceed, showProceed }: LintPanel
   }
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-foreground/40 p-4"
-      role="dialog"
-      aria-labelledby="lint-panel-title"
-      aria-modal="true"
-    >
-      <div className="max-h-[80vh] w-full max-w-lg overflow-auto rounded-md bg-overlay-surface p-6 text-overlay-foreground shadow-[var(--shadow-modal)]">
-        <h2 id="lint-panel-title" className="text-lg font-bold text-foreground">
-          ATS Check Results
-        </h2>
-        <p className="mt-1 text-sm text-muted-foreground">
+    <Dialog open onOpenChange={(open) => !open && onClose()}>
+      <DialogContent className="p-6">
+        <DialogTitle className="text-lg font-bold text-foreground">ATS Check Results</DialogTitle>
+        <DialogDescription className="mt-1 text-sm text-muted-foreground">
           {issues.length === 0
             ? 'No issues found. Ready to export.'
             : `${errors.length} error(s), ${warnings.length} warning(s), ${infos.length} note(s)`}
-        </p>
+        </DialogDescription>
 
         <div className="mt-4 space-y-4">
           {issues.length === 0 && (
@@ -95,7 +79,7 @@ export function LintPanel({ issues, onClose, onProceed, showProceed }: LintPanel
             <Button onClick={onProceed}>Export PDF anyway</Button>
           )}
         </div>
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   )
 }

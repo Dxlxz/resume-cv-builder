@@ -71,7 +71,7 @@ export function DocumentSettings() {
       </button>
 
       {open && (
-        <div className="space-y-3 border-t border-border p-4">
+        <div className="animate-slide-up space-y-3 border-t border-border p-4">
           <div className="grid gap-3 sm:grid-cols-2">
             <label className="block text-sm font-medium text-foreground">
               Preset

@@ -10,6 +10,8 @@ import type {
   TemplateId,
   ThemeId,
 } from '@rb/core/types/document'
+import type { AiEditPlan } from '@/lib/ai/edits'
+import { applyAiEditPlan as applyPlanToDocument } from '@/lib/ai/edits'
 import { createEmptyDocument } from '@rb/presets/createDocument'
 import { getPreset } from '@rb/presets/registry'
 import { themeForDocument } from '@rb/themes/registry'
@@ -59,9 +61,7 @@ interface DocumentState {
   previewPdfBlob: Blob | null
   setPreviewPdfBlob: (blob: Blob | null) => void
   layoutPlan: LayoutPlanResult | null
-  layoutDebug: boolean
   setLayoutPlan: (plan: LayoutPlanResult | null) => void
-  setLayoutDebug: (enabled: boolean) => void
   init: () => void
   startDocument: (
     type: DocumentType,
@@ -80,6 +80,8 @@ interface DocumentState {
   dismissRecovery: () => void
   applyPreset: (presetId: PresetId) => void
   setDocument: (document: ResumeDocument) => void
+  /** Applies a validated Idrizz edit plan to the current document. */
+  applyAiEditPlan: (plan: AiEditPlan) => void
   setDocumentType: (type: DocumentType) => void
   setTemplate: (templateId: TemplateId) => void
   setTheme: (themeId: ThemeId) => void
@@ -156,12 +158,10 @@ export const useDocumentStore = create<DocumentState>((set, get) => {
     previewPageCount: 1,
     previewPdfBlob: null,
     layoutPlan: null,
-    layoutDebug: false,
-
+  
   setPreviewPageCount: (count) => set({ previewPageCount: count }),
   setPreviewPdfBlob: (blob) => set({ previewPdfBlob: blob }),
   setLayoutPlan: (plan) => set({ layoutPlan: plan }),
-  setLayoutDebug: (enabled) => set({ layoutDebug: enabled }),
 
   init: () => {
     const saved = loadFromStorage()
@@ -309,6 +309,17 @@ export const useDocumentStore = create<DocumentState>((set, get) => {
 
   setDocument: (document) => {
     set({ document: touchMeta(document), exportFieldErrors: {}, pdfError: null, lintIssues: [] })
+  },
+
+  applyAiEditPlan: (plan) => {
+    const current = get().document
+    if (!current) return
+    set({
+      document: touchMeta(applyPlanToDocument(current, plan)),
+      exportFieldErrors: {},
+      pdfError: null,
+      lintIssues: [],
+    })
   },
 
   setDocumentType: (type) => {

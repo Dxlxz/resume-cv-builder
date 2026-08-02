@@ -1,23 +1,20 @@
 import { useEffect, useState } from 'react'
 
 /**
- * Minimal path router for the app's three routes. Uses the History API and
+ * Minimal path router for the app's routes. Uses the History API and
  * popstate (no dependency, no hash). Routes:
  *   /         landing (marketing)
  *   /builder  the builder (onboarding wizard when no draft yet)
- *   /admin    catalog management
  */
 
-export type AppRoute = 'landing' | 'builder' | 'admin'
+export type AppRoute = 'landing' | 'builder'
 
 export const ROUTE_PATHS: Record<AppRoute, string> = {
   landing: '/',
   builder: '/builder',
-  admin: '/admin',
 }
 
 export function routeFromPath(path: string): AppRoute {
-  if (path === ROUTE_PATHS.admin) return 'admin'
   if (path === ROUTE_PATHS.builder) return 'builder'
   return 'landing'
 }

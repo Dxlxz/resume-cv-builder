@@ -1,10 +1,8 @@
 import { describe, expect, it } from 'vitest'
 import { getBundledCatalog } from '@rb/catalog/bundles'
-import { emptyOverrides, mergeBundleWithOverrides } from '@rb/catalog/registry'
 import {
   catalogEntrySchema,
   catalogExportPackSchema,
-  catalogOverrideStateSchema,
 } from '@rb/catalog/schema'
 
 const bundle = getBundledCatalog('malaysia-default')!
@@ -37,7 +35,7 @@ describe('catalogExportPackSchema', () => {
       exportedAt: new Date().toISOString(),
       bundleId: 'malaysia-default',
       manifest: bundle.manifest,
-      mergedEntries: mergeBundleWithOverrides(bundle.entries, emptyOverrides('malaysia-default')),
+      mergedEntries: bundle.entries,
     }
     expect(catalogExportPackSchema.safeParse(pack).success).toBe(true)
   })
@@ -66,21 +64,5 @@ describe('catalogExportPackSchema', () => {
 
   it('rejects arbitrary JSON', () => {
     expect(catalogExportPackSchema.safeParse({ foo: 'bar' }).success).toBe(false)
-  })
-})
-
-describe('catalogOverrideStateSchema', () => {
-  it('accepts a valid override state', () => {
-    const state = emptyOverrides('malaysia-default')
-    state.entries['some-id'] = { deleted: true }
-    expect(catalogOverrideStateSchema.safeParse(state).success).toBe(true)
-  })
-
-  it('rejects an override state with an invalid entry override', () => {
-    const state = {
-      ...emptyOverrides('malaysia-default'),
-      entries: { broken: { deleted: false } },
-    }
-    expect(catalogOverrideStateSchema.safeParse(state).success).toBe(false)
   })
 })

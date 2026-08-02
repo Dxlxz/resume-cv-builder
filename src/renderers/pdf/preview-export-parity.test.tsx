@@ -27,7 +27,6 @@ vi.mock('@/app/store/documentStore', () => {
     setPreviewPageCount: vi.fn(),
     setPreviewPdfBlob: vi.fn(),
     layoutPlan: null,
-    layoutDebug: false,
     previewPageCount: 2,
   }
   const useDocumentStore = Object.assign(
@@ -43,7 +42,6 @@ describe('preview-export parity', () => {
       <PdfJsPreview
         document={sampleProfileDocument}
         contentKey="parity-test"
-        containerWidth={600}
       />,
     )
     expect(screen.getByTitle('Resume PDF live preview')).toBeInTheDocument()

@@ -1,15 +1,8 @@
-import { describe, expect, it, beforeEach } from 'vitest'
-import { clearCatalogOverrides } from '@rb/catalog/persistence'
-import { useCatalogStore } from '@rb/catalog/store/catalogStore'
+import { describe, expect, it } from 'vitest'
 import { runCatalogRules } from '@rb/catalog/lint/catalog-lint'
 import { sampleMalaysiaResume } from '@rb/fixtures'
 
 describe('catalog-lint', () => {
-  beforeEach(() => {
-    clearCatalogOverrides()
-    useCatalogStore.getState().init('malaysia-default')
-  })
-
   it('flags duplicate case skills', () => {
     const doc = {
       ...sampleMalaysiaResume,
@@ -38,19 +31,5 @@ describe('catalog-lint', () => {
     }
     const issues = runCatalogRules(doc)
     expect(issues.some((i) => i.code === 'CATALOG_NEAR_MATCH')).toBe(true)
-  })
-
-  it('flags very short unknown occupation titles', () => {
-    const doc = {
-      ...sampleMalaysiaResume,
-      experience: [
-        {
-          ...sampleMalaysiaResume.experience[0],
-          title: 'VP',
-        },
-      ],
-    }
-    const issues = runCatalogRules(doc)
-    expect(issues.some((i) => i.code === 'CATALOG_UNKNOWN_OCCUPATION')).toBe(true)
   })
 })

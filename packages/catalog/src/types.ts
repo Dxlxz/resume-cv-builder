@@ -1,10 +1,8 @@
 import type { z } from 'zod'
 import type {
   catalogBundleManifestSchema,
-  catalogEntryOverrideSchema,
   catalogEntrySchema,
   catalogExportPackSchema,
-  catalogOverrideStateSchema,
 } from '@rb/catalog/schema'
 import type { Locale } from '@rb/core/types/document'
 
@@ -51,11 +49,9 @@ export const CATALOG_TYPE_LABELS: Record<CatalogType, string> = {
 
 export type CatalogEntry = z.infer<typeof catalogEntrySchema>
 
-export type CatalogEntryOverride = z.infer<typeof catalogEntryOverrideSchema>
 
 export type CatalogBundleManifest = z.infer<typeof catalogBundleManifestSchema>
 
-export type CatalogOverrideState = z.infer<typeof catalogOverrideStateSchema>
 
 export type CatalogExportPack = z.infer<typeof catalogExportPackSchema>
 

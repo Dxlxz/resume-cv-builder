@@ -1,12 +1,12 @@
 /**
  * Vercel serverless function: POST /api/ai
- * Body: { feature: AiFeature, payload: object }
+ * Body: { feature: 'ai-edit', payload: { instruction, context } }
  *
  * Self-contained proxy to the OpenCode Go API. Kept dependency-free on
  * purpose: Vercel bundles this file standalone, and importing from src/
  * has proven fragile in deployments. The identical logic (shared with the
  * Vite dev middleware) lives in src/lib/ai/server.ts — keep the two in
- * sync when changing validation, the model, or the upstream URL.
+ * sync when changing validation, the prompt, the model, or limits.
  *
  * The API key is read from the OPENCODE_GO_API_KEY environment variable
  * only — it never ships in the client bundle. Stateless: no logging, no
@@ -15,9 +15,9 @@
 
 const UPSTREAM = 'https://opencode.ai/zen/go/v1/chat/completions'
 const MODEL = 'deepseek-v4-flash'
-const MAX_TOKENS = 1200
+const MAX_TOKENS = 2000
 const TEMPERATURE = 0.4
-const MAX_BODY_CHARS = 60_000
+const MAX_BODY_CHARS = 100_000
 
 interface ChatMessage {
   role: string
@@ -34,102 +34,7 @@ interface AiResponse {
   setHeader(name: string, value: string): void
 }
 
-function buildMessages(feature: string, payload: unknown): ChatMessage[] | null {
-  if (typeof payload !== 'object' || payload === null) return null
-  const p = payload as Record<string, unknown>
-
-  if (feature === 'improve-summary') {
-    if (typeof p.summary !== 'string' || !Array.isArray(p.experience)) return null
-    return [
-      { role: 'system', content: SYSTEM_PROMPT },
-      { role: 'user', content: userMessage(p, 'summary') },
-    ]
-  }
-  if (feature === 'improve-bullets') {
-    const role = p.role as Record<string, unknown> | null | undefined
-    if (!role || typeof role.title !== 'string' || !Array.isArray(role.bullets)) return null
-    return [
-      { role: 'system', content: SYSTEM_PROMPT },
-      { role: 'user', content: userMessage(p, 'bullets') },
-    ]
-  }
-  if (feature === 'tailor-to-job') {
-    if (
-      typeof p.jobDescription !== 'string' ||
-      typeof p.summary !== 'string' ||
-      !Array.isArray(p.skills)
-    ) {
-      return null
-    }
-    return [
-      { role: 'system', content: SYSTEM_PROMPT },
-      { role: 'user', content: userMessage(p, 'tailor') },
-    ]
-  }
-  return null
-}
-
-function userMessage(p: Record<string, unknown>, kind: 'summary' | 'bullets' | 'tailor'): string {
-  if (kind === 'summary') {
-    const experience = (p.experience as unknown[])
-      .map((e) => {
-        const r = e as Record<string, unknown>
-        const bullets = Array.isArray(r.bullets)
-          ? (r.bullets as string[]).map((b) => `- ${b}`).join('\n')
-          : ''
-        return `${r.title ?? ''}, ${r.company ?? ''}\n${bullets}`
-      })
-      .join('\n\n')
-    return `Rewrite the professional summary below. Keep it 2 to 4 sentences. Use the work experience to support your claims, but do not invent anything.
-Document type: ${p.documentType === 'cv' ? 'CV' : 'Resume'}
-Current summary:
-"${p.summary || '(empty)'}"
-Work experience:
-${experience || '(no work experience recorded)'}`
-  }
-  if (kind === 'bullets') {
-    const role = p.role as Record<string, unknown>
-    const bullets = Array.isArray(role.bullets)
-      ? (role.bullets as string[]).map((b) => `- ${b}`).join('\n')
-      : '- (no bullets recorded)'
-    return `Rewrite the bullet points for this role. Aim for 3 to 6 bullets. Each bullet should start with a plain verb, say what was done, and where possible include a measurable outcome. Do not add facts that are not in the source.
-Role: ${role.company ? `${role.title}, ${role.company}` : role.title}
-Current bullets:
-${bullets}
-Return only the rewritten bullets, one per line, with no numbers, dashes, or labels.`
-  }
-  const skills = Array.isArray(p.skills) ? (p.skills as string[]).map((s) => `- ${s}`).join('\n') : '- (none recorded)'
-  const experience = Array.isArray(p.experience)
-    ? (p.experience as unknown[])
-        .map((e) => {
-          const r = e as Record<string, unknown>
-          const bullets = Array.isArray(r.bullets)
-            ? (r.bullets as string[]).map((b) => `- ${b}`).join('\n')
-            : ''
-          return `${r.title ?? ''}, ${r.company ?? ''}\n${bullets}`
-        })
-        .join('\n\n')
-    : '(no work experience recorded)'
-  return `Tailor the candidate document below to the job description.
-Target document type: ${p.documentType === 'cv' ? 'CV' : 'Resume'}.
-Job description:
-"""${p.jobDescription}"""
-Current summary:
-"${p.summary || '(empty)'}"
-Skills on the document:
-${skills}
-Work experience:
-${experience}
-Return exactly this structure, with nothing before or after it:
-TAILORED SUMMARY
-{2 to 4 sentences that use keywords from the job description where they honestly apply}
-MISSING KEYWORDS
-{comma-separated keywords or phrases from the job description that are absent or understated in the document, that the candidate can honestly claim}
-BULLET SUGGESTIONS
-{bullet rewrites for existing experience that better match the job description. Prefix each line with the role, for example "Software Engineer: ...". Only suggest changes the candidate could honestly make.}`
-}
-
-const SYSTEM_PROMPT = `You are an expert resume and CV writer. You rewrite career documents so they are specific, honest, and easy for both recruiters and applicant tracking systems (ATS) to read.
+const SYSTEM_PROMPT = `You are Idrizz, the AI assistant inside Rizzume, a resume and CV builder. You edit the user's career document for them.
 
 Follow these rules exactly:
 - Use British English.
@@ -138,7 +43,52 @@ Follow these rules exactly:
 - Never use AI-sounding phrases such as "delve", "unlock", "elevate", "empower", "journey", "landscape", "in today's fast-paced world".
 - Quantify impact whenever the source material supports it: numbers, percentages, currency, time saved.
 - Stay faithful to the source. Never invent facts, employers, dates, or achievements.
-- Output plain text only. No markdown, no headings, no labels, no commentary.`
+- When the user asks to tailor to a job description, use its keywords where they honestly apply and note missing ones in the summary you write.
+
+When you reply with an edit plan, return ONLY a single JSON object with no markdown fences, no commentary, and nothing before or after it. The object must follow this schema, and you may only include keys you actually need:
+
+{
+  "summary": "optional new summary text",
+  "experience": { "add": [ { "title": "...", "company": "...", "bullets": ["..."] } ], "edit": [ { "id": "real-id-from-the-document", "patch": { "bullets": ["..."] } } ], "remove": ["real-id"] },
+  "education": { "add": [ { "institution": "..." } ], "edit": [], "remove": [] },
+  "certifications": { "add": [ { "name": "..." } ], "edit": [], "remove": [] },
+  "skills": { "add": [ { "name": "Group name", "items": ["..."] } ], "edit": [], "remove": [] },
+  "projects": { "add": [ { "name": "..." } ], "edit": [], "remove": [] },
+  "volunteer": { "add": [ { "title": "..." } ], "edit": [], "remove": [] },
+  "references": { "add": [ { "name": "..." } ], "edit": [], "remove": [] },
+  "sections": { "hide": ["section-id"], "show": ["section-id"] }
+}
+
+Rules for the plan:
+- Use the exact ids from the document JSON when editing or removing items. Never invent ids.
+- "patch" may only contain fields that exist on that item in the document schema.
+- Only include operations that genuinely satisfy the instruction. If nothing needs to change for a section, omit that section entirely.
+- Keep every array that you keep in the document (bullets, items) intact unless the edit changes it.`
+
+function buildMessages(feature: string, payload: unknown): ChatMessage[] | null {
+  if (feature !== 'ai-edit') return null
+  if (typeof payload !== 'object' || payload === null) return null
+  const p = payload as Record<string, unknown>
+  if (typeof p.instruction !== 'string' || typeof p.context !== 'string') return null
+  if (p.instruction.length > 4000 || p.instruction.length === 0) return null
+  if (p.context.length > 80_000) return null
+
+  const user = [
+    'Edit the resume document below to satisfy this request:',
+    '',
+    `Request: ${p.instruction}`,
+    '',
+    'Here is the document as JSON. Use its exact ids for edit and remove operations:',
+    p.context,
+    '',
+    'Reply with the edit plan JSON only, per the schema in the system message.',
+  ].join('\n')
+
+  return [
+    { role: 'system', content: SYSTEM_PROMPT },
+    { role: 'user', content: user },
+  ]
+}
 
 export default async function handler(req: AiRequest, res: AiResponse): Promise<void> {
   res.setHeader('Cache-Control', 'no-store')

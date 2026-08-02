@@ -120,7 +120,7 @@ There is no API server, authentication provider, or cloud storage in the current
 | **render** | `packages/render/src/` | Shared block components (`LayoutBlockHtml`, `LayoutBlockPdf`) + `RenderBackend` contract |
 | **renderers** | `src/renderers/` | PDF generation orchestration, style resolution, PDF.js helpers, download |
 | **validators** | `packages/validators/src/` | ATS, typography, spacing, layout, pagination, regional lint |
-| **catalog** | `packages/catalog/src/` | Bundled vocabulary, search, overrides, admin CRUD |
+| **catalog** | `packages/catalog/src/` | Bundled vocabulary, search, schema (edited in code, no admin) |
 | **app** | `src/app/`, `src/components/`, `src/hooks/` | Shell, editor, preview, toolbar, routing |
 | **personal** | personal/ (private) | Dale's profile pack - dev-only alias, never shipped |
 

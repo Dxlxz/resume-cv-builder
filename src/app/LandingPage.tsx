@@ -1,6 +1,5 @@
 import type { ReactNode } from 'react'
 import { useEffect, useState } from 'react'
-import { navigateTo } from '@/hooks/useAppRoute'
 import { Button } from '@/components/ui/Button'
 import { Brand } from '@/components/ui/Brand'
 import { HeroPdfCard } from '@/components/landing/HeroPdfPreview'
@@ -164,14 +163,6 @@ export function LandingPage({
         <div className="mx-auto flex max-w-6xl items-center gap-3 px-5 py-3.5">
           <Brand />
           <nav aria-label="Primary" className="ml-auto flex items-center gap-2">
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              onClick={() => navigateTo('admin')}
-            >
-              Manage catalogs
-            </Button>
             <Button type="button" onClick={onStart}>
               Start building
             </Button>
@@ -280,9 +271,6 @@ export function LandingPage({
             <Button type="button" onClick={onStart}>
               Start building
             </Button>
-            <Button type="button" variant="secondary" onClick={() => navigateTo('admin')}>
-              Browse catalogs
-            </Button>
           </div>
         </div>
       </section>
@@ -294,13 +282,6 @@ export function LandingPage({
             © 2026 Rizzume. Drafts stay in your browser. AI assistance
             is opt-in and sends text to an external service that stores nothing.
           </p>
-          <button
-            type="button"
-            onClick={() => navigateTo('admin')}
-            className="transition-colors duration-[var(--duration-state)] hover:text-foreground"
-          >
-            Manage catalogs
-          </button>
         </div>
       </footer>
     </div>

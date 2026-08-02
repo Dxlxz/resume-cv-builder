@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import { useCatalogStore } from '@rb/catalog/store/catalogStore'
+import { useCatalogBundle } from '@/hooks/useCatalogBundle'
 import { Button } from '@/components/ui/Button'
 
 interface LanguageLevelPickerProps {
@@ -37,7 +37,7 @@ function parseLanguageValue(
 }
 
 export function LanguageLevelPicker({ value, onChange, onRemove }: LanguageLevelPickerProps) {
-  const getEntries = useCatalogStore((s) => s.getEntries)
+  const { getEntries } = useCatalogBundle()
   const languages = useMemo(() => getEntries('language'), [getEntries])
   const proficiencies = useMemo(() => getEntries('language-proficiency'), [getEntries])
 

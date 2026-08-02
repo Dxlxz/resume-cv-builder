@@ -5,11 +5,11 @@ describe('app router', () => {
   it('maps paths to routes', () => {
     expect(routeFromPath('/')).toBe('landing')
     expect(routeFromPath('/builder')).toBe('builder')
-    expect(routeFromPath('/admin')).toBe('admin')
   })
 
   it('falls back to the landing for unknown paths', () => {
     expect(routeFromPath('/nonsense')).toBe('landing')
+    expect(routeFromPath('/admin')).toBe('landing')
     expect(routeFromPath('/builder/')).toBe('landing')
     expect(routeFromPath('')).toBe('landing')
   })

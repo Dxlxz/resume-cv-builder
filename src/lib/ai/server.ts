@@ -1,11 +1,4 @@
-import {
-  buildImproveBulletsMessages,
-  buildImproveSummaryMessages,
-  buildTailorToJobMessages,
-  type AiFeature,
-  type DocType,
-  type RoleLite,
-} from './prompts.ts'
+import { buildAiEditMessages, type AiFeature } from './prompts.ts'
 
 /**
  * Server-side AI proxy logic, shared by the Vercel function (api/ai.ts) and
@@ -21,59 +14,18 @@ export interface AiProxyResult {
 
 const UPSTREAM = 'https://opencode.ai/zen/go/v1/chat/completions'
 const MODEL = 'deepseek-v4-flash'
-const MAX_TOKENS = 1200
+const MAX_TOKENS = 2000
 const TEMPERATURE = 0.4
-const MAX_BODY_CHARS = 60_000
-
-function isRoleLite(value: unknown): value is RoleLite {
-  if (typeof value !== 'object' || value === null) return false
-  const v = value as Record<string, unknown>
-  return (
-    typeof v.title === 'string' &&
-    typeof v.company === 'string' &&
-    Array.isArray(v.bullets) &&
-    v.bullets.every((b) => typeof b === 'string')
-  )
-}
+const MAX_BODY_CHARS = 100_000
 
 function buildMessages(feature: AiFeature, payload: unknown): { role: 'system' | 'user'; content: string }[] | null {
+  if (feature !== 'ai-edit') return null
   if (typeof payload !== 'object' || payload === null) return null
   const p = payload as Record<string, unknown>
-
-  switch (feature) {
-    case 'improve-summary': {
-      if (typeof p.summary !== 'string' || !Array.isArray(p.experience)) return null
-      return buildImproveSummaryMessages({
-        summary: p.summary,
-        experience: (p.experience as unknown[]).filter(isRoleLite),
-        documentType: p.documentType === 'cv' ? 'cv' : 'resume',
-        presetName: typeof p.presetName === 'string' ? p.presetName : '',
-      })
-    }
-    case 'improve-bullets': {
-      if (!isRoleLite(p.role)) return null
-      return buildImproveBulletsMessages(p.role)
-    }
-    case 'tailor-to-job': {
-      if (
-        typeof p.jobDescription !== 'string' ||
-        typeof p.summary !== 'string' ||
-        !Array.isArray(p.skills)
-      ) {
-        return null
-      }
-      const docType: DocType = p.documentType === 'cv' ? 'cv' : 'resume'
-      return buildTailorToJobMessages({
-        jobDescription: p.jobDescription,
-        summary: p.summary,
-        skills: (p.skills as unknown[]).filter((s): s is string => typeof s === 'string'),
-        experience: Array.isArray(p.experience) ? (p.experience as unknown[]).filter(isRoleLite) : [],
-        documentType: docType,
-      })
-    }
-    default:
-      return null
-  }
+  if (typeof p.instruction !== 'string' || typeof p.context !== 'string') return null
+  if (p.instruction.length > 4000 || p.instruction.length === 0) return null
+  if (p.context.length > 80_000) return null
+  return buildAiEditMessages({ instruction: p.instruction, context: p.context })
 }
 
 export async function runAiProxy(body: unknown, apiKey: string | undefined): Promise<AiProxyResult> {

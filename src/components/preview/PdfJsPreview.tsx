@@ -2,28 +2,23 @@ import { useEffect, useMemo } from 'react'
 import type { ResumeDocument } from '@rb/core/types/document'
 import { usePdfPreview } from '@/hooks/usePdfPreview'
 import { useDocumentStore } from '@/app/store/documentStore'
-import { LayoutDebugInspector } from '@rb/layout/debug/LayoutDebugInspector'
 
 interface PdfJsPreviewProps {
   document: ResumeDocument
   contentKey: string
-  containerWidth: number
 }
 
 /**
  * Live preview: the exported PDF shown in the browser's own PDF viewer
  * (iframe), so zoom and pagination behave exactly like the real thing.
  */
-export function PdfJsPreview({ document, contentKey, containerWidth }: PdfJsPreviewProps) {
+export function PdfJsPreview({ document, contentKey }: PdfJsPreviewProps) {
   const setPreviewPageCount = useDocumentStore((s) => s.setPreviewPageCount)
   const setPreviewPdfBlob = useDocumentStore((s) => s.setPreviewPdfBlob)
-  const layoutPlan = useDocumentStore((s) => s.layoutPlan)
-  const layoutDebug = useDocumentStore((s) => s.layoutDebug)
 
   const { loading, refreshing, error, pageCount, blob, revision } = usePdfPreview(
     document,
     contentKey,
-    { layoutDebug, containerWidth, zoomMode: 'fit' },
   )
 
   useEffect(() => {
@@ -68,30 +63,26 @@ export function PdfJsPreview({ document, contentKey, containerWidth }: PdfJsPrev
   if (!blobUrl) return null
 
   return (
-    <div className={`flex h-full min-h-[20rem] ${layoutDebug ? 'min-w-0' : 'w-full'}`}>
-      <div className="relative min-h-[20rem] min-w-0 flex-1">
-        {refreshing && (
-          <div
-            className="pointer-events-none absolute inset-0 z-10 flex items-start justify-center bg-foreground/20 pt-6"
-            aria-live="polite"
-            aria-busy="true"
-          >
-            <div className="flex items-center gap-2 rounded-full bg-overlay-surface/95 px-3 py-1.5 text-xs text-muted-foreground shadow-[var(--shadow-menu)]">
-              <div className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-border border-t-primary" />
-              Updating preview…
-            </div>
+    <div className="relative h-full min-h-[20rem] min-w-0 flex-1">
+      {refreshing && (
+        <div
+          className="pointer-events-none absolute inset-0 z-10 flex items-start justify-center bg-foreground/20 pt-6"
+          aria-live="polite"
+          aria-busy="true"
+        >
+          <div className="flex items-center gap-2 rounded-full bg-overlay-surface/95 px-3 py-1.5 text-xs text-muted-foreground shadow-[var(--shadow-menu)]">
+            <div className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-border border-t-primary" />
+            Updating preview…
           </div>
-        )}
+        </div>
+      )}
 
-        <iframe
-          key={revision}
-          src={blobUrl}
-          title="Resume PDF live preview"
-          className="h-full min-h-[20rem] w-full border-0 bg-muted"
-        />
-      </div>
-
-      {layoutDebug && layoutPlan && <LayoutDebugInspector planResult={layoutPlan} />}
+      <iframe
+        key={revision}
+        src={blobUrl}
+        title="Resume PDF live preview"
+        className="h-full min-h-[20rem] w-full border-0 bg-muted"
+      />
     </div>
   )
 }

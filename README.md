@@ -50,9 +50,9 @@ packages/
   themes/      @rb/themes    — theme tokens: mono, navy-corporate, academic-serif
   validators/  @rb/validators— ATS lint + regional lint (Malaysia)
   presets/     @rb/presets   — document presets (Malaysia corporate, international)
-  catalog/     @rb/catalog   — versioned vocabulary bundles, registry, admin logic
+  catalog/     @rb/catalog   — versioned vocabulary bundles (edited in code)
   fixtures/    @rb/fixtures  — fictional sample documents for tests and demos
-src/                       — app shell: editor, toolbar, preview host, catalog admin UI
+src/                       — app shell: editor, toolbar, preview host
 personal/                  — PRIVATE: Dale's profile pack + personal scripts (gitignored, dev-only alias)
 ```
 
@@ -72,11 +72,13 @@ output also serves statically on Netlify, GitHub Pages, or any static host.
 
 ## AI assistance (optional)
 
-Three opt-in features: improve the summary, improve a role's bullets, and
-tailor the document to a job description (paste the JD, get a summary
-rewrite, keywords to add, and bullet suggestions). Nothing is applied
-automatically — every suggestion is reviewed, and the first use shows a
-consent notice.
+**Idrizz** is the built-in AI assistant: ask it to edit, add, or remove
+anything. Each form section has a round Idrizz icon, and the editor has an
+"Ask Idrizz" box with quick presets (rewrite summary, improve bullets,
+tailor to a job) plus free text. Idrizz replies with a typed JSON edit
+plan that is validated before anything is shown, and you review each
+change group (Apply / Discard) before it touches your document. Nothing is
+applied automatically, and the first use shows a consent notice.
 
 AI calls go through a small serverless proxy (`api/ai.ts`) so the API key
 never ships in the client bundle. The upstream is OpenCode Go

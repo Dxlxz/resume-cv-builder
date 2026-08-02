@@ -1,6 +1,7 @@
 import type { ResumeDocument } from '@rb/core/types/document'
 import type { LintIssue } from '@rb/validators/types'
-import { useCatalogStore } from '@rb/catalog/store/catalogStore'
+import { bundleIdForPreset } from '@rb/catalog/bundleForPreset'
+import { getBundledCatalog } from '@rb/catalog/bundles'
 import { findNearMatch, resolveEntryByLabel } from '@rb/catalog/search'
 
 function duplicateCaseInGroup(items: string[]): string[] {
@@ -16,10 +17,13 @@ function duplicateCaseInGroup(items: string[]): string[] {
   return dupes
 }
 
+/** ATS lint rules backed by the bundled vocabulary for the document's preset. */
 export function runCatalogRules(document: ResumeDocument): LintIssue[] {
   const issues: LintIssue[] = []
-  const skills = useCatalogStore.getState().getEntries('skill')
-  const occupations = useCatalogStore.getState().getEntries('occupation')
+  const bundle = getBundledCatalog(bundleIdForPreset(document.meta.presetId))
+  const entries = bundle?.entries ?? []
+  const skills = entries.filter((e) => e.catalogType === 'skill')
+  const occupations = entries.filter((e) => e.catalogType === 'occupation')
 
   for (const group of document.skills) {
     const dupes = duplicateCaseInGroup(group.items)

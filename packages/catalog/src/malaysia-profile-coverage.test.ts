@@ -1,17 +1,13 @@
-import { describe, expect, it, beforeEach } from 'vitest'
+import { describe, expect, it } from 'vitest'
+import { getBundledCatalog } from '@rb/catalog/bundles'
 import { resolveEntryByLabel } from '@rb/catalog/search'
-import { clearCatalogOverrides } from '@rb/catalog/persistence'
-import { useCatalogStore } from '@rb/catalog/store/catalogStore'
-import {sampleProfileDocument} from '@rb/fixtures'
+import { sampleProfileDocument } from '@rb/fixtures'
 
 describe('malaysia profile catalog coverage', () => {
-  beforeEach(() => {
-    clearCatalogOverrides()
-    useCatalogStore.getState().init('malaysia-default')
-  })
+  const bundle = getBundledCatalog('malaysia-default')
+  const skills = bundle?.entries.filter((e) => e.catalogType === 'skill') ?? []
 
-  it('resolves at least 90% of profile skills from catalog', () => {
-    const skills = useCatalogStore.getState().getEntries('skill')
+  it('resolves at least 90% of profile skills from the bundled catalog', () => {
     const allItems = sampleProfileDocument.skills.flatMap((g) =>
       g.name.toLowerCase().includes('language') ? [] : g.items,
     )

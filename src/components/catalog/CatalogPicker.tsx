@@ -1,5 +1,5 @@
 import { useEffect, useId, useRef, useState } from 'react'
-import { useCatalogStore } from '@rb/catalog/store/catalogStore'
+import { useCatalogBundle } from '@/hooks/useCatalogBundle'
 import type { CatalogType, SearchOpts } from '@rb/catalog/types'
 
 interface CatalogPickerProps {
@@ -21,8 +21,7 @@ export function CatalogPicker({
   searchOpts,
   id,
 }: CatalogPickerProps) {
-  const search = useCatalogStore((s) => s.search)
-  const resolveLabel = useCatalogStore((s) => s.resolveLabel)
+  const { search, resolveLabel } = useCatalogBundle()
   const [query, setQuery] = useState(value)
   const [open, setOpen] = useState(false)
   const [activeIndex, setActiveIndex] = useState(-1)

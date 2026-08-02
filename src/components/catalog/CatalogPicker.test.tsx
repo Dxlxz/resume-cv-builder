@@ -1,15 +1,20 @@
-import { describe, expect, it, beforeEach } from 'vitest'
+import { describe, expect, it } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
-import { clearCatalogOverrides } from '@rb/catalog/persistence'
-import { useCatalogStore } from '@rb/catalog/store/catalogStore'
 import { CatalogPicker } from '@/components/catalog/CatalogPicker'
 
-describe('CatalogPicker', () => {
-  beforeEach(() => {
-    clearCatalogOverrides()
-    useCatalogStore.getState().init('malaysia-default')
-  })
+const mockState = {
+  document: { meta: { presetId: 'malaysia-corporate' } },
+}
 
+vi.mock('@/app/store/documentStore', () => {
+  const useDocumentStore = Object.assign(
+    (selector: (s: typeof mockState) => unknown) => selector(mockState),
+    { getState: () => mockState },
+  )
+  return { useDocumentStore }
+})
+
+describe('CatalogPicker', () => {
   it('updates value on type', () => {
     const onChange = vi.fn()
     render(

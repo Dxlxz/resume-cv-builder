@@ -14,8 +14,9 @@ import { ProjectsForm } from '@/components/editor/ProjectsForm'
 import { CertificationsForm } from '@/components/editor/CertificationsForm'
 import { VolunteerForm } from '@/components/editor/VolunteerForm'
 import { ReferencesForm } from '@/components/editor/ReferencesForm'
-import { TailorToJob } from '@/components/ai/TailorToJob'
 import { DocumentSettings } from '@/components/editor/DocumentSettings'
+import { AskIdrizz } from '@/components/ai/AskIdrizz'
+import { IdrizzIconButton } from '@/components/ai/IdrizzIconButton'
 import { FormSection } from '@/components/ui/FormSection'
 import { Button } from '@/components/ui/Button'
 
@@ -43,12 +44,24 @@ const SECTION_HINTS: Partial<Record<SectionId, string>> = {
   references: 'Professional referees (usually listed last)',
 }
 
+const SECTION_AI_HINTS: Partial<Record<SectionId, string>> = {
+  summary: 'Rewrite the professional summary to be tighter and more persuasive.',
+  experience: 'Improve the bullet points for every role: stronger verbs, measurable outcomes, no invented facts.',
+  education: 'Improve my education entries.',
+  skills: 'Add or reorganise my skill groups so they match my experience.',
+  certifications: 'Improve my certifications section.',
+  projects: 'Improve my projects section.',
+  volunteer: 'Improve my volunteer and leadership section.',
+  references: 'Improve my references section.',
+  contact: 'Review my contact section for anything missing.',
+}
+
 export function EditorPanel() {
   const document = useDocumentStore((s) => s.document)
   const showOnboarding = useDocumentStore((s) => s.showOnboarding)
   const dismissOnboarding = useDocumentStore((s) => s.dismissOnboarding)
   const startFromSample = useDocumentStore((s) => s.startFromSample)
-  const [showTailor, setShowTailor] = useState(false)
+  const [sectionFocus, setSectionFocus] = useState<SectionId | null>(null)
 
   if (!document) return null
 
@@ -59,22 +72,10 @@ export function EditorPanel() {
     <div className="space-y-5">
       <DocumentSettings />
 
-      <div className="rounded-md border border-border bg-card p-4 shadow-[var(--shadow-raised)]">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div>
-            <h3 className="text-sm font-semibold text-foreground">Applying for a specific job?</h3>
-            <p className="mt-0.5 text-xs text-muted-foreground">
-              Paste the job description and get a tailored summary, keywords to add, and bullet
-              suggestions. Nothing changes until you apply it.
-            </p>
-          </div>
-          <Button type="button" variant="secondary" size="sm" onClick={() => setShowTailor(true)}>
-            Tailor to job
-          </Button>
-        </div>
-      </div>
-
-      {showTailor && <TailorToJob onClose={() => setShowTailor(false)} />}
+      <AskIdrizz
+        key={sectionFocus ?? 'ask'}
+        initialInstruction={sectionFocus ? (SECTION_AI_HINTS[sectionFocus] ?? '') : ''}
+      />
 
       {showOnboarding && (
         <div className="rounded-md border border-status-info/30 bg-badge-info p-4 text-sm text-status-info-foreground">
@@ -119,6 +120,12 @@ export function EditorPanel() {
               title={getSectionLabel(sectionId, preset.labels)}
               hint={SECTION_HINTS[sectionId]}
               defaultOpen={sectionId === 'contact' || sectionId === 'summary'}
+              action={
+                <IdrizzIconButton
+                  label={`Ask Idrizz about ${getSectionLabel(sectionId, preset.labels)}`}
+                  onClick={() => setSectionFocus(sectionId)}
+                />
+              }
             >
               <Form />
             </FormSection>

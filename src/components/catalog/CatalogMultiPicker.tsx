@@ -1,5 +1,5 @@
 import { useId, useRef, useState } from 'react'
-import { useCatalogStore } from '@rb/catalog/store/catalogStore'
+import { useCatalogBundle } from '@/hooks/useCatalogBundle'
 import type { CatalogType, SearchOpts } from '@rb/catalog/types'
 import { Button } from '@/components/ui/Button'
 
@@ -20,8 +20,7 @@ export function CatalogMultiPicker({
   searchOpts,
   'aria-label': ariaLabel = 'Skills',
 }: CatalogMultiPickerProps) {
-  const search = useCatalogStore((s) => s.search)
-  const resolveLabel = useCatalogStore((s) => s.resolveLabel)
+  const { search, resolveLabel } = useCatalogBundle()
   const [query, setQuery] = useState('')
   const [open, setOpen] = useState(false)
   const [activeIndex, setActiveIndex] = useState(-1)

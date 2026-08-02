@@ -10,7 +10,6 @@ import { LintPanel } from '@/components/toolbar/LintPanel'
 import { PdfPreviewModal } from '@/components/toolbar/PdfPreviewModal'
 import { Button } from '@/components/ui/Button'
 import { Brand } from '@/components/ui/Brand'
-import { navigateTo } from '@/hooks/useAppRoute'
 
 interface ToolbarProps {
   onHome: () => void
@@ -34,8 +33,6 @@ export function Toolbar({ onHome }: ToolbarProps) {
   const previewPageCount = useDocumentStore((s) => s.previewPageCount)
   const layoutPlan = useDocumentStore((s) => s.layoutPlan)
   const previewPdfBlob = useDocumentStore((s) => s.previewPdfBlob)
-  const layoutDebug = useDocumentStore((s) => s.layoutDebug)
-  const setLayoutDebug = useDocumentStore((s) => s.setLayoutDebug)
 
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [exporting, setExporting] = useState(false)
@@ -242,18 +239,6 @@ export function Toolbar({ onHome }: ToolbarProps) {
                 </button>
                 <button
                   type="button"
-                  className={`flex w-full items-center gap-2 rounded-sm px-3 py-2 text-left text-sm transition-colors duration-[var(--duration-state)] hover:bg-muted ${
-                    layoutDebug ? 'text-primary' : 'text-foreground'
-                  }`}
-                  onClick={() => {
-                    setMenuOpen(false)
-                    setLayoutDebug(!layoutDebug)
-                  }}
-                >
-                  Layout debug
-                </button>
-                <button
-                  type="button"
                   className="flex w-full items-center gap-2 rounded-sm px-3 py-2 text-left text-sm text-foreground transition-colors duration-[var(--duration-state)] hover:bg-muted"
                   onClick={() => {
                     setMenuOpen(false)
@@ -290,16 +275,6 @@ export function Toolbar({ onHome }: ToolbarProps) {
                     Load my profile
                   </button>
                 )}
-                <button
-                  type="button"
-                  className="flex w-full items-center gap-2 rounded-sm px-3 py-2 text-left text-sm text-foreground transition-colors duration-[var(--duration-state)] hover:bg-muted"
-                  onClick={() => {
-                    setMenuOpen(false)
-                    navigateTo('admin')
-                  }}
-                >
-                  Manage catalogs
-                </button>
                 <div className="my-1 h-px bg-border" />
                 <button
                   type="button"

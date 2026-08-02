@@ -7,7 +7,7 @@ import { LanguageLevelPicker } from '@/components/catalog/LanguageLevelPicker'
 import {
   categoryIdForSkillGroupName,
   isLanguagesSkillGroup,
-} from '@rb/catalog/store/catalogStore'
+} from '@rb/catalog/categories'
 import { FORM_PLACEHOLDERS } from '@/lib/formPlaceholders'
 
 export function SkillsForm() {

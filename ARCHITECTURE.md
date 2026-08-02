@@ -21,7 +21,7 @@
 | **themes** | `@rb/themes` (`packages/themes/`) | Theme token definitions |
 | **validators** | `@rb/validators` (`packages/validators/`) | ATS lint + regional lint (Malaysia) |
 | **presets** | `@rb/presets` (`packages/presets/`) | Document presets |
-| **catalog** | `@rb/catalog` (`packages/catalog/`) | Versioned vocabulary bundles + store (admin UI lives in `src/catalog/admin/`) |
+| **catalog** | `@rb/catalog` (`packages/catalog/`) | Versioned vocabulary bundles, search, schema (edited in code, no admin) |
 | **fixtures** | `@rb/fixtures` (`packages/fixtures/`) | Fictional sample documents (tests, demos) |
 | **app** | `src/components/`, `src/hooks/`, `src/renderers/` | Editor, preview host, toolbar, PDF.js preview, download |
 

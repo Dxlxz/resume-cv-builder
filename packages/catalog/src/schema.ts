@@ -17,25 +17,12 @@ export const catalogEntrySchema = z.object({
   meta: z.record(z.string(), z.string()).optional(),
 })
 
-export const catalogEntryOverrideSchema = z.union([
-  catalogEntrySchema,
-  z.object({ deleted: z.literal(true) }),
-])
-
 export const catalogBundleManifestSchema = z.object({
   id: z.string(),
   name: z.string(),
   version: z.string(),
   locale: z.enum(LOCALES),
   presetIds: z.array(z.enum(PRESET_IDS)),
-  updatedAt: z.string(),
-})
-
-export const catalogOverrideStateSchema = z.object({
-  schemaVersion: z.literal(1),
-  bundleId: z.string(),
-  entries: z.record(z.string(), catalogEntryOverrideSchema),
-  customEntries: z.array(catalogEntrySchema),
   updatedAt: z.string(),
 })
 

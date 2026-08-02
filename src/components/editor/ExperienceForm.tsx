@@ -7,8 +7,6 @@ import { CatalogPicker } from '@/components/catalog/CatalogPicker'
 import { MonthField } from '@/components/ui/MonthField'
 import { BulletListEditor } from '@/components/ui/BulletListEditor'
 import { EmptyHint } from '@/components/ui/EmptyHint'
-import { AiReview } from '@/components/ai/AiReview'
-import { useAi } from '@/hooks/useAi'
 import { FORM_PLACEHOLDERS } from '@/lib/formPlaceholders'
 
 type ExperienceItem = ResumeDocument['experience'][number]
@@ -21,14 +19,6 @@ interface RoleCardProps {
 }
 
 function ExperienceRoleCard({ item, index, updateItem, removeItem }: RoleCardProps) {
-  const { result, busy, error, consentOpen, run, acceptConsent, declineConsent, discard } =
-    useAi('improve-bullets')
-
-  const runImprove = () =>
-    run({
-      role: { title: item.title, company: item.company, bullets: item.bullets },
-    })
-
   return (
     <div className="space-y-4 rounded-md border border-border bg-muted/50 p-4">
       <div className="flex flex-wrap items-center justify-between gap-2">
@@ -93,48 +83,12 @@ function ExperienceRoleCard({ item, index, updateItem, removeItem }: RoleCardPro
           I currently work here
         </label>
       </div>
-      <div className="space-y-2">
-        <div className="flex flex-wrap items-end justify-between gap-2">
-          <div className="min-w-0 flex-1">
-            <BulletListEditor
-              label="Achievements"
-              bullets={item.bullets}
-              placeholder={FORM_PLACEHOLDERS.experience.bullet}
-              onChange={(bullets) => updateItem(item.id, { bullets })}
-            />
-          </div>
-          <Button
-            type="button"
-            variant="secondary"
-            size="sm"
-            onClick={runImprove}
-            disabled={busy}
-          >
-            Improve bullets with AI
-          </Button>
-        </div>
-        <AiReview
-          label="Bullets"
-          busy={busy}
-          error={error}
-          result={result}
-          consentOpen={consentOpen}
-          onAcceptConsent={acceptConsent}
-          onDeclineConsent={declineConsent}
-          onApply={() => {
-            if (result) {
-              const lines = result
-                .split('\n')
-                .map((line) => line.trim())
-                .filter(Boolean)
-              if (lines.length) updateItem(item.id, { bullets: lines })
-            }
-            discard()
-          }}
-          onRegenerate={runImprove}
-          onDiscard={discard}
-        />
-      </div>
+      <BulletListEditor
+        label="Achievements"
+        bullets={item.bullets}
+        placeholder={FORM_PLACEHOLDERS.experience.bullet}
+        onChange={(bullets) => updateItem(item.id, { bullets })}
+      />
     </div>
   )
 }

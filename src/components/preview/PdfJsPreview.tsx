@@ -1,9 +1,8 @@
-import { useEffect } from 'react'
+import { useEffect, useMemo } from 'react'
 import type { ResumeDocument } from '@rb/core/types/document'
 import { usePdfPreview } from '@/hooks/usePdfPreview'
 import { useDocumentStore } from '@/app/store/documentStore'
 import { LayoutDebugInspector } from '@rb/layout/debug/LayoutDebugInspector'
-import { PdfSelectablePage } from '@/components/preview/PdfSelectablePage'
 
 interface PdfJsPreviewProps {
   document: ResumeDocument
@@ -12,9 +11,8 @@ interface PdfJsPreviewProps {
 }
 
 /**
- * Live preview rendered with pdf.js at a scale that fits the panel width,
- * so the page follows the screen size. Pages keep a text layer for
- * selection and copy. Layout debug overlays the planned block rhythm.
+ * Live preview: the exported PDF shown in the browser's own PDF viewer
+ * (iframe), so zoom and pagination behave exactly like the real thing.
  */
 export function PdfJsPreview({ document, contentKey, containerWidth }: PdfJsPreviewProps) {
   const setPreviewPageCount = useDocumentStore((s) => s.setPreviewPageCount)
@@ -22,8 +20,11 @@ export function PdfJsPreview({ document, contentKey, containerWidth }: PdfJsPrev
   const layoutPlan = useDocumentStore((s) => s.layoutPlan)
   const layoutDebug = useDocumentStore((s) => s.layoutDebug)
 
-  const { loading, refreshing, error, pages, pageCount, scale, pdf, blob, revision } =
-    usePdfPreview(document, contentKey, { containerWidth, zoomMode: 'fit' })
+  const { loading, refreshing, error, pageCount, blob, revision } = usePdfPreview(
+    document,
+    contentKey,
+    { layoutDebug, containerWidth, zoomMode: 'fit' },
+  )
 
   useEffect(() => {
     if (pageCount > 0 && useDocumentStore.getState().previewPageCount !== pageCount) {
@@ -36,6 +37,14 @@ export function PdfJsPreview({ document, contentKey, containerWidth }: PdfJsPrev
       setPreviewPdfBlob(blob)
     }
   }, [blob, setPreviewPdfBlob])
+
+  const blobUrl = useMemo(() => (blob ? URL.createObjectURL(blob) : null), [blob])
+
+  useEffect(() => {
+    return () => {
+      if (blobUrl) URL.revokeObjectURL(blobUrl)
+    }
+  }, [blobUrl])
 
   const showInitialSpinner = loading && !blob
 
@@ -56,18 +65,11 @@ export function PdfJsPreview({ document, contentKey, containerWidth }: PdfJsPrev
     )
   }
 
-  if (!pdf || pages.length === 0) {
-    return (
-      <div className="flex h-full min-h-[20rem] flex-col items-center justify-center gap-2">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-border border-t-primary" />
-        <p className="text-sm text-muted-foreground">Scaling preview…</p>
-      </div>
-    )
-  }
+  if (!blobUrl) return null
 
   return (
     <div className={`flex h-full min-h-[20rem] ${layoutDebug ? 'min-w-0' : 'w-full'}`}>
-      <div className="relative min-h-[20rem] min-w-0 flex-1 overflow-y-auto bg-muted p-4">
+      <div className="relative min-h-[20rem] min-w-0 flex-1">
         {refreshing && (
           <div
             className="pointer-events-none absolute inset-0 z-10 flex items-start justify-center bg-foreground/20 pt-6"
@@ -81,19 +83,12 @@ export function PdfJsPreview({ document, contentKey, containerWidth }: PdfJsPrev
           </div>
         )}
 
-        <div key={revision} className="mx-auto flex w-fit flex-col gap-4">
-          {pages.map((page) => (
-            <PdfSelectablePage
-              key={page.pageNumber}
-              pdf={pdf}
-              pageNumber={page.pageNumber}
-              scale={scale}
-              width={page.width}
-              height={page.height}
-              className="rounded-sm shadow-[var(--shadow-raised)]"
-            />
-          ))}
-        </div>
+        <iframe
+          key={revision}
+          src={blobUrl}
+          title="Resume PDF live preview"
+          className="h-full min-h-[20rem] w-full border-0 bg-muted"
+        />
       </div>
 
       {layoutDebug && layoutPlan && <LayoutDebugInspector planResult={layoutPlan} />}

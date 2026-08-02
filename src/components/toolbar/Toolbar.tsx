@@ -191,6 +191,16 @@ export function Toolbar({ onHome }: ToolbarProps) {
         <div className="mx-auto max-w-[1600px] space-y-3">
           <div className="flex flex-wrap items-center gap-3">
             <Brand onClick={onHome} />
+            <span aria-hidden className="h-7 w-px bg-border" />
+            <div className="min-w-0">
+              <h1 className="truncate text-[15px] font-semibold tracking-tight text-foreground">
+                {document.meta.documentType === 'cv' ? 'CV' : 'Resume'}
+              </h1>
+              <p className="truncate text-xs text-muted-foreground">
+                {preset.name} · {document.meta.pageSize === 'a4' ? 'A4' : 'US Letter'} ·{' '}
+                {previewPageCount} page{previewPageCount === 1 ? '' : 's'}
+              </p>
+            </div>
             <span
               className={`ml-auto inline-flex shrink-0 items-center gap-1.5 rounded-full border border-border bg-card px-2.5 py-1 text-xs ${saveTone}`}
               aria-live="polite"

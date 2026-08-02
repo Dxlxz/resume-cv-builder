@@ -8,14 +8,6 @@ import { computeLayoutPlan } from '@rb/layout/computeLayoutPlan'
 
 const mockPreviewBlob = new Blob(['%PDF-1.4'], { type: 'application/pdf' })
 
-const mockState = {
-  setPreviewPageCount: vi.fn(),
-  setPreviewPdfBlob: vi.fn(),
-  layoutPlan: null,
-  layoutDebug: false,
-  previewPageCount: 2,
-}
-
 vi.mock('@/hooks/usePdfPreview', () => ({
   usePdfPreview: () => ({
     loading: false,
@@ -31,15 +23,22 @@ vi.mock('@/hooks/usePdfPreview', () => ({
 }))
 
 vi.mock('@/app/store/documentStore', () => {
+  const state = {
+    setPreviewPageCount: vi.fn(),
+    setPreviewPdfBlob: vi.fn(),
+    layoutPlan: null,
+    layoutDebug: false,
+    previewPageCount: 2,
+  }
   const useDocumentStore = Object.assign(
-    (selector: (s: typeof mockState) => unknown) => selector(mockState),
-    { getState: () => mockState },
+    (selector: (s: typeof state) => unknown) => selector(state),
+    { getState: () => state },
   )
   return { useDocumentStore }
 })
 
 describe('preview-export parity', () => {
-  it('forwards the preview blob to the store and renders the scaling state until pages are parsed', () => {
+  it('PdfJsPreview embeds the PDF blob in an iframe', () => {
     render(
       <PdfJsPreview
         document={sampleProfileDocument}
@@ -47,8 +46,7 @@ describe('preview-export parity', () => {
         containerWidth={600}
       />,
     )
-    expect(screen.getByText('Scaling preview…')).toBeInTheDocument()
-    expect(mockState.setPreviewPdfBlob).toHaveBeenCalledWith(mockPreviewBlob)
+    expect(screen.getByTitle('Resume PDF live preview')).toBeInTheDocument()
   })
 
   it('complete CV PDF has at least 3 pages', async () => {

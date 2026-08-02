@@ -53,8 +53,8 @@ export function PreviewShell({ document, contentKey }: PreviewShellProps) {
         </span>
       </div>
       <p className="mb-3 shrink-0 text-xs text-muted-foreground">
-        The preview is the exported PDF, scaled to this panel. Select, copy,
-        and scroll to check it.
+        The preview is the exported PDF in your browser's viewer. Select,
+        copy, and zoom to check it.
       </p>
 
       {isResume && previewPageCount > 2 && (

@@ -3,6 +3,7 @@ import { useCatalogStore } from '@rb/catalog/store/catalogStore'
 import { CatalogImportExport } from '@/catalog/admin/CatalogImportExport'
 import { CatalogVocabularyTabs } from '@/catalog/admin/CatalogVocabularyTabs'
 import { navigateToBuilder } from '@/hooks/useAppRoute'
+import { AppShell } from '@/app/AppShell'
 import { Button } from '@/components/ui/Button'
 
 export function CatalogAdminPage() {
@@ -12,22 +13,15 @@ export function CatalogAdminPage() {
   const bundle = getBundledCatalog(activeBundleId)
 
   return (
-    <div className="min-h-screen bg-background">
-      <header className="border-b border-border bg-header px-4 py-4 shadow-[var(--shadow-raised)]">
-        <div className="mx-auto flex max-w-5xl flex-wrap items-center gap-4">
-          <Button type="button" variant="secondary" onClick={navigateToBuilder}>
-            ← Back to builder
-          </Button>
-          <div className="mr-auto">
-            <h1 className="text-xl font-bold text-foreground">Manage catalogs</h1>
-            <p className="text-sm text-muted-foreground">
-              {bundle?.manifest.name ?? activeBundleId} · v{bundle?.manifest.version ?? '?'}
-            </p>
-          </div>
-          <label className="text-sm text-muted-foreground">
+    <AppShell
+      backLabel="Builder"
+      onBack={navigateToBuilder}
+      rightSlot={
+        <>
+          <label className="flex items-center gap-2 text-sm text-muted-foreground">
             Bundle
             <select
-              className="ml-2 rounded-sm border border-border bg-card px-2 py-1.5 text-sm text-foreground"
+              className="rounded-sm border border-border bg-card px-2 py-1.5 text-sm text-foreground"
               value={activeBundleId}
               onChange={(e) => setActiveBundle(e.target.value)}
             >
@@ -49,16 +43,24 @@ export function CatalogAdminPage() {
           >
             Reset all
           </Button>
-        </div>
-      </header>
-
-      <main className="mx-auto max-w-5xl px-4 py-6">
-        <p className="mb-6 text-sm text-muted-foreground">
+        </>
+      }
+    >
+      <div className="mx-auto w-full max-w-5xl px-5 py-8">
+        <h1 className="text-2xl font-bold tracking-tight text-foreground">
+          Manage catalogs
+          <span className="ml-2 text-sm font-normal text-muted-foreground">
+            {bundle?.manifest.name ?? activeBundleId} · v{bundle?.manifest.version ?? '?'}
+          </span>
+        </h1>
+        <p className="mt-1 text-sm text-muted-foreground">
           Customize skills, occupations, institutions, and other pick lists used in the resume builder.
           Changes are saved locally in your browser.
         </p>
-        <CatalogVocabularyTabs />
-      </main>
-    </div>
+        <div className="mt-6">
+          <CatalogVocabularyTabs />
+        </div>
+      </div>
+    </AppShell>
   )
 }

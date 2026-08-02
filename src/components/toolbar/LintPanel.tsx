@@ -52,9 +52,6 @@ export function LintPanel({ onClose, onProceed, showProceed }: LintPanelProps) {
   const previewPageCount = useDocumentStore((s) => s.previewPageCount)
   const lintIssues = useDocumentStore((s) => s.lintIssues)
   const setLintIssues = useDocumentStore((s) => s.setLintIssues)
-  const setFocusedSection = useDocumentStore((s) => s.setFocusedSection)
-  const setShowLayoutBoxes = useDocumentStore((s) => s.setShowLayoutBoxes)
-  const setShowLintPanel = useDocumentStore((s) => s.setShowLintPanel)
 
   const [filter, setFilter] = useState<SectionId | 'all'>('all')
   const [collapsed, setCollapsed] = useState<Record<LintIssue['level'], boolean>>({
@@ -116,12 +113,6 @@ export function LintPanel({ onClose, onProceed, showProceed }: LintPanelProps) {
     }
   }
 
-  const viewOnLayout = (section: SectionId) => {
-    setShowLintPanel(false)
-    setShowLayoutBoxes(true)
-    setFocusedSection(section)
-  }
-
   const renderGroup = (level: LintIssue['level'], items: LintIssue[]) => {
     if (!items.length) return null
     const isCollapsed = collapsed[level]
@@ -174,17 +165,6 @@ export function LintPanel({ onClose, onProceed, showProceed }: LintPanelProps) {
                     >
                       {getSectionLabel(issue.section, {})}
                     </span>
-                  )}
-                  {issue.section && (
-                    <button
-                      type="button"
-                      onClick={() => viewOnLayout(issue.section!)}
-                      title={`Show ${getSectionLabel(issue.section, {})} on the layout`}
-                      aria-label={`Show ${getSectionLabel(issue.section, {})} on the layout`}
-                      className="mt-0.5 shrink-0 rounded-full border border-border/60 px-1.5 py-0.5 text-[10px] font-medium text-foreground transition-colors duration-[var(--duration-state)] hover:bg-card/60"
-                    >
-                      View on layout
-                    </button>
                   )}
                 </div>
               </li>

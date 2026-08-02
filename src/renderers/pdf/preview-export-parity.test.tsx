@@ -1,19 +1,21 @@
 import { describe, expect, it, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import {sampleCvDocument, sampleProfileDocument} from '@rb/fixtures'
-import { PdfCanvasPreview } from '@/components/preview/PdfCanvasPreview'
+import { PdfJsPreview } from '@/components/preview/PdfJsPreview'
 import { generatePdf } from '@/lib/pdf'
 import { countPdfPages } from '@/renderers/pdf/countPdfPages'
 import { computeLayoutPlan } from '@rb/layout/computeLayoutPlan'
 
+const mockPreviewBlob = new Blob(['%PDF-1.4'], { type: 'application/pdf' })
+
 vi.mock('@/hooks/usePdfPreview', () => ({
   usePdfPreview: () => ({
-    loading: true,
+    loading: false,
     refreshing: false,
     error: null,
-    pageCount: 0,
-    blob: null,
-    revision: 0,
+    pageCount: 2,
+    blob: mockPreviewBlob,
+    revision: 1,
   }),
 }))
 
@@ -23,10 +25,6 @@ vi.mock('@/app/store/documentStore', () => {
     setPreviewPdfBlob: vi.fn(),
     layoutPlan: null,
     previewPageCount: 2,
-    showLayoutBoxes: false,
-    setShowLayoutBoxes: vi.fn(),
-    focusedSection: null,
-    setFocusedSection: vi.fn(),
   }
   const useDocumentStore = Object.assign(
     (selector: (s: typeof state) => unknown) => selector(state),
@@ -36,15 +34,14 @@ vi.mock('@/app/store/documentStore', () => {
 })
 
 describe('preview-export parity', () => {
-  it('PdfCanvasPreview mounts its loading state (no iframe)', () => {
+  it('PdfJsPreview embeds the PDF blob in an iframe', () => {
     render(
-      <PdfCanvasPreview
+      <PdfJsPreview
         document={sampleProfileDocument}
         contentKey="parity-test"
       />,
     )
-    expect(screen.getByText('Rendering PDF preview…')).toBeInTheDocument()
-    expect(document.querySelector('iframe')).toBeNull()
+    expect(screen.getByTitle('Resume PDF live preview')).toBeInTheDocument()
   })
 
   it('complete CV PDF has at least 3 pages', async () => {

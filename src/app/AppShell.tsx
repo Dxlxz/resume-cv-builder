@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react'
 
 /**
- * App shell — the persistent chrome for non-builder flows (onboarding).
+ * App shell - the persistent chrome for non-builder flows (onboarding).
  * Header hosts the leading back control (top-left), brand, and trailing
  * actions; content sits on the UDS canvas below. Matches the builder's
  * Toolbar chrome (bg-header, border-border, shadow-raised).

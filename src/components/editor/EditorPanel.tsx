@@ -30,7 +30,7 @@ const SECTION_FORMS: Record<SectionId, ComponentType> = {
 
 const SECTION_HINTS: Partial<Record<SectionId, string>> = {
   contact: 'Name, email, and links',
-  summary: '2–4 sentences about your focus',
+  summary: '2-4 sentences about your focus',
   experience: 'Roles, dates, and bullet achievements',
   education: 'Degrees and institutions',
   certifications: 'Courses and credentials with issuer and date',
@@ -55,14 +55,13 @@ export function EditorPanel() {
     <div className="space-y-5">
       {showOnboarding && (
         <div className="rounded-md border border-status-info/30 bg-badge-info p-4 text-sm text-status-info-foreground">
-          <p className="font-semibold">Welcome — {preset.name}</p>
+          <p className="font-semibold">Welcome to {preset.name}</p>
           <p className="mt-1 text-status-info-foreground/90">
             Three quick steps to an ATS-ready document:
           </p>
           <ol className="mt-3 list-decimal space-y-1.5 pl-5">
             <li>
-              Fill in your details — the live preview on the right updates as
-              you type.
+              Fill in your details. The preview on the right updates as you type.
             </li>
             <li>Add sections you need (skills, projects, references) from the section list.</li>
             <li>Run the ATS check in the toolbar, then export your PDF.</li>

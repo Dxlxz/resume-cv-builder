@@ -8,20 +8,37 @@ import { Button } from '@/components/ui/Button'
 
 type Step = 'preset' | 'doctype'
 
-const DOC_OPTIONS: {
+interface DocOption {
   type: DocumentType
   title: string
-  description: string
-}[] = [
+  /** One plain line: what this document is. */
+  line: string
+  /** When to choose it. */
+  points: string[]
+  /** Page motif: 1 = single page, 3 = full record stack. */
+  pages: 1 | 3
+}
+
+const DOC_OPTIONS: DocOption[] = [
   {
     type: 'resume',
     title: 'Resume',
-    description: 'Concise 1–2 pages for most job applications.',
+    line: 'One or two pages. The standard for most applications.',
+    points: [
+      'Covers the essentials: contact, recent roles, key skills',
+      'What recruiters expect for corporate and tech roles',
+    ],
+    pages: 1,
   },
   {
     type: 'cv',
     title: 'CV',
-    description: 'Detailed record for academic or research roles.',
+    line: 'Full career record, no page limit.',
+    points: [
+      'Every role, project, and certification in detail',
+      'For academic, research, and senior applications',
+    ],
+    pages: 3,
   },
 ]
 
@@ -31,16 +48,16 @@ const TEMPLATE_LABELS: Record<PresetDefinition['defaults']['templateId'], string
   'ats-strict': 'ATS-strict layout',
 }
 
-/** What each preset is for — plain language, not lint rules. */
+/** What each preset is for - plain language, not lint rules. */
 const PRESET_POINTS: Record<PresetId, string[]> = {
   'malaysia-corporate': [
-    'ATS-safe single-column layout, kept to 1–2 pages',
+    'ATS-safe single-column layout, kept to 1-2 pages',
     'Malaysia checks: city/state only, no IC/NRIC numbers',
     'Quantify impact in % or RM where possible',
   ],
   'international-generic': [
     'Clean, familiar layout recruiters read quickly',
-    'US Letter or A4 — your choice',
+    'Choose US Letter or A4',
     'Detailed CV mode for academic or research roles',
   ],
 }
@@ -54,7 +71,7 @@ function presetChips(p: PresetDefinition): string[] {
   return chips
 }
 
-/** Decorative page schematic — differs per preset so the choice feels concrete. */
+/** Decorative page schematic - differs per preset so the choice feels concrete. */
 function PresetSchematic({ atsStrict }: { atsStrict: boolean }) {
   const bar = (w: string, t: 'strong' | 'soft' | 'faint') =>
     `h-1.5 rounded-full ${w} ${
@@ -97,6 +114,28 @@ function PresetSchematic({ atsStrict }: { atsStrict: boolean }) {
         </div>
         <div className={bar('w-full', 'faint')} />
         <div className={bar('w-3/4', 'faint')} />
+      </div>
+    </div>
+  )
+}
+
+/** Decorative page motif: single page (resume) vs stacked pages (CV). */
+function PageStack({ pages }: { pages: 1 | 3 }) {
+  return (
+    <div aria-hidden className="relative h-14 w-10 shrink-0">
+      {pages === 3 && (
+        <div className="absolute inset-0 translate-x-1.5 translate-y-1.5 rounded-sm border border-border bg-card" />
+      )}
+      {pages === 3 && (
+        <div className="absolute inset-0 translate-x-0.5 translate-y-0.5 rounded-sm border border-border bg-card" />
+      )}
+      <div className="absolute inset-0 rounded-sm border border-border bg-card shadow-[var(--shadow-raised)]">
+        <div className="mx-1.5 mt-2 space-y-1">
+          <div className="h-1 w-2/3 rounded-full bg-foreground/50" />
+          <div className="h-1 w-full bg-foreground/15" />
+          <div className="h-1 w-4/5 bg-foreground/15" />
+          <div className="h-1 w-full bg-foreground/15" />
+        </div>
       </div>
     </div>
   )
@@ -235,7 +274,7 @@ export function DocTypeSelector({ onBack }: DocTypeSelectorProps) {
             Resume or CV?
           </h1>
           <p className="mt-3 text-lg text-muted-foreground">
-            Your content is preserved if you switch later.
+            Both start from the same details. You can switch later and nothing is lost.
           </p>
         </div>
 
@@ -245,39 +284,55 @@ export function DocTypeSelector({ onBack }: DocTypeSelectorProps) {
               key={option.type}
               className="flex flex-col rounded-lg border border-border bg-card p-6 shadow-[var(--shadow-raised)]"
             >
-              <h2 className="text-2xl font-bold text-foreground">{option.title}</h2>
-              <p className="mt-2 flex-1 text-muted-foreground">{option.description}</p>
-              <Button
-                className="mt-6 w-full"
-                onClick={() => startDocument(option.type, selectedPreset)}
-              >
-                Start blank {option.title}
-              </Button>
-              <Button
-                className="mt-2 w-full"
-                variant="secondary"
-                onClick={() => startFromSample(option.type, selectedPreset)}
-              >
-                Start from sample
-              </Button>
-              {personalProfileAvailable && (
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <h2 className="text-2xl font-bold text-foreground">{option.title}</h2>
+                  <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">
+                    {option.line}
+                  </p>
+                </div>
+                <PageStack pages={option.pages} />
+              </div>
+              <ul className="mt-5 space-y-2 text-sm text-muted-foreground">
+                {option.points.map((point) => (
+                  <li key={point} className="flex gap-2">
+                    <span aria-hidden className="mt-1.5 h-1 w-1 shrink-0 rounded-full bg-primary/70" />
+                    {point}
+                  </li>
+                ))}
+              </ul>
+              <div className="mt-6 space-y-2">
                 <Button
-                  className="mt-2 w-full"
-                  variant="secondary"
-                  onClick={() =>
-                    startDocument(option.type, selectedPreset, { withPersonalProfile: true })
-                  }
+                  className="w-full"
+                  onClick={() => startDocument(option.type, selectedPreset)}
                 >
-                  Start with my profile
+                  Start blank
                 </Button>
-              )}
+                <Button
+                  className="w-full"
+                  variant="secondary"
+                  onClick={() => startFromSample(option.type, selectedPreset)}
+                >
+                  See a sample
+                </Button>
+                {personalProfileAvailable && (
+                  <Button
+                    className="w-full"
+                    variant="secondary"
+                    onClick={() =>
+                      startDocument(option.type, selectedPreset, { withPersonalProfile: true })
+                    }
+                  >
+                    Use my profile
+                  </Button>
+                )}
+              </div>
             </article>
           ))}
         </div>
 
         <p className="mt-6 text-center text-sm text-muted-foreground">
-          Start blank and build from scratch, or load a fictional sample to see a
-          finished, ATS-ready example you can edit or replace.
+          Saved automatically in your browser. No account needed.
         </p>
 
         {personalProfileAvailable && (
@@ -291,10 +346,6 @@ export function DocTypeSelector({ onBack }: DocTypeSelectorProps) {
             </button>
           </p>
         )}
-
-        <p className="mt-4 text-center text-sm text-muted-foreground">
-          Local only — drafts save automatically in this browser.
-        </p>
       </div>
     </AppShell>
   )

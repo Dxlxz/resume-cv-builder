@@ -1,5 +1,6 @@
 import { useState, type ReactNode } from 'react'
 import type { SectionId } from '@rb/core/types/document'
+import { IdrizzIconButton } from '@/components/ai/IdrizzIconButton'
 
 interface FormSectionProps {
   sectionId: SectionId
@@ -75,13 +76,19 @@ export function FormSection({
           {onGuideChange && (
             <div className="border-t border-border pt-3">
               {!guideOpen ? (
-                <button
-                  type="button"
-                  onClick={() => setGuideOpen(true)}
-                  className="text-xs font-medium text-muted-foreground underline-offset-2 transition-colors duration-[var(--duration-state)] hover:text-foreground hover:underline"
-                >
-                  {guide ? 'Edit Idrizz guide' : 'Set an Idrizz guide'}
-                </button>
+                <div className="flex items-center gap-2">
+                  <IdrizzIconButton
+                    label="Set how Idrizz writes this section"
+                    onClick={() => setGuideOpen(true)}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setGuideOpen(true)}
+                    className="text-xs font-medium text-muted-foreground underline-offset-2 transition-colors duration-[var(--duration-state)] hover:text-foreground hover:underline"
+                  >
+                    {guide ? 'Edit Idrizz guide' : 'Set an Idrizz guide'}
+                  </button>
+                </div>
               ) : (
                 <div className="animate-slide-up rounded-md border border-border bg-muted/50 p-3">
                   <label htmlFor={guideId} className="text-xs font-medium text-foreground">

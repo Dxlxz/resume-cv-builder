@@ -5,34 +5,15 @@ import { useMediaQuery } from '@/hooks/useMediaQuery'
 import { buildDocumentContext, parseAiEditPlan, type AiEditPlan } from '@/lib/ai/edits'
 import { AiEditReview } from '@/components/ai/AiEditReview'
 import { Button } from '@/components/ui/Button'
-import { Tooltip } from '@/components/ui/Tooltip'
 
 /**
  * Idrizz, the floating chatbot. A round bubble sits at the bottom-right of
  * the builder; it opens a chat panel with a persona: a warm, direct resume
  * wingman. Edit requests come back as typed JSON plans, reviewed inline
- * (Apply/Discard per group). Size is a simple S/M/L preset.
+ * (Apply/Discard per group). Size adapts automatically to the viewport:
+ * a bottom sheet on mobile, a floating panel sized to the screen on
+ * desktop - no user options.
  */
-
-const CHAT_SIZES = {
-  S: { width: 320, height: 400 },
-  M: { width: 384, height: 512 },
-  L: { width: 448, height: 600 },
-} as const
-
-type ChatSize = keyof typeof CHAT_SIZES
-
-const CHAT_SIZE_KEY = 'rizzume-idrizz-size'
-
-function loadChatSize(): ChatSize {
-  try {
-    const raw = window.localStorage.getItem(CHAT_SIZE_KEY)
-    if (raw === 'S' || raw === 'M' || raw === 'L') return raw
-  } catch {
-    // ignore
-  }
-  return 'M'
-}
 
 /**
  * Idrizz, the floating chatbot. A round bubble sits at the bottom-right of
@@ -85,16 +66,6 @@ export function IdrizzChat({ open, onOpen, onClose }: IdrizzChatProps) {
   const document = useDocumentStore((s) => s.document)
   const isMobile = useMediaQuery('(max-width: 767px)')
   const { result, busy, error, consentOpen, run, acceptConsent, declineConsent } = useAi('ai-edit')
-  const [chatSize, setChatSize] = useState<ChatSize>(loadChatSize)
-  const size = CHAT_SIZES[chatSize]
-
-  useEffect(() => {
-    try {
-      window.localStorage.setItem(CHAT_SIZE_KEY, chatSize)
-    } catch {
-      // private mode: just don't remember
-    }
-  }, [chatSize])
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [input, setInput] = useState('')
   const [started, setStarted] = useState(false)
@@ -170,17 +141,7 @@ export function IdrizzChat({ open, onOpen, onClose }: IdrizzChatProps) {
       className={
         isMobile
           ? 'fixed inset-x-0 bottom-0 z-40 flex h-[min(85dvh,100dvh)] animate-chat-in flex-col overflow-hidden rounded-t-lg border border-b-0 border-border bg-card shadow-[var(--shadow-modal)]'
-          : 'fixed bottom-20 right-5 z-40 flex animate-chat-in flex-col overflow-hidden rounded-lg border border-border bg-card shadow-[var(--shadow-modal)]'
-      }
-      style={
-        isMobile
-          ? undefined
-          : {
-              width: size.width,
-              height: size.height,
-              maxWidth: 'calc(100vw - 2rem)',
-              maxHeight: 'calc(100dvh - 7rem)',
-            }
+          : 'fixed bottom-20 right-5 z-40 flex h-[min(32rem,calc(100dvh-7rem))] w-[min(25rem,calc(100vw-2rem))] animate-chat-in flex-col overflow-hidden rounded-lg border border-border bg-card shadow-[var(--shadow-modal)]'
       }
     >
       <header className="flex shrink-0 items-center gap-2.5 border-b border-border bg-header px-3 py-2.5">
@@ -192,30 +153,6 @@ export function IdrizzChat({ open, onOpen, onClose }: IdrizzChatProps) {
           <p className="text-sm font-semibold leading-tight text-foreground">Idrizz</p>
           <p className="text-xs text-muted-foreground">Your resume wingman</p>
         </div>
-        {!isMobile && (
-          <div
-            role="group"
-            aria-label="Chat size"
-            className="flex items-center gap-0.5 rounded-sm border border-border bg-muted p-0.5"
-          >
-            {(['S', 'M', 'L'] as const).map((preset) => (
-              <Tooltip key={preset} label={`Chat size ${preset}`}>
-                <button
-                  type="button"
-                  onClick={() => setChatSize(preset)}
-                  aria-pressed={chatSize === preset}
-                  className={`h-6 w-7 rounded-sm text-xs font-medium transition-colors duration-[var(--duration-state)] ${
-                    chatSize === preset
-                      ? 'bg-card text-foreground shadow-[var(--shadow-raised)]'
-                      : 'text-muted-foreground hover:text-foreground'
-                  }`}
-                >
-                  {preset}
-                </button>
-              </Tooltip>
-            ))}
-          </div>
-        )}
         <button
           type="button"
           onClick={onClose}

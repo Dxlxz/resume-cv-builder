@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react'
 import type { SectionId } from '@rb/core/types/document'
+import { useDocumentStore } from '@/app/store/documentStore'
+import { getSectionLabel } from '@rb/core/selectors/getSectionLabel'
 import { IdrizzIconButton } from '@/components/ai/IdrizzIconButton'
 import { Button } from '@/components/ui/Button'
 
@@ -35,6 +37,17 @@ export function FormSection({
   const guideId = `form-section-guide-${sectionId}`
   const guideInputRef = useRef<HTMLTextAreaElement>(null)
   const savedTimerRef = useRef<number | null>(null)
+  const setIdrizzOpen = useDocumentStore((s) => s.setIdrizzOpen)
+  const setIdrizzPrefill = useDocumentStore((s) => s.setIdrizzPrefill)
+
+  const rewriteWithIdrizz = () => {
+    const label = getSectionLabel(sectionId, {})
+    setIdrizzPrefill(
+      `Rewrite the ${label} section to follow my guide. Make it tighter and stronger. Stay faithful to the source; never invent facts, dates, or achievements.`,
+    )
+    setIdrizzOpen(true)
+    cancelGuide()
+  }
 
   const openGuide = () => {
     setDraft(guide ?? '')
@@ -149,7 +162,7 @@ export function FormSection({
             aria-describedby={`${guideId}-hint`}
             className="w-full rounded-sm border border-border bg-card px-3 py-2 text-sm text-foreground transition-colors duration-[var(--duration-state)] focus:border-[var(--ring)]"
           />
-          <div className="flex items-center justify-between gap-2">
+          <div className="flex flex-wrap items-center justify-between gap-2">
             <p id={`${guideId}-hint`} className="text-xs text-muted-foreground">
               Enter to save · Shift+Enter for a new line · Esc to cancel. Empty means Idrizz uses
               its default style.
@@ -160,6 +173,9 @@ export function FormSection({
                   Saved ✓
                 </span>
               )}
+              <Button type="button" variant="secondary" size="sm" onClick={rewriteWithIdrizz}>
+                Rewrite this section with Idrizz
+              </Button>
               <Button type="button" variant="ghost" size="sm" onClick={cancelGuide}>
                 Cancel
               </Button>

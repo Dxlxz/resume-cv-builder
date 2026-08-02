@@ -55,6 +55,10 @@ interface DocumentState {
   pdfError: string | null
   lintIssues: LintIssue[]
   showLintPanel: boolean
+  idrizzOpen: boolean
+  setIdrizzOpen: (open: boolean) => void
+  idrizzPrefill: string | null
+  setIdrizzPrefill: (instruction: string | null) => void
   showOnboarding: boolean
   previewPageCount: number
   setPreviewPageCount: (count: number) => void
@@ -156,6 +160,8 @@ export const useDocumentStore = create<DocumentState>((set, get) => {
     pdfError: null,
     lintIssues: [],
     showLintPanel: false,
+    idrizzOpen: false,
+    idrizzPrefill: null,
     showOnboarding: true,
     previewPageCount: 1,
     previewPdfBlob: null,
@@ -513,6 +519,10 @@ export const useDocumentStore = create<DocumentState>((set, get) => {
   setLintIssues: (issues) => set({ lintIssues: issues }),
 
   setShowLintPanel: (show) => set({ showLintPanel: show }),
+
+  setIdrizzOpen: (open) => set({ idrizzOpen: open }),
+
+  setIdrizzPrefill: (instruction) => set({ idrizzPrefill: instruction }),
 
   dismissOnboarding: () => set({ showOnboarding: false }),
 

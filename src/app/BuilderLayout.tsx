@@ -4,6 +4,7 @@ import { EditorPanel } from '@/components/editor/EditorPanel'
 import { PreviewPanel } from '@/components/preview/PreviewPanel'
 import { RecoveryBanner } from '@/components/RecoveryBanner'
 import { IdrizzChat } from '@/components/ai/IdrizzChat'
+import { useDocumentStore } from '@/app/store/documentStore'
 
 type MobileTab = 'edit' | 'preview'
 
@@ -14,7 +15,8 @@ interface BuilderLayoutProps {
 export function BuilderLayout({ onHome }: BuilderLayoutProps) {
   const [mobileTab, setMobileTab] = useState<MobileTab>('edit')
   const [previewHidden, setPreviewHidden] = useState(false)
-  const [idrizzOpen, setIdrizzOpen] = useState(false)
+  const idrizzOpen = useDocumentStore((s) => s.idrizzOpen)
+  const setIdrizzOpen = useDocumentStore((s) => s.setIdrizzOpen)
 
   const effectiveTab: MobileTab = previewHidden ? 'edit' : mobileTab
 

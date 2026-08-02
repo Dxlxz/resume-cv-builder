@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { runAiProxy } from '@/lib/ai/server'
+import { runAiProxy } from './ai-impl.ts'
 
 const FAKE_KEY = 'opencode-go-test-key-12345'
 

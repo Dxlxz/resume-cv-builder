@@ -4,7 +4,7 @@ import { defineConfig, defaultExclude } from 'vitest/config'
 import { loadEnv } from 'vite'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
-import { runAiProxy } from './src/lib/ai/server.ts'
+import { runAiProxy } from './api/ai-impl.ts'
 
 // Private personal pack (Dale's profile) — dev/test only. Shipping builds
 // apply no alias: `@personal/profile` stays an external dynamic import that

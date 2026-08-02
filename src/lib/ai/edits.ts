@@ -310,6 +310,9 @@ export function parseAiEditPlan(text: string): AiEditPlan | null {
   }
 }
 
+/** Maximum context length the AI proxy accepts (see api/ai-impl.ts). */
+export const MAX_AI_CONTEXT_CHARS = 80_000
+
 /** Compact document view sent to the model so it can reference real ids. */
 export function buildDocumentContext(document: ResumeDocument): string {
   const context = {
@@ -338,5 +341,9 @@ export function buildDocumentContext(document: ResumeDocument): string {
     volunteer: document.volunteer,
     references: document.references,
   }
-  return JSON.stringify(context)
+  const json = JSON.stringify(context)
+  if (json.length > MAX_AI_CONTEXT_CHARS) {
+    throw new Error('Document context is too large for the AI service.')
+  }
+  return json
 }

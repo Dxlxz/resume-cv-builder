@@ -57,6 +57,14 @@ export async function requestAi(
       throw new AiError('The AI service is busy. Wait a moment and try again.', 'rate')
     }
     if (!response.ok) {
+      const body: unknown = await response.json().catch(() => null)
+      const message = (body as { error?: unknown } | null)?.error
+      if (typeof message === 'string' && message.includes('not configured')) {
+        throw new AiError('Idrizz is not set up on this deployment yet.', 'server')
+      }
+      if (typeof message === 'string' && message.includes('too large')) {
+        throw new AiError('Your document is too large for Idrizz right now. Ask about one section at a time.', 'server')
+      }
       throw new AiError('The AI service returned an error. Try again.', 'server')
     }
 

@@ -1,10 +1,10 @@
-import { buildAiEditMessages, type AiFeature } from './prompts.ts'
+import { buildAiEditMessages, type AiFeature } from '../src/lib/ai/prompts.ts'
 
 /**
- * Server-side AI proxy logic, shared by the Vercel function (api/ai.ts) and
- * the Vite dev middleware. Validates the request, builds the prompt, and
- * forwards it to the OpenCode Go API with the key. Stateless: no logging,
- * no storage, no rate counters.
+ * Canonical server-side AI proxy logic - the single source of truth shared
+ * by the Vercel function (api/ai.ts) and the Vite dev middleware. Kept
+ * free of @rb/* imports so both entry points can load it relatively.
+ * Stateless: no logging of payloads, no storage, no rate counters.
  */
 
 export interface AiProxyResult {
@@ -17,18 +17,26 @@ const MODEL = 'deepseek-v4-flash'
 const MAX_TOKENS = 2000
 const TEMPERATURE = 0.4
 const MAX_BODY_CHARS = 100_000
+const MAX_CONTEXT_CHARS = 80_000
+const MAX_INSTRUCTION_CHARS = 4000
 
-function buildMessages(feature: AiFeature, payload: unknown): { role: 'system' | 'user'; content: string }[] | null {
+function buildMessages(
+  feature: AiFeature,
+  payload: unknown,
+): { role: 'system' | 'user'; content: string }[] | null {
   if (feature !== 'ai-edit') return null
   if (typeof payload !== 'object' || payload === null) return null
   const p = payload as Record<string, unknown>
   if (typeof p.instruction !== 'string' || typeof p.context !== 'string') return null
-  if (p.instruction.length > 4000 || p.instruction.length === 0) return null
-  if (p.context.length > 80_000) return null
+  if (p.instruction.length > MAX_INSTRUCTION_CHARS || p.instruction.length === 0) return null
+  if (p.context.length > MAX_CONTEXT_CHARS) return null
   return buildAiEditMessages({ instruction: p.instruction, context: p.context })
 }
 
-export async function runAiProxy(body: unknown, apiKey: string | undefined): Promise<AiProxyResult> {
+export async function runAiProxy(
+  body: unknown,
+  apiKey: string | undefined,
+): Promise<AiProxyResult> {
   if (!apiKey) {
     return { status: 500, json: { error: 'AI is not configured on this deployment.' } }
   }
@@ -67,9 +75,11 @@ export async function runAiProxy(body: unknown, apiKey: string | undefined): Pro
     })
 
     if (upstream.status === 429) {
+      console.error(`[ai-proxy] upstream rate limited (429) for ${feature}`)
       return { status: 429, json: { error: 'The AI service is busy. Try again in a moment.' } }
     }
     if (!upstream.ok) {
+      console.error(`[ai-proxy] upstream error ${upstream.status} for ${feature} (${MODEL})`)
       return { status: 502, json: { error: 'The AI service returned an error.' } }
     }
 
@@ -77,10 +87,12 @@ export async function runAiProxy(body: unknown, apiKey: string | undefined): Pro
     const text = (data as { choices?: { message?: { content?: unknown } }[] } | null)?.choices?.[0]
       ?.message?.content
     if (typeof text !== 'string') {
+      console.error(`[ai-proxy] upstream response missing text for ${feature}`)
       return { status: 502, json: { error: 'Unexpected response from the AI service.' } }
     }
     return { status: 200, json: { text: text.trim() } }
-  } catch {
+  } catch (err) {
+    console.error(`[ai-proxy] upstream request failed for ${feature}: ${String(err)}`)
     return { status: 502, json: { error: 'The AI service is unavailable.' } }
   }
 }

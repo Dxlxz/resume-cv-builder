@@ -75,6 +75,11 @@ export function IdrizzChat({ open, onOpen, onClose }: IdrizzChatProps) {
   const scrollRef = useRef<HTMLDivElement>(null)
   const lastResultRef = useRef<string | null>(null)
   const lastErrorRef = useRef<string | null>(null)
+  const documentRef = useRef(document)
+
+  useEffect(() => {
+    documentRef.current = document
+  }, [document])
 
   const hasUserMessage = messages.some((m) => m.role === 'user')
 
@@ -87,6 +92,36 @@ export function IdrizzChat({ open, onOpen, onClose }: IdrizzChatProps) {
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: 'smooth' })
   }, [messages, busy, consentOpen])
+
+  // A section-scoped "Rewrite this section" request arrives through the
+  // store (idrizzPrefill). Consumed on the store subscription - the
+  // recommended external-system pattern - so it goes through the normal
+  // send flow, consent gate included.
+  useEffect(() => {
+    return useDocumentStore.subscribe((state, prev) => {
+      if (!state.idrizzOpen || !state.idrizzPrefill) return
+      if (state.idrizzPrefill === prev.idrizzPrefill) return
+      const text = state.idrizzPrefill
+      useDocumentStore.getState().setIdrizzPrefill(null)
+      const doc = documentRef.current
+      if (!doc) return
+      setMessages((prevMessages) => [...prevMessages, { role: 'user', text }])
+      let context: string
+      try {
+        context = buildDocumentContext(doc)
+      } catch {
+        setMessages((prevMessages) => [
+          ...prevMessages,
+          {
+            role: 'idrizz',
+            text: 'Your document is too large for Idrizz right now. Ask about one section at a time, or trim some bullets.',
+          },
+        ])
+        return
+      }
+      run({ instruction: text, context })
+    })
+  }, [run])
 
   useEffect(() => {
     if (result === null || result === lastResultRef.current) return
@@ -113,7 +148,20 @@ export function IdrizzChat({ open, onOpen, onClose }: IdrizzChatProps) {
     if (!text || busy) return
     setMessages((prev) => [...prev, { role: 'user', text }])
     setInput('')
-    run({ instruction: text, context: buildDocumentContext(document) })
+    let context: string
+    try {
+      context = buildDocumentContext(document)
+    } catch {
+      setMessages((prev) => [
+        ...prev,
+        {
+          role: 'idrizz',
+          text: 'Your document is too large for Idrizz right now. Ask about one section at a time, or trim some bullets.',
+        },
+      ])
+      return
+    }
+    run({ instruction: text, context })
   }
 
   const clearPlan = (index: number) => {

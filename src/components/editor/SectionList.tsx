@@ -74,7 +74,14 @@ function SortableSectionRow({
           {...attributes}
           {...listeners}
         >
-          ⠿
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+            <circle cx="9" cy="6" r="1.6" />
+            <circle cx="15" cy="6" r="1.6" />
+            <circle cx="9" cy="12" r="1.6" />
+            <circle cx="15" cy="12" r="1.6" />
+            <circle cx="9" cy="18" r="1.6" />
+            <circle cx="15" cy="18" r="1.6" />
+          </svg>
         </button>
       )}
       <button
@@ -149,7 +156,8 @@ export function SectionList() {
       <div>
         <h3 className="text-sm font-semibold text-foreground">Sections</h3>
         <p className="mt-0.5 text-xs text-muted-foreground">
-          Click a name to jump · drag ⠿ to reorder · toggle Show to hide from export
+          Click a name to jump to it. Drag or use the arrows to reorder. Untick
+          Show to leave a section out of the PDF.
         </p>
       </div>
       <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={onDragEnd}>

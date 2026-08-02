@@ -11,6 +11,7 @@ import { paginateDriftIssue } from '@rb/validators/paginate-lint'
 import { LintPanel } from '@/components/toolbar/LintPanel'
 import { PdfPreviewModal } from '@/components/toolbar/PdfPreviewModal'
 import { Button } from '@/components/ui/Button'
+import { Brand } from '@/components/ui/Brand'
 import { navigateToAdmin } from '@/hooks/useAppRoute'
 import type { DocumentType, ExportProfile, PresetId } from '@rb/core/types/document'
 
@@ -60,6 +61,25 @@ export function Toolbar({ onHome }: ToolbarProps) {
       if (pdfPreview?.url) URL.revokeObjectURL(pdfPreview.url)
     }
   }, [pdfPreview?.url])
+
+  // "More" menu: close on outside click or Escape.
+  const menuRef = useRef<HTMLDetailsElement>(null)
+  const [menuOpen, setMenuOpen] = useState(false)
+  useEffect(() => {
+    if (!menuOpen) return
+    const onDocClick = (e: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) setMenuOpen(false)
+    }
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setMenuOpen(false)
+    }
+    window.document.addEventListener('mousedown', onDocClick)
+    window.document.addEventListener('keydown', onKey)
+    return () => {
+      window.document.removeEventListener('mousedown', onDocClick)
+      window.document.removeEventListener('keydown', onKey)
+    }
+  }, [menuOpen])
 
   if (!document) return null
 
@@ -186,7 +206,7 @@ export function Toolbar({ onHome }: ToolbarProps) {
     saveStatus === 'saving'
       ? 'Saving…'
       : saveStatus === 'error'
-        ? saveError ?? 'Save error'
+        ? saveError ?? 'Save failed'
         : 'Saved locally'
 
   const saveTone =
@@ -215,12 +235,20 @@ export function Toolbar({ onHome }: ToolbarProps) {
               </svg>
               Home
             </Button>
-            <div className="mr-auto min-w-0">
-              <h1 className="text-lg font-bold text-foreground">Resume & CV Builder</h1>
-              <p className={`text-xs ${saveTone}`} aria-live="polite">
-                {saveLabel} · {preset.name}
-              </p>
-            </div>
+            <span className="min-w-0">
+              <Brand />
+            </span>
+            <span
+              className={`ml-auto inline-flex shrink-0 items-center gap-1.5 rounded-full border border-border bg-card px-2.5 py-1 text-xs ${saveTone}`}
+              aria-live="polite"
+              title={saveStatus === 'error' && saveError ? saveError : undefined}
+            >
+              <span aria-hidden className={`h-1.5 w-1.5 rounded-full ${saveTone}`} />
+              {saveLabel}
+            </span>
+            <Button variant="secondary" onClick={runAtsCheck} className="shrink-0">
+              ATS Check
+            </Button>
             <Button
               onClick={handleExportPdf}
               disabled={exporting}
@@ -228,30 +256,11 @@ export function Toolbar({ onHome }: ToolbarProps) {
             >
               {exporting ? 'Exporting…' : 'Export PDF'}
             </Button>
-            <Button
-              variant="secondary"
-              onClick={() => void handlePreviewPdf()}
-              disabled={previewing || exporting}
-              className="shrink-0"
-            >
-              {previewing ? 'Opening…' : 'Fullscreen PDF'}
-            </Button>
-            <Button variant="secondary" onClick={runAtsCheck} className="shrink-0">
-              ATS Check
-            </Button>
-            <Button
-              variant={layoutDebug ? 'primary' : 'secondary'}
-              onClick={() => setLayoutDebug(!layoutDebug)}
-              className="shrink-0 text-left"
-              title="Show measured block boxes and page break lines on preview"
-            >
-              Layout debug
-            </Button>
           </div>
 
           <div className="flex flex-wrap items-end gap-x-4 gap-y-2 border-t border-border pt-3">
             <p className="w-full text-xs font-medium uppercase tracking-wide text-muted-foreground sm:w-auto sm:pr-2">
-              Layout
+              Document
             </p>
             <label className="text-sm text-muted-foreground">
               Preset
@@ -327,53 +336,117 @@ export function Toolbar({ onHome }: ToolbarProps) {
                 <option value="portal-safe">Portal-safe</option>
               </select>
             </label>
+
+            <details
+              ref={menuRef}
+              className="relative ml-auto"
+              open={menuOpen}
+              onToggle={(e) => setMenuOpen(e.currentTarget.open)}
+            >
+              <summary className="flex cursor-pointer list-none items-center gap-1.5 rounded-sm border border-border bg-card px-3 py-1.5 text-sm text-foreground transition-colors duration-[var(--duration-state)] hover:bg-muted [&::-webkit-details-marker]:hidden">
+                More
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                  <path d="M6 9l6 6 6-6" />
+                </svg>
+              </summary>
+              <div className="absolute right-0 z-50 mt-2 w-60 rounded-md border border-border bg-card p-1.5 shadow-[var(--shadow-menu)]">
+                <button
+                  type="button"
+                  className="flex w-full items-center gap-2 rounded-sm px-3 py-2 text-left text-sm text-foreground transition-colors duration-[var(--duration-state)] hover:bg-muted"
+                  onClick={() => {
+                    setMenuOpen(false)
+                    void handlePreviewPdf()
+                  }}
+                  disabled={previewing || exporting}
+                >
+                  Open fullscreen PDF
+                </button>
+                <button
+                  type="button"
+                  className={`flex w-full items-center gap-2 rounded-sm px-3 py-2 text-left text-sm transition-colors duration-[var(--duration-state)] hover:bg-muted ${
+                    layoutDebug ? 'text-primary' : 'text-foreground'
+                  }`}
+                  onClick={() => {
+                    setMenuOpen(false)
+                    setLayoutDebug(!layoutDebug)
+                  }}
+                >
+                  Layout debug
+                </button>
+                <button
+                  type="button"
+                  className="flex w-full items-center gap-2 rounded-sm px-3 py-2 text-left text-sm text-foreground transition-colors duration-[var(--duration-state)] hover:bg-muted"
+                  onClick={() => {
+                    setMenuOpen(false)
+                    exportDocumentJson(document)
+                  }}
+                >
+                  Export JSON
+                </button>
+                <button
+                  type="button"
+                  className="flex w-full items-center gap-2 rounded-sm px-3 py-2 text-left text-sm text-foreground transition-colors duration-[var(--duration-state)] hover:bg-muted"
+                  onClick={() => {
+                    setMenuOpen(false)
+                    fileInputRef.current?.click()
+                  }}
+                >
+                  Import JSON
+                </button>
+                {personalProfileAvailable && (
+                  <button
+                    type="button"
+                    className="flex w-full items-center gap-2 rounded-sm px-3 py-2 text-left text-sm text-foreground transition-colors duration-[var(--duration-state)] hover:bg-muted"
+                    onClick={() => {
+                      setMenuOpen(false)
+                      if (
+                        confirm(
+                          'Replace your current draft with your personal profile? Your current edits will be replaced.',
+                        )
+                      ) {
+                        loadPersonalProfile()
+                      }
+                    }}
+                  >
+                    Load my profile
+                  </button>
+                )}
+                <button
+                  type="button"
+                  className="flex w-full items-center gap-2 rounded-sm px-3 py-2 text-left text-sm text-foreground transition-colors duration-[var(--duration-state)] hover:bg-muted"
+                  onClick={() => {
+                    setMenuOpen(false)
+                    navigateToAdmin()
+                  }}
+                >
+                  Manage catalogs
+                </button>
+                <div className="my-1 h-px bg-border" />
+                <button
+                  type="button"
+                  className="flex w-full items-center gap-2 rounded-sm px-3 py-2 text-left text-sm text-status-danger transition-colors duration-[var(--duration-state)] hover:bg-badge-danger"
+                  onClick={() => {
+                    setMenuOpen(false)
+                    handleStartFresh()
+                  }}
+                >
+                  Start fresh
+                </button>
+              </div>
+            </details>
           </div>
 
-          <div className="flex flex-wrap items-center gap-2 border-t border-border pt-3">
-            <p className="mr-1 w-full text-xs font-medium uppercase tracking-wide text-muted-foreground sm:w-auto">
-              Data
-            </p>
-            <Button variant="secondary" size="sm" onClick={() => exportDocumentJson(document)}>
-              Export JSON
-            </Button>
-            <Button variant="secondary" size="sm" onClick={() => fileInputRef.current?.click()}>
-              Import JSON
-            </Button>
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="application/json,.json"
-              className="hidden"
-              onChange={(e) => {
-                const file = e.target.files?.[0]
-                if (file) void handleImport(file)
-                e.target.value = ''
-              }}
-            />
-            {personalProfileAvailable && (
-              <Button
-                variant="secondary"
-                size="sm"
-                onClick={() => {
-                  if (
-                    confirm(
-                      'Replace your current draft with your personal profile? Your current edits will be replaced.',
-                    )
-                  ) {
-                    loadPersonalProfile()
-                  }
-                }}
-              >
-                Load my profile
-              </Button>
-            )}
-            <Button variant="ghost" size="sm" onClick={handleStartFresh}>
-              Start fresh
-            </Button>
-            <Button variant="ghost" size="sm" onClick={navigateToAdmin}>
-              Manage catalogs
-            </Button>
-          </div>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="application/json,.json"
+            className="hidden"
+            onChange={(e) => {
+              const file = e.target.files?.[0]
+              if (file) void handleImport(file)
+              e.target.value = ''
+            }}
+          />
         </div>
 
         {exportNotice && (

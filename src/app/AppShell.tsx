@@ -1,7 +1,8 @@
 import type { ReactNode } from 'react'
+import { Brand } from '@/components/ui/Brand'
 
 /**
- * App shell - the persistent chrome for non-builder flows (onboarding).
+ * App shell — the persistent chrome for non-builder flows (onboarding).
  * Header hosts the leading back control (top-left), brand, and trailing
  * actions; content sits on the UDS canvas below. Matches the builder's
  * Toolbar chrome (bg-header, border-border, shadow-raised).
@@ -14,27 +15,6 @@ interface AppShellProps {
   onBack?: () => void
   /** Optional trailing actions (e.g. catalog link). */
   rightSlot?: ReactNode
-}
-
-function BrandMark() {
-  return (
-    <span className="flex h-7 w-7 items-center justify-center rounded-sm bg-primary text-primary-foreground">
-      <svg
-        width="15"
-        height="15"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        aria-hidden
-      >
-        <path d="M6 2h9l5 5v13a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2z" />
-        <path d="M14 2v5h5M9 12h6M9 16h6" />
-      </svg>
-    </span>
-  )
 }
 
 export function AppShell({ children, backLabel = 'Home', onBack, rightSlot }: AppShellProps) {
@@ -65,11 +45,8 @@ export function AppShell({ children, backLabel = 'Home', onBack, rightSlot }: Ap
               {backLabel}
             </button>
           )}
-          <span className="flex items-center gap-2.5 pl-2">
-            <BrandMark />
-            <span className="text-[15px] font-semibold tracking-tight text-foreground">
-              Resume &amp; CV Builder
-            </span>
+          <span className="pl-2">
+            <Brand />
           </span>
           {rightSlot && <div className="ml-auto flex flex-wrap items-center gap-2">{rightSlot}</div>}
         </div>

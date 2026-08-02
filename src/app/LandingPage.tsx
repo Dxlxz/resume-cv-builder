@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react'
+import { useEffect, useState } from 'react'
 import { navigateToAdmin } from '@/hooks/useAppRoute'
 import { Button } from '@/components/ui/Button'
 import { Brand } from '@/components/ui/Brand'
@@ -149,6 +150,44 @@ function ResumeMock() {
   )
 }
 
+/** Hero backdrop: compressed looping video with a dark veil; static poster under reduced motion. */
+function HeroBackground() {
+  const [reduced, setReduced] = useState(
+    () => window.matchMedia('(prefers-reduced-motion: reduce)').matches,
+  )
+
+  useEffect(() => {
+    const mq = window.matchMedia('(prefers-reduced-motion: reduce)')
+    const onChange = (e: MediaQueryListEvent) => setReduced(e.matches)
+    mq.addEventListener('change', onChange)
+    return () => mq.removeEventListener('change', onChange)
+  }, [])
+
+  return (
+    <div className="absolute inset-0 overflow-hidden" aria-hidden="true">
+      {reduced ? (
+        <img
+          src="/images/landing-bg-poster.jpg"
+          alt=""
+          className="h-full w-full object-cover"
+        />
+      ) : (
+        <video
+          className="h-full w-full object-cover"
+          src="/videos/landing-bg.mp4"
+          poster="/images/landing-bg-poster.jpg"
+          autoPlay
+          muted
+          loop
+          playsInline
+          tabIndex={-1}
+        />
+      )}
+      <div className="absolute inset-0 bg-foreground/45" />
+    </div>
+  )
+}
+
 export function LandingPage({
   onStart,
   onLoadProfile,
@@ -177,19 +216,21 @@ export function LandingPage({
       </header>
 
       {/* --- Hero --- */}
-      <section className="border-b border-border">
-        <div className="mx-auto grid max-w-6xl items-center gap-12 px-5 py-20 lg:grid-cols-[1.05fr_0.95fr] lg:py-28">
+      <section className="relative overflow-hidden border-b border-border">
+        <HeroBackground />
+
+        <div className="relative mx-auto grid max-w-6xl items-center gap-12 px-5 py-20 lg:grid-cols-[1.05fr_0.95fr] lg:py-28">
           <div>
-            <span className="inline-flex items-center gap-2 rounded-full border border-border bg-muted px-3.5 py-1.5 text-xs font-medium text-muted-foreground">
+            <span className="inline-flex items-center gap-2 rounded-full border border-background/25 bg-background/10 px-3.5 py-1.5 text-xs font-medium text-background">
               <span className="h-1.5 w-1.5 rounded-full bg-status-success" aria-hidden />
               Local-first. No account required.
             </span>
 
-            <h1 className="mt-6 text-4xl font-semibold leading-[1.08] tracking-tight sm:text-5xl">
+            <h1 className="mt-6 text-4xl font-semibold leading-[1.08] tracking-tight text-background sm:text-5xl">
               Resumes that clear ATS.
             </h1>
 
-            <p className="mt-5 max-w-xl text-base leading-relaxed text-muted-foreground sm:text-lg">
+            <p className="mt-5 max-w-xl text-base leading-relaxed text-background/80 sm:text-lg">
               A local-first builder with a live PDF preview, ATS checks, and
               presets tuned for Malaysia. Your data stays in your browser.
             </p>
@@ -205,7 +246,7 @@ export function LandingPage({
               )}
             </div>
 
-            <p className="mt-6 text-sm text-muted-foreground">
+            <p className="mt-6 text-sm text-background/70">
               Free. No account. Export a PDF you can check before sending.
             </p>
           </div>
@@ -237,6 +278,11 @@ export function LandingPage({
             </div>
           </div>
         </div>
+
+        <div
+          className="pointer-events-none absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-background to-transparent"
+          aria-hidden
+        />
       </section>
 
       {/* --- How it works --- */}

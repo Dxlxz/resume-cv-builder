@@ -5,9 +5,11 @@ import { useDocumentStore } from '@/store/documentStore'
 interface PreviewShellProps {
   document: ResumeDocument
   contentKey: string
+  /** Desktop affordance to hide the preview column (also in the More menu). */
+  onTogglePreview?: () => void
 }
 
-export function PreviewShell({ document, contentKey }: PreviewShellProps) {
+export function PreviewShell({ document, contentKey, onTogglePreview }: PreviewShellProps) {
   const isResume = document.meta.documentType === 'resume'
   const previewPageCount = useDocumentStore((s) => s.previewPageCount)
   const layoutPlan = useDocumentStore((s) => s.layoutPlan)
@@ -21,6 +23,15 @@ export function PreviewShell({ document, contentKey }: PreviewShellProps) {
         <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
           Preview
         </h2>
+        {onTogglePreview && (
+          <button
+            type="button"
+            onClick={onTogglePreview}
+            className="hidden rounded-sm border border-border px-2.5 py-1 text-xs text-muted-foreground transition-colors duration-[var(--duration-state)] hover:bg-muted sm:inline-flex"
+          >
+            Hide preview
+          </button>
+        )}
         <span className="text-xs text-muted-foreground">
           {document.meta.pageSize === 'letter' ? 'US Letter' : 'A4'} · {previewPageCount} page
           {previewPageCount === 1 ? '' : 's'}

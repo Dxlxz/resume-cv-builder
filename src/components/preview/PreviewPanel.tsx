@@ -2,7 +2,11 @@ import { memo } from 'react'
 import { useDocumentStore } from '@/store/documentStore'
 import { PreviewShell } from '@/components/preview/PreviewShell'
 
-export const PreviewPanel = memo(function PreviewPanel() {
+export const PreviewPanel = memo(function PreviewPanel({
+  onTogglePreview,
+}: {
+  onTogglePreview?: () => void
+}) {
   const document = useDocumentStore((s) => s.document)
 
   if (!document) return null
@@ -11,7 +15,7 @@ export const PreviewPanel = memo(function PreviewPanel() {
 
   return (
     <div className="flex min-h-0 flex-1 flex-col">
-      <PreviewShell document={document} contentKey={contentKey} />
+      <PreviewShell document={document} contentKey={contentKey} onTogglePreview={onTogglePreview} />
     </div>
   )
 })

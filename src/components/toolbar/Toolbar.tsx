@@ -216,7 +216,7 @@ export function Toolbar({ onHome, previewVisible, onTogglePreview }: ToolbarProp
               <span className="font-normal text-muted-foreground"> · {preset.name}</span>
             </h1>
             <span
-              className={`ml-auto inline-flex shrink-0 items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs ${saveStatusBadge.tone}`}
+              className={`ml-auto inline-flex shrink-0 items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs ${saveStatusBadge.tone} hidden sm:inline-flex`}
               aria-live="polite"
               title={saveStatus === 'error' && saveError ? saveError : undefined}
             >

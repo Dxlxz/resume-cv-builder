@@ -79,12 +79,14 @@ export function BuilderLayout({ onHome }: BuilderLayoutProps) {
         </section>
         {!previewHidden && (
           <section
-            className={`flex min-h-0 flex-col overflow-hidden bg-muted p-4 lg:p-4 ${
+            className={`flex min-h-0 flex-col overflow-hidden bg-muted p-4 lg:p-6 ${
               effectiveTab === 'preview' ? 'flex' : 'hidden lg:flex'
             }`}
             aria-label="Document preview"
           >
-            <PreviewPanel />
+            <PreviewPanel
+              onTogglePreview={() => setPreviewHidden((v) => !v)}
+            />
           </section>
         )}
       </main>

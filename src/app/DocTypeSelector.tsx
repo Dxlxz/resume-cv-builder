@@ -188,7 +188,7 @@ export function DocTypeSelector({ onBack }: DocTypeSelectorProps) {
                       setSelectedPreset(p.id)
                     }
                   }}
-                  className={`flex cursor-pointer flex-col rounded-lg border bg-card p-6 transition-shadow duration-[var(--duration-state)] ${
+                  className={`flex cursor-pointer flex-col rounded-lg border bg-card p-6 transition-[border-color,background-color] duration-[var(--duration-state)] focus-visible:[box-shadow:var(--focus-ring)] ${
                     isSelected
                       ? 'border-ring ring-2 ring-ring/20 shadow-[var(--shadow-raised)]'
                       : 'border-border shadow-[var(--shadow-raised)] hover:shadow-[var(--shadow-menu)]'

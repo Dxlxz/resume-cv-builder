@@ -17,6 +17,7 @@ import {
 import { scrollToFormSection } from '@/lib/scrollToSection'
 import { getSectionLabel } from '@rb/core/selectors/getSectionLabel'
 import { AiEditReview, type AiAppliedInfo } from '@/features/ai/AiEditReview'
+import { MarkdownMessage } from '@/features/ai/MarkdownMessage'
 import { Button } from '@/components/ui/Button'
 
 /**
@@ -441,18 +442,30 @@ export function IdrizzChat({ open, onOpen, onClose }: IdrizzChatProps) {
           ) : (
             <div
               key={index}
-              className={`animate-slide-up ${
-                message.role === 'user' ? 'flex justify-end' : 'flex justify-start'
+              className={`animate-slide-up flex items-start gap-2 ${
+                message.role === 'user' ? 'justify-end' : 'justify-start'
               }`}
             >
+              {message.role !== 'user' && (
+                <span
+                  className="mt-1 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary"
+                  aria-hidden
+                >
+                  <SparkleIcon size={12} />
+                </span>
+              )}
               <div
                 className={`max-w-[85%] rounded-lg px-3 py-2 text-sm ${
                   message.role === 'user'
-                    ? 'bg-primary text-primary-foreground'
-                    : 'border border-border bg-muted text-foreground'
+                    ? 'rounded-tr-sm bg-primary text-primary-foreground'
+                    : 'rounded-tl-sm border border-border bg-muted text-foreground'
                 }`}
               >
-                <p className="whitespace-pre-wrap leading-relaxed">{message.text}</p>
+                {message.role === 'user' ? (
+                  <p className="whitespace-pre-wrap leading-relaxed">{message.text}</p>
+                ) : (
+                  <MarkdownMessage text={message.text} />
+                )}
               </div>
             </div>
           ),

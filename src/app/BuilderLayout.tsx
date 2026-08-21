@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Toolbar } from '@/components/toolbar/Toolbar'
 import { EditorPanel } from '@/components/editor/EditorPanel'
 import { PreviewPanel } from '@/components/preview/PreviewPanel'
-import { RecoveryBanner } from '@/components/RecoveryBanner'
+import { RecoveryBanner } from '@/app/RecoveryBanner'
 import { IdrizzChat } from '@/components/ai/IdrizzChat'
 import { useDocumentStore } from '@/app/store/documentStore'
 

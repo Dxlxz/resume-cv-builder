@@ -1,10 +1,10 @@
 import { useEffect, useRef, useState } from 'react'
 import type { ResumeDocument } from '@rb/core/types/document'
 import { computeLayoutPlan } from '@rb/layout/computeLayoutPlan'
-import { generatePdfWithPlan } from '@/renderers/pdf/generatePdf'
+import { generatePdfWithPlan } from '@/lib/pdf/generatePdf'
 import { useDocumentStore } from '@/app/store/documentStore'
 import { getPreset } from '@rb/presets/registry'
-import { countPdfPages } from '@/renderers/pdf/countPdfPages'
+import { countPdfPages } from '@/lib/pdf/countPdfPages'
 
 const DEBOUNCE_MS = 400
 

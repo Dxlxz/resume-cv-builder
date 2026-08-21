@@ -1,5 +1,5 @@
 import type { PDFDocumentProxy } from 'pdfjs-dist'
-import { loadPdfDocument } from '@/renderers/pdf/pdfjsClient'
+import { loadPdfDocument } from '@/lib/pdf/pdfjsClient'
 
 export interface PdfPageLayout {
   pageNumber: number

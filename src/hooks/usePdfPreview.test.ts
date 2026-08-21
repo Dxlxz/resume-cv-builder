@@ -4,8 +4,8 @@ import type { LayoutPlanResult } from '@rb/layout/types'
 import {sampleProfileDocument} from '@rb/fixtures'
 import { usePdfPreview } from '@/hooks/usePdfPreview'
 import { computeLayoutPlan } from '@rb/layout/computeLayoutPlan'
-import { generatePdfWithPlan } from '@/renderers/pdf/generatePdf'
-import { countPdfPages } from '@/renderers/pdf/countPdfPages'
+import { generatePdfWithPlan } from '@/lib/pdf/generatePdf'
+import { countPdfPages } from '@/lib/pdf/countPdfPages'
 
 const setLayoutPlan = vi.fn()
 
@@ -17,15 +17,15 @@ vi.mock('@rb/layout/computeLayoutPlan', () => ({
   computeLayoutPlan: vi.fn(),
 }))
 
-vi.mock('@/renderers/pdf/generatePdf', () => ({
+vi.mock('@/lib/pdf/generatePdf', () => ({
   generatePdfWithPlan: vi.fn(async () => new Blob(['%PDF-1.4'], { type: 'application/pdf' })),
 }))
 
-vi.mock('@/renderers/pdf/countPdfPages', () => ({
+vi.mock('@/lib/pdf/countPdfPages', () => ({
   countPdfPages: vi.fn(async () => 1),
 }))
 
-vi.mock('@/renderers/pdf/renderPdfWithPdfJs', () => ({
+vi.mock('@/lib/pdf/renderPdfWithPdfJs', () => ({
   loadPdfPreviewLayout: vi.fn(async () => ({
     pages: [],
     pageCount: 0,

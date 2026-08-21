@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { generatePdf } from '@/lib/pdf'
-import { countPdfPages } from '@/renderers/pdf/countPdfPages'
+import { countPdfPages } from '@/lib/pdf/countPdfPages'
 import {sampleCvDocument, sampleResumeDocument} from '@rb/fixtures'
 
 describe('countPdfPages', () => {

@@ -1,2 +1,2 @@
-export { generatePdf, generatePdfWithPlan } from '@/renderers/pdf/generatePdf'
-export { downloadPdf } from '@/renderers/pdf/download'
+export { generatePdf, generatePdfWithPlan } from '@/lib/pdf/generatePdf'
+export { downloadPdf } from '@/lib/pdf/download'

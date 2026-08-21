@@ -3,7 +3,7 @@ import { render, screen } from '@testing-library/react'
 import {sampleCvDocument, sampleProfileDocument} from '@rb/fixtures'
 import { PdfJsPreview } from '@/components/preview/PdfJsPreview'
 import { generatePdf } from '@/lib/pdf'
-import { countPdfPages } from '@/renderers/pdf/countPdfPages'
+import { countPdfPages } from '@/lib/pdf/countPdfPages'
 import { computeLayoutPlan } from '@rb/layout/computeLayoutPlan'
 
 const mockPreviewBlob = new Blob(['%PDF-1.4'], { type: 'application/pdf' })

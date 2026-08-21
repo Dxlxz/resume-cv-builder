@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import type { DocumentType, PresetId } from '@rb/core/types/document'
 import type { PresetDefinition } from '@rb/presets/types'
-import { useDocumentStore } from '@/app/store/documentStore'
+import { useDocumentStore } from '@/store/documentStore'
 import { PRESET_LIST } from '@rb/presets/registry'
 import { AppShell } from '@/app/AppShell'
 import { Button } from '@/components/ui/Button'

@@ -1,7 +1,7 @@
 import { useEffect, useMemo } from 'react'
 import type { ResumeDocument } from '@rb/core/types/document'
-import { usePdfPreview } from '@/hooks/usePdfPreview'
-import { useDocumentStore } from '@/app/store/documentStore'
+import { usePdfPreview } from '@/lib/pdf/usePdfPreview'
+import { useDocumentStore } from '@/store/documentStore'
 
 interface PdfJsPreviewProps {
   document: ResumeDocument

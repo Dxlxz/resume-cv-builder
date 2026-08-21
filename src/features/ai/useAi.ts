@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { AiError, requestAi } from '@/lib/ai/client'
-import type { AiFeature } from '@/lib/ai/types'
+import { AiError, requestAi } from '@/features/ai/client'
+import type { AiFeature } from '@/features/ai/types'
 
 const CONSENT_KEY = 'resume-builder:ai-consent'
 

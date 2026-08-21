@@ -1,4 +1,4 @@
-import { useDocumentStore } from '@/app/store/documentStore'
+import { useDocumentStore } from '@/store/documentStore'
 import { createEmptyExperience } from '@rb/core/schema'
 import type { ResumeDocument } from '@rb/core/types/document'
 import { Button } from '@/components/ui/Button'
@@ -7,7 +7,7 @@ import { CatalogPicker } from '@/components/catalog/CatalogPicker'
 import { MonthField } from '@/components/ui/MonthField'
 import { BulletListEditor } from '@/components/ui/BulletListEditor'
 import { EmptyHint } from '@/components/ui/EmptyHint'
-import { FORM_PLACEHOLDERS } from '@/lib/formPlaceholders'
+import { FORM_PLACEHOLDERS } from '@/components/editor/formPlaceholders'
 
 type ExperienceItem = ResumeDocument['experience'][number]
 

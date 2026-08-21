@@ -4,7 +4,7 @@ import {
   applyAiEditPlan,
   buildDocumentContext,
   parseAiEditPlan,
-} from '@/lib/ai/edits'
+} from '@/features/ai/edits'
 import { sampleResumeDocument } from '@rb/fixtures'
 import type { ResumeDocument } from '@rb/core/types/document'
 

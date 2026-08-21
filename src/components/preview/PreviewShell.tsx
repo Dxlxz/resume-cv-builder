@@ -1,6 +1,6 @@
 import type { ResumeDocument } from '@rb/core/types/document'
 import { PdfJsPreview } from '@/components/preview/PdfJsPreview'
-import { useDocumentStore } from '@/app/store/documentStore'
+import { useDocumentStore } from '@/store/documentStore'
 
 interface PreviewShellProps {
   document: ResumeDocument

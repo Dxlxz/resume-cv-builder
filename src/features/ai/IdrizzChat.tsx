@@ -1,22 +1,22 @@
 import { useEffect, useRef, useState } from 'react'
 import type { SectionId } from '@rb/core/types/document'
-import { useDocumentStore } from '@/app/store/documentStore'
-import { useAi } from '@/hooks/useAi'
+import { useDocumentStore } from '@/store/documentStore'
+import { useAi } from '@/features/ai/useAi'
 import { useMediaQuery } from '@/hooks/useMediaQuery'
 import {
   aiEditPlanHasEffects,
   buildDocumentContext,
   parseAiEditPlan,
-} from '@/lib/ai/edits'
+} from '@/features/ai/edits'
 import {
   clearChatHistory,
   loadChatHistory,
   saveChatHistory,
   type ChatHistoryMessage,
-} from '@/lib/ai/history'
+} from '@/features/ai/history'
 import { scrollToFormSection } from '@/lib/scrollToSection'
 import { getSectionLabel } from '@rb/core/selectors/getSectionLabel'
-import { AiEditReview, type AiAppliedInfo } from '@/components/ai/AiEditReview'
+import { AiEditReview, type AiAppliedInfo } from '@/features/ai/AiEditReview'
 import { Button } from '@/components/ui/Button'
 
 /**

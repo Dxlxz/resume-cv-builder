@@ -1,4 +1,4 @@
-import { useDocumentStore } from '@/app/store/documentStore'
+import { useDocumentStore } from '@/store/documentStore'
 import { createEmptySkillGroup } from '@rb/core/schema'
 import { Button } from '@/components/ui/Button'
 import { TextField } from '@/components/ui/TextField'
@@ -8,7 +8,7 @@ import {
   categoryIdForSkillGroupName,
   isLanguagesSkillGroup,
 } from '@rb/catalog/categories'
-import { FORM_PLACEHOLDERS } from '@/lib/formPlaceholders'
+import { FORM_PLACEHOLDERS } from '@/components/editor/formPlaceholders'
 
 export function SkillsForm() {
   const skills = useDocumentStore((s) => s.document?.skills ?? [])

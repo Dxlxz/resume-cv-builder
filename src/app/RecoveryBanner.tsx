@@ -1,4 +1,4 @@
-import { useDocumentStore } from '@/app/store/documentStore'
+import { useDocumentStore } from '@/store/documentStore'
 
 /**
  * Shown when a corrupted draft was quarantined instead of deleted. Restore

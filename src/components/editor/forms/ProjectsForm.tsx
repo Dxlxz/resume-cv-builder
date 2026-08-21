@@ -1,10 +1,10 @@
-import { useDocumentStore } from '@/app/store/documentStore'
+import { useDocumentStore } from '@/store/documentStore'
 import { createEmptyProject } from '@rb/core/schema'
 import { Button } from '@/components/ui/Button'
 import { TextField } from '@/components/ui/TextField'
 import { TextArea } from '@/components/ui/TextArea'
 import { BulletListEditor } from '@/components/ui/BulletListEditor'
-import { FORM_PLACEHOLDERS } from '@/lib/formPlaceholders'
+import { FORM_PLACEHOLDERS } from '@/components/editor/formPlaceholders'
 
 export function ProjectsForm() {
   const projects = useDocumentStore((s) => s.document?.projects ?? [])

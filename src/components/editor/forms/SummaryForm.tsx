@@ -1,6 +1,6 @@
-import { useDocumentStore } from '@/app/store/documentStore'
+import { useDocumentStore } from '@/store/documentStore'
 import { TextArea } from '@/components/ui/TextArea'
-import { FORM_PLACEHOLDERS } from '@/lib/formPlaceholders'
+import { FORM_PLACEHOLDERS } from '@/components/editor/formPlaceholders'
 
 export function SummaryForm() {
   const summary = useDocumentStore((s) => s.document?.summary ?? '')

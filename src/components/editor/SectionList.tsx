@@ -15,7 +15,7 @@ import {
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
-import { useDocumentStore } from '@/app/store/documentStore'
+import { useDocumentStore } from '@/store/documentStore'
 import { getSectionLabel } from '@rb/core/selectors/getSectionLabel'
 import type { SectionId } from '@rb/core/types/document'
 import { getPreset } from '@rb/presets/registry'

@@ -2,13 +2,13 @@ import { describe, expect, it, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import {sampleCvDocument, sampleProfileDocument} from '@rb/fixtures'
 import { PdfJsPreview } from '@/components/preview/PdfJsPreview'
-import { generatePdf } from '@/lib/pdf'
+import { generatePdf } from '@/lib/pdf/generatePdf'
 import { countPdfPages } from '@/lib/pdf/countPdfPages'
 import { computeLayoutPlan } from '@rb/layout/computeLayoutPlan'
 
 const mockPreviewBlob = new Blob(['%PDF-1.4'], { type: 'application/pdf' })
 
-vi.mock('@/hooks/usePdfPreview', () => ({
+vi.mock('@/lib/pdf/usePdfPreview', () => ({
   usePdfPreview: () => ({
     loading: false,
     refreshing: false,
@@ -19,7 +19,7 @@ vi.mock('@/hooks/usePdfPreview', () => ({
   }),
 }))
 
-vi.mock('@/app/store/documentStore', () => {
+vi.mock('@/store/documentStore', () => {
   const state = {
     setPreviewPageCount: vi.fn(),
     setPreviewPdfBlob: vi.fn(),

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import type { LintIssue } from '@rb/validators/types'
 import type { SectionId } from '@rb/core/types/document'
-import { useDocumentStore } from '@/app/store/documentStore'
+import { useDocumentStore } from '@/store/documentStore'
 import { getSectionLabel } from '@rb/core/selectors/getSectionLabel'
 import { scoreDocument } from '@rb/validators/score'
 import { runValidation } from '@rb/validators/ats-lint'

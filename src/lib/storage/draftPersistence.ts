@@ -5,7 +5,7 @@ import {
   DRAFT_STORAGE_KEY_V2,
   StorageQuotaError,
   trySaveToStorage,
-} from '@/lib/persistence'
+} from '@/lib/storage/persistence'
 
 /**
  * Draft persistence controller. Owns the debounced autosave, flushes on

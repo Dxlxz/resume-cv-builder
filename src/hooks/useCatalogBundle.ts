@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import { useDocumentStore } from '@/app/store/documentStore'
+import { useDocumentStore } from '@/store/documentStore'
 import { bundleIdForPreset } from '@rb/catalog/bundleForPreset'
 import { getBundledCatalog } from '@rb/catalog/bundles'
 import { filterEntries, resolveEntryByLabel } from '@rb/catalog/search'

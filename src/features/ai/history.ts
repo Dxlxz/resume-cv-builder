@@ -1,5 +1,5 @@
 import type { ResumeDocument } from '@rb/core/types/document'
-import type { AiEditPlan } from '@/lib/ai/edits'
+import type { AiEditPlan } from '@/features/ai/edits'
 
 export interface ChatHistoryMessage {
   role: 'user' | 'idrizz'

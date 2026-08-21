@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react'
 import type { SectionId } from '@rb/core/types/document'
-import { useDocumentStore } from '@/app/store/documentStore'
+import { useDocumentStore } from '@/store/documentStore'
 import { getSectionLabel } from '@rb/core/selectors/getSectionLabel'
-import { IdrizzIconButton } from '@/components/ai/IdrizzIconButton'
+import { IdrizzIconButton } from '@/features/ai/IdrizzIconButton'
 import { Button } from '@/components/ui/Button'
 
 interface FormSectionProps {

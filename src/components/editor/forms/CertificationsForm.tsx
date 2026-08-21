@@ -1,4 +1,4 @@
-import { useDocumentStore } from '@/app/store/documentStore'
+import { useDocumentStore } from '@/store/documentStore'
 import { createEmptyCertification } from '@rb/core/schema'
 import { Button } from '@/components/ui/Button'
 import { TextField } from '@/components/ui/TextField'

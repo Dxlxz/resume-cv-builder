@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
-import { useDocumentStore } from '@/app/store/documentStore'
-import { startDraftPersistence } from '@/lib/draftPersistence'
+import { useDocumentStore } from '@/store/documentStore'
+import { startDraftPersistence } from '@/lib/storage/draftPersistence'
 
 /**
  * Wires the draft persistence controller to the document store. The

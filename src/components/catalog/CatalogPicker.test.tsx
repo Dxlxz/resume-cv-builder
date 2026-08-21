@@ -6,7 +6,7 @@ const mockState = {
   document: { meta: { presetId: 'malaysia-corporate' } },
 }
 
-vi.mock('@/app/store/documentStore', () => {
+vi.mock('@/store/documentStore', () => {
   const useDocumentStore = Object.assign(
     (selector: (s: typeof mockState) => unknown) => selector(mockState),
     { getState: () => mockState },

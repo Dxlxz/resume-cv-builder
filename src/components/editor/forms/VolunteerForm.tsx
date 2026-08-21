@@ -1,4 +1,4 @@
-import { useDocumentStore } from '@/app/store/documentStore'
+import { useDocumentStore } from '@/store/documentStore'
 import { createEmptyVolunteer } from '@rb/core/schema'
 import { Button } from '@/components/ui/Button'
 import { TextField } from '@/components/ui/TextField'
@@ -6,7 +6,7 @@ import { CatalogPicker } from '@/components/catalog/CatalogPicker'
 import { MonthField } from '@/components/ui/MonthField'
 import { BulletListEditor } from '@/components/ui/BulletListEditor'
 import { EmptyHint } from '@/components/ui/EmptyHint'
-import { FORM_PLACEHOLDERS } from '@/lib/formPlaceholders'
+import { FORM_PLACEHOLDERS } from '@/components/editor/formPlaceholders'
 
 export function VolunteerForm() {
   const volunteer = useDocumentStore((s) => s.document?.volunteer ?? [])

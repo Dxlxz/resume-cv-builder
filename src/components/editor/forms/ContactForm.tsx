@@ -1,7 +1,7 @@
-import { useDocumentStore } from '@/app/store/documentStore'
+import { useDocumentStore } from '@/store/documentStore'
 import { TextField } from '@/components/ui/TextField'
 import { CatalogPicker } from '@/components/catalog/CatalogPicker'
-import { FORM_PLACEHOLDERS } from '@/lib/formPlaceholders'
+import { FORM_PLACEHOLDERS } from '@/components/editor/formPlaceholders'
 
 export function ContactForm() {
   const contact = useDocumentStore((s) => s.document?.contact)

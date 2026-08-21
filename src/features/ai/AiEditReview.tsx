@@ -1,8 +1,8 @@
 import { useState } from 'react'
-import { useDocumentStore } from '@/app/store/documentStore'
+import { useDocumentStore } from '@/store/documentStore'
 import { getSectionLabel } from '@rb/core/selectors/getSectionLabel'
 import type { ResumeDocument } from '@rb/core/types/document'
-import type { AiEditPlan } from '@/lib/ai/edits'
+import type { AiEditPlan } from '@/features/ai/edits'
 import { Button } from '@/components/ui/Button'
 
 /**

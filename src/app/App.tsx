@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
-import { useDocumentStore } from '@/app/store/documentStore'
-import { usePersistence } from '@/hooks/usePersistence'
+import { useDocumentStore } from '@/store/documentStore'
+import { usePersistence } from '@/lib/storage/usePersistence'
 import { navigateTo, useAppRoute } from '@/hooks/useAppRoute'
 import { BrowserGuard } from '@/app/BrowserGuard'
 import { LandingPage } from '@/app/LandingPage'

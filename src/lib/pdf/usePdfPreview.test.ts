@@ -2,14 +2,14 @@ import { act, renderHook } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import type { LayoutPlanResult } from '@rb/layout/types'
 import {sampleProfileDocument} from '@rb/fixtures'
-import { usePdfPreview } from '@/hooks/usePdfPreview'
+import { usePdfPreview } from '@/lib/pdf/usePdfPreview'
 import { computeLayoutPlan } from '@rb/layout/computeLayoutPlan'
 import { generatePdfWithPlan } from '@/lib/pdf/generatePdf'
 import { countPdfPages } from '@/lib/pdf/countPdfPages'
 
 const setLayoutPlan = vi.fn()
 
-vi.mock('@/app/store/documentStore', () => ({
+vi.mock('@/store/documentStore', () => ({
   useDocumentStore: { getState: () => ({ setLayoutPlan }) },
 }))
 

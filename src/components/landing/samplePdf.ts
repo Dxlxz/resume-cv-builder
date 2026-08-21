@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import type { ResumeDocument } from '@rb/core/types/document'
-import { generatePdf } from '@/lib/pdf'
+import { generatePdf } from '@/lib/pdf/generatePdf'
 import { renderPdfBlobToPages } from '@/lib/pdf/renderPdfWithPdfJs'
 import { getPreset } from '@rb/presets/registry'
 

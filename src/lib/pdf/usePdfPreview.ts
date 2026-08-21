@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import type { ResumeDocument } from '@rb/core/types/document'
 import { computeLayoutPlan } from '@rb/layout/computeLayoutPlan'
 import { generatePdfWithPlan } from '@/lib/pdf/generatePdf'
-import { useDocumentStore } from '@/app/store/documentStore'
+import { useDocumentStore } from '@/store/documentStore'
 import { getPreset } from '@rb/presets/registry'
 import { countPdfPages } from '@/lib/pdf/countPdfPages'
 

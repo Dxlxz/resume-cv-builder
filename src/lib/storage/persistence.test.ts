@@ -7,7 +7,7 @@ import {
   loadFromStorage,
   RECOVERY_KEY,
   saveToStorage,
-} from '@/lib/persistence'
+} from '@/lib/storage/persistence'
 
 const STORAGE_KEY_V2 = 'resume-cv-builder-draft-v2'
 const STORAGE_KEY_V1 = 'resume-cv-builder-draft-v1'

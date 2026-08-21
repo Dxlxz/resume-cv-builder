@@ -1,4 +1,4 @@
-import { useDocumentStore } from '@/app/store/documentStore'
+import { useDocumentStore } from '@/store/documentStore'
 import { PRESET_LIST, getPreset } from '@rb/presets/registry'
 import { TEMPLATE_LIST } from '@rb/templates/registry'
 import { THEME_LIST } from '@rb/themes/registry'

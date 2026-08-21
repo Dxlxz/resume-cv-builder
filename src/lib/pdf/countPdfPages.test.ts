@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { generatePdf } from '@/lib/pdf'
+import { generatePdf } from '@/lib/pdf/generatePdf'
 import { countPdfPages } from '@/lib/pdf/countPdfPages'
 import {sampleCvDocument, sampleResumeDocument} from '@rb/fixtures'
 

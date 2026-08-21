@@ -3,8 +3,8 @@ import { Toolbar } from '@/components/toolbar/Toolbar'
 import { EditorPanel } from '@/components/editor/EditorPanel'
 import { PreviewPanel } from '@/components/preview/PreviewPanel'
 import { RecoveryBanner } from '@/app/RecoveryBanner'
-import { IdrizzChat } from '@/components/ai/IdrizzChat'
-import { useDocumentStore } from '@/app/store/documentStore'
+import { IdrizzChat } from '@/features/ai/IdrizzChat'
+import { useDocumentStore } from '@/store/documentStore'
 
 type MobileTab = 'edit' | 'preview'
 

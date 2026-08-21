@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { startDraftPersistence } from '@/lib/draftPersistence'
-import { DRAFT_STORAGE_KEY_V2 } from '@/lib/persistence'
+import { startDraftPersistence } from '@/lib/storage/draftPersistence'
+import { DRAFT_STORAGE_KEY_V2 } from '@/lib/storage/persistence'
 import { sampleResumeDocument } from '@rb/fixtures'
 import type { ResumeDocument } from '@rb/core/types/document'
 

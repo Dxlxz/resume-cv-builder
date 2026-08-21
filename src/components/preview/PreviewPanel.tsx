@@ -1,5 +1,5 @@
 import { memo } from 'react'
-import { useDocumentStore } from '@/app/store/documentStore'
+import { useDocumentStore } from '@/store/documentStore'
 import { PreviewShell } from '@/components/preview/PreviewShell'
 
 export const PreviewPanel = memo(function PreviewPanel() {

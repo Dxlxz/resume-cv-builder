@@ -10,8 +10,8 @@ import type {
   TemplateId,
   ThemeId,
 } from '@rb/core/types/document'
-import type { AiEditPlan } from '@/lib/ai/edits'
-import { applyAiEditPlan as applyPlanToDocument } from '@/lib/ai/edits'
+import type { AiEditPlan } from '@/features/ai/edits'
+import { applyAiEditPlan as applyPlanToDocument } from '@/features/ai/edits'
 import { createEmptyDocument } from '@rb/presets/createDocument'
 import { getPreset } from '@rb/presets/registry'
 import { themeForDocument } from '@rb/themes/registry'
@@ -21,7 +21,7 @@ import {
   hasRecoverableDraft,
   loadFromStorage,
   loadRecoveredDraft,
-} from '@/lib/persistence'
+} from '@/lib/storage/persistence'
 import type { LintIssue } from '@rb/validators/types'
 import type { LayoutPlanResult } from '@rb/layout/types'
 import {

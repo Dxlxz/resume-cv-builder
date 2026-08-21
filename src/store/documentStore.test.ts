@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from 'vitest'
-import { useDocumentStore } from '@/app/store/documentStore'
-import { RECOVERY_KEY } from '@/lib/persistence'
+import { useDocumentStore } from '@/store/documentStore'
+import { RECOVERY_KEY } from '@/lib/storage/persistence'
 import { sampleResumeDocument } from '@rb/fixtures'
 
 describe('document store onboarding', () => {

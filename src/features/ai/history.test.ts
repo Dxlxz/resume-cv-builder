@@ -4,7 +4,7 @@ import {
   loadChatHistory,
   saveChatHistory,
   type ChatHistoryMessage,
-} from '@/lib/ai/history'
+} from '@/features/ai/history'
 import { createEmptyDocument } from '@rb/presets/createDocument'
 import type { ResumeDocument } from '@rb/core/types/document'
 

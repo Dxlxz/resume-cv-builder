@@ -2,7 +2,7 @@
 
 Rizzume - local-first, browser-based document editor with ATS-aware PDF export.
 
-**Quick reference:** [../ARCHITECTURE.md](../ARCHITECTURE.md) · **Engine decision:** [../ENGINE_DECISION.md](../ENGINE_DECISION.md) · **Specs:** [../.kiro/README.md](../.kiro/README.md)
+**Quick reference:** [../ARCHITECTURE.md](../ARCHITECTURE.md) · **Engine decision:** [decisions/layout-engine.md](decisions/layout-engine.md)
 
 ---
 

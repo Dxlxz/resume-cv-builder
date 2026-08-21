@@ -578,7 +578,7 @@ interface RenderBackend {
 |---------|--------|------|
 | react-pdf + block walker | **v1 (shipped)** | `renderDocumentToPdf` → `BlockLayoutPdf` |
 | `reactPdfBackend` | Pluggable adapter | `packages/render/src/reactPdfBackend.tsx` |
-| Forme | v2 candidate | Not implemented - see [ENGINE_DECISION.md](../ENGINE_DECISION.md) |
+| Forme | v2 candidate | Not implemented - see [decisions/layout-engine.md](decisions/layout-engine.md) |
 
 ### Font registration
 

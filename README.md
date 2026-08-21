@@ -131,5 +131,4 @@ to the app chrome.
 
 ## Specs & research
 
-- **Start here:** [`.kiro/README.md`](.kiro/README.md) — canonical spec index
-- Research: [`.kiro/research/`](.kiro/research/)
+- **Doc index:** [docs/README.md](docs/README.md) — architecture, decisions, and references

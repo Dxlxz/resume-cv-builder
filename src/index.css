@@ -10,6 +10,7 @@
    the non-circular @theme inline bridge. */
 @import '@rb/styles/uds/tokens.css';
 @import '@rb/styles/uds/theme-inline.css';
+@import '@rb/styles/uds/layouts.css';
 
 @layer base {
   html {

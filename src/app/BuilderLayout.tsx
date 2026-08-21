@@ -66,7 +66,7 @@ export function BuilderLayout({ onHome }: BuilderLayoutProps) {
         id="main-content"
         tabIndex={-1}
         className={`grid min-h-0 flex-1 grid-cols-1 outline-none ${
-          previewHidden ? '' : 'lg:grid-cols-[minmax(380px,40%)_minmax(0,60%)]'
+          previewHidden ? '' : 'lg:grid-cols-[minmax(var(--layout-editor-min),var(--layout-editor-split))_minmax(0,1fr)]'
         }`}
       >
         <section

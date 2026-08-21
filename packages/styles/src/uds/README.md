@@ -18,7 +18,14 @@ two CSS files it needs** instead of installing them.
 
 ## Sync procedure
 
-To pick up UDS changes, re-copy from source and re-verify:
+Use the script (recommended) or re-copy manually:
+
+```bash
+node scripts/sync-uds.mjs --check   # drift gate — exit 1 when behind (CI-able)
+node scripts/sync-uds.mjs           # sync: copy + preserve the VENDORED banner
+```
+
+The script compares **content** (leading doc blocks ignored — the banner is spliced into the original UDS comment). Manual fallback:
 
 ```powershell
 Copy-Item "..\..\..\Universal Design System\packages\tokens\src\tokens.css" .\tokens.css

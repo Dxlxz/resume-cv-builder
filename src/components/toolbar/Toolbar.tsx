@@ -207,7 +207,7 @@ export function Toolbar({ onHome, previewVisible, onTogglePreview }: ToolbarProp
   return (
     <>
       <header className="border-b border-border bg-header px-4 py-2 shadow-[var(--shadow-raised)]">
-        <div className="mx-auto max-w-[1600px]">
+        <div className="mx-auto max-w-[var(--layout-max-content)]">
           <div className="flex flex-wrap items-center gap-2">
             <Brand onClick={onHome} />
             <span aria-hidden className="h-6 w-px bg-border" />
@@ -307,14 +307,14 @@ export function Toolbar({ onHome, previewVisible, onTogglePreview }: ToolbarProp
         </div>
 
         {exportNotice && (
-          <p className="mx-auto max-w-[1600px] text-xs text-status-success" role="status">
+          <p className="mx-auto max-w-[var(--layout-max-content)] text-xs text-status-success" role="status">
             {exportNotice}
           </p>
         )}
 
         {pdfError && (
           <div
-            className="mx-auto mt-2 max-w-[1600px] rounded-md border border-status-danger/30 bg-badge-danger px-3 py-2 text-sm text-status-danger-foreground"
+            className="mx-auto mt-2 max-w-[var(--layout-max-content)] rounded-md border border-status-danger/30 bg-badge-danger px-3 py-2 text-sm text-status-danger-foreground"
             role="alert"
           >
             {pdfError}{' '}

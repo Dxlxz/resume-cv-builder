@@ -13,7 +13,7 @@ export function RecoveryBanner() {
 
   return (
     <div className="border-b border-status-warning/30 bg-badge-warning px-4 py-2 text-sm text-status-warning-foreground">
-      <div className="mx-auto flex max-w-[1600px] flex-wrap items-center gap-x-4 gap-y-1">
+      <div className="mx-auto flex max-w-[var(--layout-max-content)] flex-wrap items-center gap-x-4 gap-y-1">
         <span>A backup of your last draft was found after it failed to load.</span>
         <button
           type="button"

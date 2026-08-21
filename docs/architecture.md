@@ -511,7 +511,7 @@ flowchart TB
 
 ## 3.3 Preview and export sequence
 
-Preview and export share the **same PDF generation path** (`generatePdfWithPlan`). The legacy HTML `*Preview` stack was removed (see [legacy-preview-removal spec](../.kiro/specs/legacy-preview-removal/requirements.md)).
+Preview and export share the **same PDF generation path** (`generatePdfWithPlan`). The legacy HTML `*Preview` stack was removed.
 
 ```mermaid
 sequenceDiagram
@@ -721,10 +721,7 @@ src/
 | Document | Contents |
 |----------|----------|
 | [ARCHITECTURE.md](../ARCHITECTURE.md) | One-page pipeline cheat sheet |
-| [ENGINE_DECISION.md](../ENGINE_DECISION.md) | Why v1 stays on react-pdf + measure/plan |
-| [.kiro/README.md](../.kiro/README.md) | Feature specs and research index |
-| [.kiro/specs/layout-engine/](../.kiro/specs/layout-engine/) | Layout engine requirements and design |
-| [.kiro/specs/legacy-preview-removal/](../.kiro/specs/legacy-preview-removal/) | HTML preview stack removal |
+| [decisions/layout-engine.md](decisions/layout-engine.md) | Why v1 stays on react-pdf + measure/plan |
 | [packages/catalog/src/README.md](../packages/catalog/src/README.md) | Catalog module notes |
 
 ---

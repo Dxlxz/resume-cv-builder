@@ -147,12 +147,26 @@ export function IdrizzChat({ open, onOpen, onClose }: IdrizzChatProps) {
       ])
       return
     }
+    const prose = result.trim()
+    if (plan) {
+      // Parsed but effect-less plan (prompt forbids these, but defend anyway).
+      setMessages((prev) => [
+        ...prev,
+        {
+          role: 'idrizz',
+          text: 'Idrizz tak jumpa apa-apa yang patut diubah untuk permintaan tu. Cuba lebih spesifik, contohnya "Kemas summary aku jadi 3 ayat".',
+        },
+      ])
+      return
+    }
     setMessages((prev) => [
       ...prev,
-      plan
+      prose
         ? {
+            // Non-edit reply (question / small talk): show the AI's own words,
+            // rendered as markdown. Keeps the old fallback only for empty output.
             role: 'idrizz',
-            text: 'Idrizz tak jumpa apa-apa yang patut diubah untuk permintaan tu. Cuba lebih spesifik, contohnya "Kemas summary aku jadi 3 ayat".',
+            text: prose,
           }
         : {
             role: 'idrizz',

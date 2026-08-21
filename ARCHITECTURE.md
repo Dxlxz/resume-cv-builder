@@ -95,7 +95,7 @@ interface RenderBackend {
 - **v1:** `reactPdfBackend` - `@react-pdf/renderer` + block walker
 - **v2 candidate:** Forme adapter - same `RenderInput`, swap backend
 
-See [ENGINE_DECISION.md](./ENGINE_DECISION.md).
+See [docs/decisions/layout-engine.md](docs/decisions/layout-engine.md).
 
 ## Anti-patterns (avoid)
 

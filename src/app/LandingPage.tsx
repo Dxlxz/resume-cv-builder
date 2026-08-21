@@ -1,5 +1,4 @@
 import type { ReactNode } from 'react'
-import { useEffect, useState } from 'react'
 import { Button } from '@/components/ui/Button'
 import { Brand } from '@/components/ui/Brand'
 import { HeroPdfCard } from '@/components/landing/HeroPdfPreview'
@@ -113,44 +112,6 @@ const STEPS: { title: string; description: string }[] = [
 
 /** Abstract resume mock. Skeleton bars that read like a real page without fake text. */
 
-/** Hero backdrop: compressed looping video with a dark veil; static poster under reduced motion. */
-function HeroBackground() {
-  const [reduced, setReduced] = useState(
-    () => window.matchMedia('(prefers-reduced-motion: reduce)').matches,
-  )
-
-  useEffect(() => {
-    const mq = window.matchMedia('(prefers-reduced-motion: reduce)')
-    const onChange = (e: MediaQueryListEvent) => setReduced(e.matches)
-    mq.addEventListener('change', onChange)
-    return () => mq.removeEventListener('change', onChange)
-  }, [])
-
-  return (
-    <div className="absolute inset-0 overflow-hidden" aria-hidden="true">
-      {reduced ? (
-        <img
-          src="/images/landing-bg-poster.jpg"
-          alt=""
-          className="h-full w-full object-cover"
-        />
-      ) : (
-        <video
-          className="h-full w-full object-cover"
-          src="/videos/landing-bg.mp4"
-          poster="/images/landing-bg-poster.jpg"
-          autoPlay
-          muted
-          loop
-          playsInline
-          tabIndex={-1}
-        />
-      )}
-      <div className="absolute inset-0 bg-foreground/45" />
-    </div>
-  )
-}
-
 export function LandingPage({
   onStart,
   onLoadProfile,
@@ -170,27 +131,28 @@ export function LandingPage({
         </div>
       </header>
 
-      {/* --- Hero --- */}
-      <section className="relative overflow-hidden border-b border-border">
-        <HeroBackground />
+      {/* --- Hero: the document studio. The paper is the star; everything
+          around it is quiet. The right side renders a REAL exported PDF
+          (see HeroPdfCard) and carries the signature ATS stamp. --- */}
+      <section className="relative overflow-hidden border-b border-border bg-background">
+        <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-72 bg-[radial-gradient(60%_120%_at_70%_-20%,var(--fill-muted),transparent)]" />
 
-        <div className="relative mx-auto grid max-w-6xl items-center gap-10 px-5 py-16 lg:grid-cols-[1.05fr_0.95fr] lg:py-24">
+        <div className="relative mx-auto grid max-w-6xl items-center gap-10 px-5 py-16 sm:py-20 lg:grid-cols-[1.05fr_0.95fr] lg:py-24">
           <div>
-            <span className="inline-flex items-center gap-2 rounded-full border border-background/25 bg-background/10 px-3.5 py-1.5 text-xs font-medium text-background">
-              <span className="h-1.5 w-1.5 rounded-full bg-status-success" aria-hidden />
-              Local-first. No account required.
-            </span>
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">
+              ATS-ready resume builder
+            </p>
 
-            <h1 className="mt-5 text-4xl font-semibold leading-[1.08] tracking-tight text-background sm:text-5xl">
-              Resumes with rizz.
+            <h1 className="mt-4 text-5xl font-semibold leading-[1.04] tracking-tight sm:text-6xl">
+              Resumes with <em className="italic">rizz.</em>
             </h1>
 
-            <p className="mt-4 max-w-xl text-base leading-relaxed text-background/80 sm:text-lg">
+            <p className="mt-5 max-w-xl text-base leading-relaxed text-muted-foreground sm:text-lg">
               A local-first builder with a live PDF preview, ATS checks, and
               presets tuned for Malaysia. Your data stays in your browser.
             </p>
 
-            <div className="mt-7 flex flex-wrap items-center gap-3">
+            <div className="mt-8 flex flex-wrap items-center gap-3">
               <Button type="button" onClick={onStart}>
                 Start building
               </Button>
@@ -201,8 +163,8 @@ export function LandingPage({
               )}
             </div>
 
-            <p className="mt-5 text-sm text-background/70">
-              Free. No account. Export a PDF you can check before sending.
+            <p className="mt-6 text-sm text-muted-foreground">
+              Free · No account · Runs entirely in your browser
             </p>
           </div>
 

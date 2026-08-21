@@ -32,12 +32,14 @@ export function HeroPdfCard() {
           ) : (
             <PdfSkeleton />
           )}
-          <div className="hidden flex-col items-start justify-center gap-4 sm:flex">
-            <span className="inline-flex items-center gap-2 rounded-full border border-status-success/30 bg-badge-success px-3 py-1.5 text-xs font-medium text-status-success-foreground">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+          <div className="hidden flex-col items-center justify-center gap-4 sm:flex">
+            {/* The signature: a rubber stamp, like the one an approval desk
+                would leave on the finished document. */}
+            <span className="rb-stamp-in inline-flex rotate-[-4deg] items-center gap-1.5 rounded-sm border-2 border-status-success-foreground px-3 py-1.5 text-xs font-bold uppercase tracking-[0.14em] text-status-success-foreground">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
                 <path d="M20 6L9 17l-5-5" />
               </svg>
-              ATS check passed
+              ATS passed
             </span>
             <span className="text-xs text-muted-foreground">
               {pageCount ? `A4 · ${pageCount} pages · Malaysia Corporate` : 'A4 · Malaysia Corporate'}
@@ -45,7 +47,7 @@ export function HeroPdfCard() {
           </div>
         </div>
       </div>
-      <p className="mt-3 text-center text-xs text-background/60">
+      <p className="mt-3 text-center text-xs text-muted-foreground">
         A real exported PDF, generated in your browser. Fictional sample data.
       </p>
     </div>

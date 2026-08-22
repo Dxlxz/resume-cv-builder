@@ -6,10 +6,12 @@ import { BrowserGuard } from '@/app/BrowserGuard'
 import { LandingPage } from '@/app/LandingPage'
 import { DocTypeSelector } from '@/app/DocTypeSelector'
 import { BuilderLayout } from '@/app/BuilderLayout'
+import { AtsCheckerPage } from '@/app/AtsCheckerPage'
 
 const ROUTE_TITLES: Record<string, string> = {
   '/': 'Rizzume - ATS-ready resumes, built locally',
   '/builder': 'Rizzume - Build your resume',
+  '/ats-check': 'Rizzume - ATS check',
 }
 
 export default function App() {
@@ -50,6 +52,12 @@ export default function App() {
           ) : (
             <DocTypeSelector onBack={() => navigateTo('landing')} />
           )}
+        </BrowserGuard>
+      )}
+
+      {route === 'ats-check' && (
+        <BrowserGuard>
+          <AtsCheckerPage onHome={() => navigateTo('landing')} />
         </BrowserGuard>
       )}
 

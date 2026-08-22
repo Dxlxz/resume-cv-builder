@@ -4,7 +4,11 @@ import { getPreset } from '@rb/presets/registry'
 import { generatePdf } from '@/lib/pdf/generatePdf'
 import { downloadPdf } from '@/lib/pdf/download'
 import { countPdfPages } from '@/lib/pdf/countPdfPages'
-import { exportDocumentJson, importDocumentJson } from '@/lib/storage/importExport'
+import {
+  exportDocumentJson,
+  exportJsonResume,
+  importDocumentJson,
+} from '@/lib/storage/importExport'
 import { runValidation, hasBlockingErrors } from '@rb/validators/ats-lint'
 import { paginateDriftIssue } from '@rb/validators/paginate-lint'
 import { scoreDocument } from '@rb/validators/score'
@@ -150,8 +154,13 @@ export function Toolbar({ onHome, previewVisible, onTogglePreview }: ToolbarProp
       alert(result.message)
       return
     }
-    if (confirm('Replace your current draft with the imported file?')) {
-      setDocument(result.document)
+    if (!confirm('Replace your current draft with the imported file?')) return
+    setDocument(result.document)
+    if (result.dropped && result.dropped.length > 0) {
+      // Say what was lost rather than dropping it silently.
+      alert(
+        `Imported. These fields have no place in this builder and were not kept:\n\n${result.dropped.join(', ')}`,
+      )
     }
   }
 
@@ -265,7 +274,10 @@ export function Toolbar({ onHome, previewVisible, onTogglePreview }: ToolbarProp
                   {previewVisible ? 'Hide preview' : 'Show preview'}
                 </DropdownMenuItem>
                 <DropdownMenuItem onSelect={() => exportDocumentJson(document)}>
-                  Export JSON
+                  Export JSON backup
+                </DropdownMenuItem>
+                <DropdownMenuItem onSelect={() => exportJsonResume(document)}>
+                  Export JSON Resume
                 </DropdownMenuItem>
                 <DropdownMenuItem onSelect={() => fileInputRef.current?.click()}>
                   Import JSON

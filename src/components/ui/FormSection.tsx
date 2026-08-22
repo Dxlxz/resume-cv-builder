@@ -3,6 +3,7 @@ import type { SectionId } from '@rb/core/types/document'
 import { useDocumentStore } from '@/store/documentStore'
 import { getSectionLabel } from '@rb/core/selectors/getSectionLabel'
 import { IdrizzIconButton } from '@/features/ai/IdrizzIconButton'
+import { IDRIZZ_ENABLED } from '@/features/ai/enabled'
 import { Button } from '@/components/ui/Button'
 
 interface FormSectionProps {
@@ -39,6 +40,9 @@ export function FormSection({
   const savedTimerRef = useRef<number | null>(null)
   const setIdrizzOpen = useDocumentStore((s) => s.setIdrizzOpen)
   const setIdrizzPrefill = useDocumentStore((s) => s.setIdrizzPrefill)
+
+  /** Guide + rewrite affordances are Idrizz-only; both hide when it is off. */
+  const showIdrizz = IDRIZZ_ENABLED && Boolean(onGuideChange)
 
   const rewriteWithIdrizz = () => {
     const label = getSectionLabel(sectionId, {})
@@ -124,7 +128,7 @@ export function FormSection({
             </svg>
           </span>
         </button>
-        {onGuideChange && (
+        {showIdrizz && (
           <IdrizzIconButton
             label={guide ? 'Edit Idrizz guide' : 'Set how Idrizz writes this section'}
             onClick={() => {
@@ -138,7 +142,7 @@ export function FormSection({
         )}
       </div>
 
-      {guideOpen && onGuideChange && (
+      {guideOpen && showIdrizz && (
         <div className="animate-slide-up space-y-1.5 border-t border-border bg-muted/50 px-4 py-3">
           <label htmlFor={guideId} className="text-xs font-medium text-foreground">
             How should Idrizz write this section?

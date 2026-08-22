@@ -4,6 +4,7 @@ import { EditorPanel } from '@/components/editor/EditorPanel'
 import { PreviewPanel } from '@/components/preview/PreviewPanel'
 import { RecoveryBanner } from '@/app/RecoveryBanner'
 import { IdrizzChat } from '@/features/ai/IdrizzChat'
+import { IDRIZZ_ENABLED } from '@/features/ai/enabled'
 import { useDocumentStore } from '@/store/documentStore'
 
 type MobileTab = 'edit' | 'preview'
@@ -91,11 +92,13 @@ export function BuilderLayout({ onHome }: BuilderLayoutProps) {
         )}
       </main>
 
-      <IdrizzChat
-        open={idrizzOpen}
-        onOpen={() => setIdrizzOpen(true)}
-        onClose={() => setIdrizzOpen(false)}
-      />
+      {IDRIZZ_ENABLED && (
+        <IdrizzChat
+          open={idrizzOpen}
+          onOpen={() => setIdrizzOpen(true)}
+          onClose={() => setIdrizzOpen(false)}
+        />
+      )}
     </div>
   )
 }

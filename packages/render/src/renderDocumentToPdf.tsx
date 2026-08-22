@@ -4,6 +4,8 @@ import { ensurePdfFontsRegistered } from './fonts/registerPdfFonts'
 import { ClassicPdf } from '@rb/templates/classic/ClassicPdf'
 import { AcademicPdf } from '@rb/templates/academic/AcademicPdf'
 import { AtsStrictPdf } from '@rb/templates/ats-strict/AtsStrictPdf'
+import { ModernRailPdf } from '@rb/templates/modern-rail/ModernRailPdf'
+import { BannerPdf } from '@rb/templates/banner/BannerPdf'
 
 export async function renderDocumentToPdf(document: ResumeDocument): Promise<Blob> {
   await ensurePdfFontsRegistered()
@@ -14,6 +16,12 @@ export async function renderDocumentToPdf(document: ResumeDocument): Promise<Blo
   switch (templateId) {
     case 'ats-strict':
       element = <AtsStrictPdf document={document} />
+      break
+    case 'modern-rail':
+      element = <ModernRailPdf document={document} />
+      break
+    case 'banner':
+      element = <BannerPdf document={document} />
       break
     case 'academic':
       element = <AcademicPdf document={document} pageSize={document.meta.pageSize} />

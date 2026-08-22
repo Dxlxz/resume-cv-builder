@@ -26,7 +26,14 @@ export type LayoutBlockContent =
   | { kind: 'sectionTitle'; text: string; isFirst: boolean }
   | { kind: 'paragraph'; text: string }
   | { kind: 'bullet'; text: string }
-  | { kind: 'skillGroup'; name: string; itemLines: string[] }
+  | {
+      kind: 'skillGroup'
+      name: string
+      /** Comma-packed lines, used by skillsStyle 'lines'. */
+      itemLines: string[]
+      /** Individual items, used by skillsStyle 'grid'. */
+      items: string[]
+    }
   | {
       kind: 'experienceItem'
       title: string

@@ -1,6 +1,7 @@
 import { StyleSheet } from '@react-pdf/renderer'
 import type { ResolvedStyles } from '@rb/styles/shared/types'
 import { minPresenceForSection } from '@rb/templates/shared/spacingHelpers'
+import { pdfBoldStyle, pdfHeadingStyle } from '@rb/render/fonts/pdfFontStyle'
 
 export function createPdfBlockStyles(resolved: ResolvedStyles) {
   const { pdf, theme, typography, layout } = resolved
@@ -43,6 +44,21 @@ export function createPdfBlockStyles(resolved: ResolvedStyles) {
     },
     itemBlock: pdf.itemBlock,
     muted: { color: theme.colors.textMuted, fontSize: typography.bodySize },
+    /** Dates in the left gutter, rail entry style. */
+    railDate: {
+      fontSize: typography.metaSize,
+      ...pdfBoldStyle(theme.fonts),
+      color: theme.colors.textMuted,
+      lineHeight: layout.metaLineHeight,
+    },
+    /** Title text inside a decorated (accent-bar / inline-rule) section head. */
+    sectionTitleText: {
+      fontSize: typography.sectionSize,
+      ...pdfHeadingStyle(theme.fonts),
+      color: theme.colors.accent,
+      textTransform: layout.sectionTitleTransform,
+      letterSpacing: typography.letterSpacingSection,
+    },
   })
 }
 

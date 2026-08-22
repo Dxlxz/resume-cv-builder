@@ -2,6 +2,17 @@ import type { CSSProperties } from 'react'
 import type { LayoutBlock } from '@rb/layout/types'
 import type { ResolvedStyles } from '@rb/styles/shared/types'
 import { blockWrapperStyleCss } from '@rb/render/blocks/blockSpacing'
+import {
+  accentBarHeightPt,
+  bulletIndentPt,
+  skillColumnWidth,
+  skillGridGutterPt,
+  skillGridRowGapPt,
+  usesAccentBar,
+  usesInlineRule,
+  usesRail,
+  usesSkillGrid,
+} from '@rb/render/blocks/blockVariants'
 
 interface LayoutBlockHtmlProps {
   block: LayoutBlock
@@ -34,6 +45,84 @@ function BulletRowHtml({
       <span style={{ ...line, flex: 1 }}>{text}</span>
     </div>
   )
+}
+
+/** Rail entry — must match RailRowPdf, since this is what gets measured. */
+function RailRowHtml({
+  dates,
+  styles,
+  children,
+}: {
+  dates?: string
+  styles: ResolvedStyles
+  children: React.ReactNode
+}) {
+  const { css, layout, typography, theme } = styles
+  return (
+    <div style={{ display: 'flex' }}>
+      <div
+        style={{
+          width: `${layout.railWidthPt}pt`,
+          paddingRight: `${layout.railGutterPt}pt`,
+          flexShrink: 0,
+        }}
+      >
+        {dates ? (
+          <p
+            style={{
+              ...css.meta,
+              fontWeight: 700,
+              color: theme.colors.textMuted,
+              fontSize: `${typography.metaSize}pt`,
+              margin: 0,
+            }}
+          >
+            {dates}
+          </p>
+        ) : null}
+      </div>
+      <div style={{ flex: 1, minWidth: 0 }}>{children}</div>
+    </div>
+  )
+}
+
+/** Section title with an accent bar or a trailing hairline. */
+function SectionTitleHtml({ text, styles }: { text: string; styles: ResolvedStyles }) {
+  const { css, layout, typography, theme } = styles
+  const titleText = { ...css.sectionTitle, margin: 0, borderBottom: 'none' } as CSSProperties
+
+  if (usesAccentBar(layout)) {
+    return (
+      <div style={{ display: 'flex', alignItems: 'center', ...css.sectionTitle, borderBottom: 'none' }}>
+        <span
+          style={{
+            width: `${layout.accentBarWidthPt}pt`,
+            height: `${accentBarHeightPt(layout, typography.sectionSize)}pt`,
+            backgroundColor: theme.colors.accent,
+            marginRight: `${layout.accentBarGapPt}pt`,
+            flexShrink: 0,
+          }}
+        />
+        <span style={titleText}>{text}</span>
+      </div>
+    )
+  }
+  if (usesInlineRule(layout)) {
+    return (
+      <div style={{ display: 'flex', alignItems: 'center', ...css.sectionTitle, borderBottom: 'none' }}>
+        <span style={titleText}>{text}</span>
+        <span
+          style={{
+            flex: 1,
+            height: `${layout.headerBorderWidthPt}pt`,
+            backgroundColor: theme.colors.border,
+            marginLeft: `${layout.inlineRuleGapPt}pt`,
+          }}
+        />
+      </div>
+    )
+  }
+  return <h2 style={css.sectionTitle}>{text}</h2>
 }
 
 export function LayoutBlockHtml({ block, styles }: LayoutBlockHtmlProps) {
@@ -69,7 +158,7 @@ export function LayoutBlockHtml({ block, styles }: LayoutBlockHtmlProps) {
     case 'sectionTitle':
       return (
         <div data-layout-id={block.id} style={wrapperStyle}>
-          <h2 style={css.sectionTitle}>{content.text}</h2>
+          <SectionTitleHtml text={content.text} styles={styles} />
         </div>
       )
     case 'paragraph':
@@ -80,7 +169,10 @@ export function LayoutBlockHtml({ block, styles }: LayoutBlockHtmlProps) {
       )
     case 'bullet':
       return (
-        <div data-layout-id={block.id} style={wrapperStyle}>
+        <div
+          data-layout-id={block.id}
+          style={{ ...wrapperStyle, paddingLeft: `${bulletIndentPt(layout)}pt` }}
+        >
           <BulletRowHtml text={content.text} styles={styles} last />
         </div>
       )
@@ -92,17 +184,52 @@ export function LayoutBlockHtml({ block, styles }: LayoutBlockHtmlProps) {
               {content.name}
             </p>
           )}
-          {content.itemLines.map((line, i) => (
-            <p key={i} style={{ ...css.body, marginBottom: i < content.itemLines.length - 1 ? `${layout.bulletGapPt}pt` : 0 }}>
-              {line}
-            </p>
-          ))}
+          {usesSkillGrid(layout) ? (
+            <div style={{ display: 'flex', flexWrap: 'wrap' }}>
+              {content.items.map((item, i) => (
+                <p
+                  key={i}
+                  style={{
+                    ...css.body,
+                    width: skillColumnWidth(layout),
+                    paddingRight: `${skillGridGutterPt(layout)}pt`,
+                    marginBottom: `${skillGridRowGapPt(layout)}pt`,
+                    boxSizing: 'border-box',
+                  }}
+                >
+                  {item}
+                </p>
+              ))}
+            </div>
+          ) : (
+            content.itemLines.map((line, i) => (
+              <p key={i} style={{ ...css.body, marginBottom: i < content.itemLines.length - 1 ? `${layout.bulletGapPt}pt` : 0 }}>
+                {line}
+              </p>
+            ))
+          )}
         </div>
       )
     case 'itemHeader':
       return (
         <div data-layout-id={block.id} style={wrapperStyle}>
-          {content.dates ? (
+          {content.dates && usesRail(layout) ? (
+            <RailRowHtml dates={content.dates} styles={styles}>
+              <p style={css.subheading}>{content.title}</p>
+              {content.subtitle ? (
+                <p
+                  style={{
+                    ...css.body,
+                    fontStyle: 'italic',
+                    marginBottom: 0,
+                    marginTop: `${layout.itemSubtitleGapPt}pt`,
+                  }}
+                >
+                  {content.subtitle}
+                </p>
+              ) : null}
+            </RailRowHtml>
+          ) : content.dates ? (
             <div style={{ ...css.row, marginBottom: 0 }}>
               <div>
                 <p style={css.subheading}>{content.title}</p>
@@ -145,6 +272,34 @@ export function LayoutBlockHtml({ block, styles }: LayoutBlockHtmlProps) {
         </div>
       )
     case 'experienceItem':
+      if (usesRail(layout)) {
+        return (
+          <div data-layout-id={block.id} style={{ ...css.itemBlock, ...wrapperStyle }}>
+            <RailRowHtml dates={content.dates} styles={styles}>
+              <p style={css.subheading}>{content.title}</p>
+              <p
+                style={{
+                  ...css.body,
+                  fontStyle: 'italic',
+                  marginBottom: 0,
+                  marginTop: `${layout.itemSubtitleGapPt}pt`,
+                }}
+              >
+                {content.company}
+                {content.location ? `, ${content.location}` : ''}
+              </p>
+              {content.bullets.map((bullet, i) => (
+                <BulletRowHtml
+                  key={i}
+                  text={bullet}
+                  styles={styles}
+                  last={i === content.bullets.length - 1}
+                />
+              ))}
+            </RailRowHtml>
+          </div>
+        )
+      }
       return (
         <div data-layout-id={block.id} style={{ ...css.itemBlock, ...wrapperStyle }}>
           <div style={css.row}>

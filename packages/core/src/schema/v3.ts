@@ -39,7 +39,7 @@ export const documentMetaV3Schema = z.object({
   schemaVersion: z.literal(3),
   documentType: z.enum(['resume', 'cv']),
   presetId: z.enum(['malaysia-corporate', 'international-generic']),
-  templateId: z.enum(['classic', 'academic', 'ats-strict']),
+  templateId: z.enum(['classic', 'academic', 'ats-strict', 'modern-rail', 'banner']),
   themeId: z.enum(['mono', 'navy-corporate', 'academic-serif']),
   exportProfile: z.enum(['standard', 'portal-safe']),
   locale: z.enum(['en-MY', 'en-US']),

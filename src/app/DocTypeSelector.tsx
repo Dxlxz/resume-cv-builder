@@ -46,6 +46,8 @@ const TEMPLATE_LABELS: Record<PresetDefinition['defaults']['templateId'], string
   classic: 'Classic layout',
   academic: 'Academic layout',
   'ats-strict': 'ATS-strict layout',
+  'modern-rail': 'Modern rail layout',
+  banner: 'Banner layout',
 }
 
 /** What each preset is for - plain language, not lint rules. */

@@ -3,6 +3,7 @@ import type { ResumeDocument } from '@rb/core/types/document'
 import { getTheme } from '@rb/themes/registry'
 import type { LayoutProfile, ThemeTokens, TypographyScale } from '@rb/themes/types'
 import { ptCss } from '@rb/styles/shared/pt'
+import { headerBandPaddingPt } from '@rb/render/blocks/blockVariants'
 import type { PageDimensions, ResolvedCssStyles, ResolvedPdfStyles, ResolvedStyles } from '@rb/styles/shared/types'
 import { TEMPLATE_LAYOUTS } from '@rb/templates/shared/layoutProfiles'
 import { getPreset } from '@rb/presets/registry'
@@ -90,6 +91,12 @@ function buildCssStyles(
       wordBreak: 'break-word',
     },
     header: {
+      ...(layout.headerStyle === 'band'
+        ? {
+            backgroundColor: theme.colors.accent,
+            padding: ptCss(headerBandPaddingPt(layout)),
+          }
+        : {}),
       textAlign: layout.headerAlign,
       marginBottom: 0,
       borderBottomWidth: layout.headerBorderBottom ? ptCss(layout.headerBorderWidthPt) : undefined,
@@ -103,7 +110,7 @@ function buildCssStyles(
       fontFamily: theme.fonts.previewHeading,
       fontSize: ptCss(typography.nameSize),
       fontWeight: 700,
-      color: theme.colors.accent,
+      color: layout.headerStyle === 'band' ? theme.colors.paper : theme.colors.accent,
       marginBottom: 0,
       lineHeight: 1.15,
     },
@@ -111,13 +118,13 @@ function buildCssStyles(
       fontFamily: theme.fonts.previewBody,
       fontSize: ptCss(typography.bodySize),
       fontWeight: 500,
-      color: theme.colors.text,
+      color: layout.headerStyle === 'band' ? theme.colors.paper : theme.colors.text,
       marginBottom: 0,
       lineHeight: 1.3,
     },
     meta: {
       fontSize: ptCss(typography.metaSize),
-      color: theme.colors.textMuted,
+      color: layout.headerStyle === 'band' ? theme.colors.paper : theme.colors.textMuted,
       marginBottom: 0,
       lineHeight: layout.metaLineHeight,
     },
@@ -167,7 +174,7 @@ function buildCssStyles(
     row: {
       display: 'flex',
       justifyContent: 'space-between',
-      gap: ptCss(8),
+      gap: ptCss(layout.rowGapPt),
       alignItems: 'flex-start',
       marginBottom: ptCss(layout.bulletGapPt),
     },
@@ -212,31 +219,42 @@ function buildPdfStyles(
     section: {
       marginBottom: 0,
     },
-    header: {
-      textAlign: layout.headerAlign,
-      marginBottom: 0,
-      borderBottomWidth: layout.headerBorderBottom ? layout.headerBorderWidthPt : 0,
-      borderBottomColor: theme.colors.border,
-      paddingBottom: layout.headerBorderBottom ? layout.headerRulePaddingPt : 0,
-    },
+    header:
+      layout.headerStyle === 'band'
+        ? {
+            textAlign: layout.headerAlign,
+            marginBottom: 0,
+            backgroundColor: theme.colors.accent,
+            paddingTop: headerBandPaddingPt(layout),
+            paddingBottom: headerBandPaddingPt(layout),
+            paddingLeft: headerBandPaddingPt(layout),
+            paddingRight: headerBandPaddingPt(layout),
+          }
+        : {
+            textAlign: layout.headerAlign,
+            marginBottom: 0,
+            borderBottomWidth: layout.headerBorderBottom ? layout.headerBorderWidthPt : 0,
+            borderBottomColor: theme.colors.border,
+            paddingBottom: layout.headerBorderBottom ? layout.headerRulePaddingPt : 0,
+          },
     name: {
       fontSize: typography.nameSize,
       ...pdfHeadingStyle(theme.fonts),
-      color: theme.colors.accent,
+      color: layout.headerStyle === 'band' ? theme.colors.paper : theme.colors.accent,
       marginBottom: 0,
       lineHeight: 1.15,
     },
     headline: {
       fontSize: typography.bodySize,
       fontFamily: pdfBodyFamily(theme.fonts),
-      color: theme.colors.text,
+      color: layout.headerStyle === 'band' ? theme.colors.paper : theme.colors.text,
       marginTop: layout.nameToMetaPt,
       marginBottom: 0,
       lineHeight: 1.3,
     },
     meta: {
       fontSize: typography.metaSize,
-      color: theme.colors.textMuted,
+      color: layout.headerStyle === 'band' ? theme.colors.paper : theme.colors.textMuted,
       marginBottom: 0,
       lineHeight: layout.metaLineHeight,
     },
@@ -272,7 +290,7 @@ function buildPdfStyles(
       flexDirection: 'row',
       justifyContent: 'space-between',
       marginBottom: layout.bulletGapPt,
-      gap: 8,
+      gap: layout.rowGapPt,
     },
     bold: pdfBoldStyle(theme.fonts),
     italic: pdfItalicStyle(theme.fonts),

@@ -191,13 +191,14 @@ function emitSkills(ctx: CompileContext) {
     blocks.push({
       id: `skill-${group.id}`,
       type: 'skillGroup',
-      breakPolicy: 'auto',
+      breakPolicy: 'keep',
       spacingBeforePt: 0,
       spacingAfterPt: layout.skillGroupGapPt,
       content: {
         kind: 'skillGroup',
         name: group.name ?? '',
         itemLines: chunkSkillItems(group.items, layout.skillLineMaxChars),
+        items: group.items.filter(Boolean),
       },
     })
   }

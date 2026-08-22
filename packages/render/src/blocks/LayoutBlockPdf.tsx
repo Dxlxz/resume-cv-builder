@@ -9,6 +9,17 @@ import {
   pdfMinPresenceHint,
   pdfWrapHint,
 } from '@rb/templates/shared/blockHints'
+import {
+  accentBarHeightPt,
+  bulletIndentPt,
+  skillColumnWidth,
+  skillGridGutterPt,
+  skillGridRowGapPt,
+  usesAccentBar,
+  usesInlineRule,
+  usesRail,
+  usesSkillGrid,
+} from '@rb/render/blocks/blockVariants'
 
 interface LayoutBlockPdfProps {
   block: LayoutBlock
@@ -33,6 +44,83 @@ function BulletRowPdf({
       <Text style={sheet.bulletText}>{text}</Text>
     </View>
   )
+}
+
+/**
+ * Rail entry: dates in a fixed left gutter, content in the remaining column.
+ * Mirrors RailRowHtml, so the measured height matches what react-pdf lays out.
+ */
+function RailRowPdf({
+  dates,
+  sheet,
+  resolved,
+  children,
+}: {
+  dates?: string
+  sheet: PdfBlockStyles
+  resolved: ResolvedStyles
+  children: React.ReactNode
+}) {
+  const { layout } = resolved
+  return (
+    <View style={{ flexDirection: 'row' }}>
+      <View
+        style={{
+          width: layout.railWidthPt,
+          paddingRight: layout.railGutterPt,
+        }}
+      >
+        {dates ? <Text style={sheet.railDate}>{dates}</Text> : null}
+      </View>
+      <View style={{ flex: 1 }}>{children}</View>
+    </View>
+  )
+}
+
+/** Section title with an accent bar or a trailing hairline. */
+function SectionTitlePdf({
+  text,
+  style,
+  sheet,
+  resolved,
+}: {
+  text: string
+  style: PdfStyle
+  sheet: PdfBlockStyles
+  resolved: ResolvedStyles
+}) {
+  const { layout, typography, theme } = resolved
+  if (usesAccentBar(layout)) {
+    return (
+      <View style={{ ...style, flexDirection: 'row', alignItems: 'center' }}>
+        <View
+          style={{
+            width: layout.accentBarWidthPt,
+            height: accentBarHeightPt(layout, typography.sectionSize),
+            backgroundColor: theme.colors.accent,
+            marginRight: layout.accentBarGapPt,
+          }}
+        />
+        <Text style={sheet.sectionTitleText}>{text}</Text>
+      </View>
+    )
+  }
+  if (usesInlineRule(layout)) {
+    return (
+      <View style={{ ...style, flexDirection: 'row', alignItems: 'center' }}>
+        <Text style={sheet.sectionTitleText}>{text}</Text>
+        <View
+          style={{
+            flex: 1,
+            height: layout.headerBorderWidthPt,
+            backgroundColor: theme.colors.border,
+            marginLeft: layout.inlineRuleGapPt,
+          }}
+        />
+      </View>
+    )
+  }
+  return <Text style={style}>{text}</Text>
 }
 
 export function LayoutBlockPdf({
@@ -66,19 +154,37 @@ export function LayoutBlockPdf({
           </View>
         </View>
       )
-    case 'sectionTitle':
+    case 'sectionTitle': {
+      const titleStyle: PdfStyle = {
+        ...(content.isFirst ? sheet.sectionTitleFirst : sheet.sectionTitle),
+        ...wrapper,
+      }
+      if (usesAccentBar(resolved.layout) || usesInlineRule(resolved.layout)) {
+        return (
+          <View
+            minPresenceAhead={pdfMinPresenceHint(block.id, minPresence)}
+            break={breakHint}
+            wrap={false}
+          >
+            <SectionTitlePdf
+              text={content.text}
+              style={titleStyle}
+              sheet={sheet}
+              resolved={resolved}
+            />
+          </View>
+        )
+      }
       return (
         <Text
-          style={{
-            ...(content.isFirst ? sheet.sectionTitleFirst : sheet.sectionTitle),
-            ...wrapper,
-          }}
+          style={titleStyle}
           minPresenceAhead={pdfMinPresenceHint(block.id, minPresence)}
           break={breakHint}
         >
           {content.text}
         </Text>
       )
+    }
     case 'paragraph':
       return (
         <Text style={{ ...sheet.body, ...wrapper }} wrap={wrapHint} break={breakHint}>
@@ -93,19 +199,37 @@ export function LayoutBlockPdf({
               {content.name}
             </Text>
           ) : null}
-          {content.itemLines.map((line, i) => (
-            <Text
-              key={i}
-              style={{
-                ...sheet.skillLine,
-                marginBottom:
-                  i < content.itemLines.length - 1 ? resolved.layout.bulletGapPt : 0,
-              }}
-              wrap
-            >
-              {line}
-            </Text>
-          ))}
+          {usesSkillGrid(resolved.layout) ? (
+            <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
+              {content.items.map((item, i) => (
+                <Text
+                  key={i}
+                  style={{
+                    ...sheet.skillLine,
+                    width: skillColumnWidth(resolved.layout),
+                    paddingRight: skillGridGutterPt(resolved.layout),
+                    marginBottom: skillGridRowGapPt(resolved.layout),
+                  }}
+                >
+                  {item}
+                </Text>
+              ))}
+            </View>
+          ) : (
+            content.itemLines.map((line, i) => (
+              <Text
+                key={i}
+                style={{
+                  ...sheet.skillLine,
+                  marginBottom:
+                    i < content.itemLines.length - 1 ? resolved.layout.bulletGapPt : 0,
+                }}
+                wrap
+              >
+                {line}
+              </Text>
+            ))
+          )}
         </View>
       )
     case 'itemHeader':
@@ -116,7 +240,21 @@ export function LayoutBlockPdf({
           break={breakHint}
           minPresenceAhead={pdfMinPresenceHint(block.id, 0) || undefined}
         >
-          {content.dates ? (
+          {content.dates && usesRail(resolved.layout) ? (
+            <RailRowPdf dates={content.dates} sheet={sheet} resolved={resolved}>
+              <Text style={sheet.subheading}>{content.title}</Text>
+              {content.subtitle ? (
+                <Text
+                  style={{
+                    ...sheet.italic,
+                    marginTop: resolved.layout.itemSubtitleGapPt,
+                  }}
+                >
+                  {content.subtitle}
+                </Text>
+              ) : null}
+            </RailRowPdf>
+          ) : content.dates ? (
             <View style={sheet.rowTight}>
               <View>
                 <Text style={sheet.subheading}>{content.title}</Text>
@@ -161,6 +299,32 @@ export function LayoutBlockPdf({
         </View>
       )
     case 'experienceItem':
+      if (usesRail(resolved.layout)) {
+        return (
+          <View style={{ ...sheet.itemBlock, ...wrapper }} wrap={wrapHint} break={breakHint}>
+            <RailRowPdf dates={content.dates} sheet={sheet} resolved={resolved}>
+              <Text style={sheet.subheading}>{content.title}</Text>
+              <Text
+                style={{
+                  ...sheet.italic,
+                  marginTop: resolved.layout.itemSubtitleGapPt,
+                }}
+              >
+                {content.company}
+                {content.location ? `, ${content.location}` : ''}
+              </Text>
+              {content.bullets.map((bullet, i) => (
+                <BulletRowPdf
+                  key={i}
+                  text={bullet}
+                  sheet={sheet}
+                  last={i === content.bullets.length - 1}
+                />
+              ))}
+            </RailRowPdf>
+          </View>
+        )
+      }
       return (
         <View style={{ ...sheet.itemBlock, ...wrapper }} wrap={wrapHint} break={breakHint}>
           <View style={sheet.row}>
@@ -227,7 +391,11 @@ export function LayoutBlockPdf({
       )
     case 'bullet':
       return (
-        <View style={wrapper} wrap={wrapHint ?? true} break={breakHint}>
+        <View
+          style={{ ...wrapper, paddingLeft: bulletIndentPt(resolved.layout) }}
+          wrap={wrapHint ?? true}
+          break={breakHint}
+        >
           <BulletRowPdf text={content.text} sheet={sheet} last />
         </View>
       )

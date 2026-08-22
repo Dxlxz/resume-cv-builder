@@ -5,7 +5,13 @@ export type SchemaVersion = 1 | 2 | 3
 export const PRESET_IDS = ['malaysia-corporate', 'international-generic'] as const
 export type PresetId = (typeof PRESET_IDS)[number]
 
-export const TEMPLATE_IDS = ['classic', 'academic', 'ats-strict'] as const
+export const TEMPLATE_IDS = [
+  'classic',
+  'academic',
+  'ats-strict',
+  'modern-rail',
+  'banner',
+] as const
 export type TemplateId = (typeof TEMPLATE_IDS)[number]
 
 export const THEME_IDS = ['mono', 'navy-corporate', 'academic-serif'] as const

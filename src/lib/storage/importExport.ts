@@ -1,7 +1,11 @@
 import type { ResumeDocument } from '@rb/core/types/document'
 import { MAX_IMPORT_BYTES } from '@/lib/utils'
+
+/** PDFs carry fonts and images, so they need more headroom than JSON. */
+const MAX_IMPORT_PDF_BYTES = 10 * 1024 * 1024
 import { parseAndMigrate } from '@rb/core/schema/migrate'
 import { fromJsonResume, toJsonResume, type JsonResume } from '@rb/core/interop/jsonResume'
+import { parseResumePdf } from '@rb/core/import-pdf/parseResumePdf'
 import { createEmptyDocument } from '@rb/presets/createDocument'
 
 export interface ImportResult {
@@ -9,6 +13,8 @@ export interface ImportResult {
   document: ResumeDocument
   /** Set when the file was a JSON Resume and some fields had no home here. */
   dropped?: string[]
+  /** Set when the file was a PDF: what the parser could and could not read. */
+  parsed?: { foundSections: string[]; unplacedLines: string[] }
 }
 
 export interface ImportError {
@@ -50,6 +56,36 @@ export function exportJsonResume(resume: ResumeDocument): void {
   anchor.download = `resume-${new Date().toISOString().slice(0, 10)}.json-resume.json`
   anchor.click()
   URL.revokeObjectURL(url)
+}
+
+/**
+ * Import an existing resume PDF.
+ *
+ * Extraction from a PDF is heuristic and will not always be right, so the
+ * result is handed back with what it found — the caller shows that before
+ * anything is replaced.
+ */
+export async function importResumePdf(file: File): Promise<ImportResult | ImportError> {
+  if (file.size > MAX_IMPORT_PDF_BYTES) {
+    return { success: false, message: 'PDF is too large. Maximum size is 10 MB.' }
+  }
+  try {
+    const bytes = new Uint8Array(await file.arrayBuffer())
+    const parsed = await parseResumePdf(bytes, createEmptyDocument('resume'))
+    return {
+      success: true,
+      document: parsed.document,
+      parsed: { foundSections: parsed.foundSections, unplacedLines: parsed.unplacedLines },
+    }
+  } catch (error) {
+    return {
+      success: false,
+      message:
+        error instanceof Error
+          ? error.message
+          : 'Could not read that PDF. Try exporting it again, or import a JSON file instead.',
+    }
+  }
 }
 
 export async function importDocumentJson(

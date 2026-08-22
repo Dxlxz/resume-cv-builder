@@ -8,6 +8,7 @@ import {
   exportDocumentJson,
   exportJsonResume,
   importDocumentJson,
+  importResumePdf,
 } from '@/lib/storage/importExport'
 import { runValidation, hasBlockingErrors } from '@rb/validators/ats-lint'
 import { paginateDriftIssue } from '@rb/validators/paginate-lint'
@@ -149,12 +150,24 @@ export function Toolbar({ onHome, previewVisible, onTogglePreview }: ToolbarProp
   }
 
   const handleImport = async (file: File) => {
-    const result = await importDocumentJson(file)
+    const isPdf = file.type === 'application/pdf' || /\.pdf$/i.test(file.name)
+    const result = isPdf ? await importResumePdf(file) : await importDocumentJson(file)
     if (!result.success) {
       alert(result.message)
       return
     }
-    if (!confirm('Replace your current draft with the imported file?')) return
+    if (result.parsed) {
+      // Reading a PDF is guesswork; say what came back before replacing a draft.
+      const found = result.parsed.foundSections.length
+        ? `Found: ${[...new Set(result.parsed.foundSections)].join(', ')}.`
+        : 'No standard section headings were recognised.'
+      const missed = result.parsed.unplacedLines.length
+        ? ` ${result.parsed.unplacedLines.length} line(s) could not be placed.`
+        : ''
+      if (!confirm(`${found}${missed}\n\nReplace your current draft with this?`)) return
+    } else if (!confirm('Replace your current draft with the imported file?')) {
+      return
+    }
     setDocument(result.document)
     if (result.dropped && result.dropped.length > 0) {
       // Say what was lost rather than dropping it silently.
@@ -280,7 +293,7 @@ export function Toolbar({ onHome, previewVisible, onTogglePreview }: ToolbarProp
                   Export JSON Resume
                 </DropdownMenuItem>
                 <DropdownMenuItem onSelect={() => fileInputRef.current?.click()}>
-                  Import JSON
+                  Import JSON or PDF
                 </DropdownMenuItem>
                 {personalProfileAvailable && (
                   <DropdownMenuItem
@@ -308,7 +321,7 @@ export function Toolbar({ onHome, previewVisible, onTogglePreview }: ToolbarProp
           <input
             ref={fileInputRef}
             type="file"
-            accept="application/json,.json"
+            accept="application/json,.json,application/pdf,.pdf"
             className="hidden"
             onChange={(e) => {
               const file = e.target.files?.[0]

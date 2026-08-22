@@ -92,7 +92,9 @@ export default defineConfig(({ command, mode }) => {
       // `personal/` is the private workspace (Dale's pack + personal dev
       // scripts) — never part of CI or product test runs. defaultExclude
       // keeps dependency internals (e.g. zod's own tests) out.
-      exclude: ['personal/**', ...defaultExclude],
+      // `tmp/` holds scratch output and upstream clones used as reference —
+      // never product tests.
+      exclude: ['personal/**', 'tmp/**', ...defaultExclude],
     },
   }
 })

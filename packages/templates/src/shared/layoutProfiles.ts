@@ -73,6 +73,28 @@ export const TEMPLATE_LAYOUTS: Record<TemplateId, TemplateLayoutProfile> = {
       skillGridColumns: 2,
     },
   },
+  /**
+   * The only multi-column template. The sidebar carries short items only —
+   * contact, links, skills — and every dated entry stays in the main column,
+   * because reading order is what parsers actually care about. Evidence on
+   * two-column parsing is split, so this is deliberately not marked ATS
+   * optimised and ats-strict remains the portal choice.
+   */
+  sidebar: {
+    id: 'sidebar',
+    layout: {
+      columns: 2,
+      sidebarSections: ['contact', 'skills', 'certifications'],
+      sidebarWidthPt: 168,
+      sidebarGutterPt: 22,
+      sidebarBackground: true,
+      sectionTitleDecoration: 'rule',
+      sectionTitleTransform: 'uppercase',
+      headerAlign: 'left',
+      headerBorderBottom: false,
+      sectionGapPt: 14,
+    },
+  },
   academic: {
     id: 'academic',
     typography: { bodySize: 11, lineHeight: 1.45, nameSize: 22 },

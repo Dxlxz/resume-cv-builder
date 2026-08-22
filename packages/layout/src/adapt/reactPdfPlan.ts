@@ -34,9 +34,12 @@ export function buildBlockPdfHints(
     if (block.breakPolicy === 'keepWithNext') {
       const next = blocks[index + 1]
       const selfHeight = measuredById.get(block.id)?.bbox.height ?? 0
+      const nextIsKeep = next?.breakPolicy === 'keep'
+      const nextHeight = measuredById.get(next?.id ?? '')?.bbox.height ?? 0
       const nextPeek = next
-        ? Math.min(measuredById.get(next.id)?.bbox.height ?? 0, peek) +
-          next.spacingBeforePt
+        ? nextIsKeep && nextHeight <= plan.contentHeightPt * 0.5
+          ? nextHeight + next.spacingBeforePt
+          : Math.min(nextHeight, peek) + next.spacingBeforePt
         : 0
       const paired = selfHeight + block.spacingAfterPt + nextPeek
       const floor = block.type === 'sectionTitle' ? minPresence : 0

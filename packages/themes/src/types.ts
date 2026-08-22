@@ -1,4 +1,4 @@
-import type { ThemeId } from '@rb/core/types/document'
+import type { SectionId, ThemeId } from '@rb/core/types/document'
 
 export type BuiltinPdfFontFamily =
   | 'Helvetica'
@@ -85,6 +85,22 @@ export interface LayoutProfile {
   skillGridGutterScale: number
   /** Row gap in a skills grid, as a multiple of bulletGapPt. */
   skillGridRowGapScale: number
+
+  // -- Multi-column. `columns: 2` puts sidebarSections into a narrow rail
+  // that paginates independently of the main column.
+  columns: 1 | 2
+  /** Width of the sidebar rail. */
+  sidebarWidthPt: number
+  /** Gap between the sidebar and the main column. */
+  sidebarGutterPt: number
+  /** Paint the sidebar column with a tint for its full page height. */
+  sidebarBackground: boolean
+  /**
+   * Sections that move to the sidebar. Keep these short — contact, links,
+   * skills, languages. All chronology belongs in the main column, because
+   * that is what keeps a parser's reading order intact.
+   */
+  sidebarSections: SectionId[]
   headerAlign: 'left' | 'center'
   headerBorderBottom: boolean
   /** Character budget per packed skill line (content width at body size). */
@@ -178,6 +194,11 @@ export const DEFAULT_LAYOUT: LayoutProfile = {
   rowGapPt: 8,
   skillGridGutterScale: 2,
   skillGridRowGapScale: 0.5,
+  columns: 1,
+  sidebarWidthPt: 168,
+  sidebarGutterPt: 22,
+  sidebarBackground: true,
+  sidebarSections: [],
 }
 
 export function buildLegacyPdf(theme: Pick<ThemeTokens, 'typography' | 'fonts'>): LegacyPdfTokens {

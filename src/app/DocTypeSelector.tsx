@@ -48,6 +48,7 @@ const TEMPLATE_LABELS: Record<PresetDefinition['defaults']['templateId'], string
   'ats-strict': 'ATS-strict layout',
   'modern-rail': 'Modern rail layout',
   banner: 'Banner layout',
+  sidebar: 'Sidebar layout',
 }
 
 /** What each preset is for - plain language, not lint rules. */

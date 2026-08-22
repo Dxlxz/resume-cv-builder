@@ -38,6 +38,14 @@ export const TEMPLATES: Record<ResumeDocument['meta']['templateId'], TemplateDef
     description: 'Full-width colour header, single reading column beneath',
     atsOptimized: true,
   },
+  sidebar: {
+    id: 'sidebar',
+    name: 'Sidebar',
+    description: 'Tinted rail for contact and skills, chronology in the main column',
+    // Two columns are a reading-order risk for some parsers — see the
+    // template profile comment. Use ats-strict for portal submissions.
+    atsOptimized: false,
+  },
 }
 
 export const TEMPLATE_LIST = Object.values(TEMPLATES)

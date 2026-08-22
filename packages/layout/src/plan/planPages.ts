@@ -54,8 +54,12 @@ export function planPages(
     const totalBlock = blockHeight + block.spacingAfterPt
 
     if (block.breakPolicy === 'keepWithNext' && top > 0) {
+      const nextIsKeep = next?.breakPolicy === 'keep'
+      const nextHeight = next ? next.bbox.height : 0
       const nextPeek = next
-        ? Math.min(next.bbox.height, peekPt) + next.spacingBeforePt
+        ? nextIsKeep && nextHeight <= contentHeightPt * 0.5
+          ? nextHeight + next.spacingBeforePt
+          : Math.min(nextHeight, peekPt) + next.spacingBeforePt
         : 0
       const needWithNext = blockHeight + block.spacingAfterPt + nextPeek
       if (top + needWithNext > contentHeightPt && blockHeight <= contentHeightPt) {

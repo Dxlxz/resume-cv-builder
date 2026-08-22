@@ -2,6 +2,7 @@ import type { ResumeDocument, SectionId } from '@rb/core/types/document'
 import { compileLayout } from '@rb/layout/compile/compileLayout'
 import { measureLayout } from '@rb/layout/measure/measureLayout'
 import { planPages } from '@rb/layout/plan/planPages'
+import { planColumns } from '@rb/layout/plan/planColumns'
 import { buildBlockPdfHints } from '@rb/layout/adapt/reactPdfPlan'
 import type { LayoutPlanResult } from '@rb/layout/types'
 import { resolveDocumentStyles } from '@rb/styles'
@@ -14,9 +15,12 @@ export async function computeLayoutPlan(
   const layout = compileLayout(document, presetLabels)
   const styles = resolveDocumentStyles(document)
   const measured = await measureLayout(layout, styles)
-  const plan = planPages(measured.blocks, layout.contentHeightPt, layout.contentWidthPt, {
+  const planOptions = {
     keepWithNextPeekPt: keepWithNextPeekPt(styles.typography, styles.layout),
-  })
+  }
+  const plan = layout.columnWidthsPt
+    ? planColumns(measured.blocks, layout.contentHeightPt, layout.columnWidthsPt, planOptions)
+    : planPages(measured.blocks, layout.contentHeightPt, layout.contentWidthPt, planOptions)
   const blockHints = buildBlockPdfHints(
     layout.blocks,
     measured,

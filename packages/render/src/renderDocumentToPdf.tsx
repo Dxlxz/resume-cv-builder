@@ -6,6 +6,7 @@ import { AcademicPdf } from '@rb/templates/academic/AcademicPdf'
 import { AtsStrictPdf } from '@rb/templates/ats-strict/AtsStrictPdf'
 import { ModernRailPdf } from '@rb/templates/modern-rail/ModernRailPdf'
 import { BannerPdf } from '@rb/templates/banner/BannerPdf'
+import { ColumnLayoutPdf } from '@rb/templates/shared/ColumnLayoutPdf'
 
 export async function renderDocumentToPdf(document: ResumeDocument): Promise<Blob> {
   await ensurePdfFontsRegistered()
@@ -22,6 +23,9 @@ export async function renderDocumentToPdf(document: ResumeDocument): Promise<Blo
       break
     case 'banner':
       element = <BannerPdf document={document} />
+      break
+    case 'sidebar':
+      element = <ColumnLayoutPdf document={document} />
       break
     case 'academic':
       element = <AcademicPdf document={document} pageSize={document.meta.pageSize} />

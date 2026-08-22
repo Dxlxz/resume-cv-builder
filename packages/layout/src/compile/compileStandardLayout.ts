@@ -365,10 +365,27 @@ export function compileStandardLayout(
     }
   }
 
+  const contentWidthPt = pageSpec.widthMm * (72 / 25.4) - layout.pageMarginPt * 2
+
+  // Two-column templates split the single stream by section. Assigning the
+  // column here — rather than at render time — is what lets measure and plan
+  // treat the columns as genuinely independent flows.
+  let columnWidthsPt: LayoutDocument['columnWidthsPt']
+  if (layout.columns === 2) {
+    const side = layout.sidebarWidthPt
+    const main = contentWidthPt - side - layout.sidebarGutterPt
+    columnWidthsPt = { side, main }
+    const sidebar = new Set(layout.sidebarSections)
+    for (const block of blocks as LayoutBlock[]) {
+      block.column = sidebar.has(block.sectionId) ? 'side' : 'main'
+    }
+  }
+
   return {
     templateId: document.meta.templateId,
     blocks: blocks as LayoutBlock[],
-    contentWidthPt: pageSpec.widthMm * (72 / 25.4) - layout.pageMarginPt * 2,
+    contentWidthPt,
     contentHeightPt: pageSpec.contentHeightPt,
+    columnWidthsPt,
   }
 }

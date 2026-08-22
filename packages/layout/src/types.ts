@@ -2,6 +2,13 @@ import type { SectionId } from '@rb/core/types/document'
 
 export type BreakPolicy = 'auto' | 'keep' | 'keepWithNext'
 
+/**
+ * Which column a block flows in. Single-column templates leave this unset
+ * and everything behaves as before; only a sidebar template splits the
+ * stream, and then the two columns paginate independently.
+ */
+export type ColumnId = 'main' | 'side'
+
 export type LayoutBlockType =
   | 'header'
   | 'sectionTitle'
@@ -74,6 +81,8 @@ export type LayoutBlockContent =
 
 export interface LayoutBlock {
   id: string
+  /** Defaults to 'main' when absent. */
+  column?: ColumnId
   /** Section this block belongs to (the document header maps to contact). */
   sectionId: SectionId
   type: LayoutBlockType
@@ -88,6 +97,11 @@ export interface LayoutDocument {
   blocks: LayoutBlock[]
   contentWidthPt: number
   contentHeightPt: number
+  /**
+   * Present only for multi-column templates. Each column measures and
+   * paginates at its own width.
+   */
+  columnWidthsPt?: Record<ColumnId, number>
 }
 
 export interface MeasuredBlock extends LayoutBlock {
@@ -104,6 +118,7 @@ export interface PageSlice {
   pageIndex: number
   blockId: string
   yPt: number
+  column?: ColumnId
 }
 
 export interface PageBreak {

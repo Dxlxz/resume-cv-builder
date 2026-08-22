@@ -20,6 +20,9 @@ importers:
       '@fontsource/carlito':
         specifier: ^5.2.8
         version: 5.3.0
+      '@fontsource/source-serif-4':
+        specifier: ^5.3.0
+        version: 5.3.0
       '@radix-ui/react-dialog':
         specifier: ^1.1.23
         version: 1.1.23(@types/react-dom@19.2.4(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
@@ -400,6 +403,9 @@ packages:
 
   '@fontsource/carlito@5.3.0':
     resolution: {integrity: sha512-oPqvLGK/dtVzC4KjdDcV/YzQq37sZdMXxD58ADvguPo3dm6yzbBKs40ADmevJF0wLvyvJY7/fPl5YkCQ1njWUw==}
+
+  '@fontsource/source-serif-4@5.3.0':
+    resolution: {integrity: sha512-yQz8xmIgMzks8zQbpuca3UYtjxK798XCyQAGdDXmzBgvV7sdoK6d0YvE9F9kiYxORCEMRBgGZDZsSYcXj5KvwA==}
 
   '@humanfs/core@0.19.2':
     resolution: {integrity: sha512-UhXNm+CFMWcbChXywFwkmhqjs3PRCmcSa/hfBgLIb7oQ5HNb1wS0icWsGtSAUNgefHeI+eBrA8I1fxmbHsGdvA==}
@@ -2810,6 +2816,8 @@ snapshots:
   '@floating-ui/utils@0.2.12': {}
 
   '@fontsource/carlito@5.3.0': {}
+
+  '@fontsource/source-serif-4@5.3.0': {}
 
   '@humanfs/core@0.19.2':
     dependencies:

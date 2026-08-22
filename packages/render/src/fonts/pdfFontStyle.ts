@@ -1,7 +1,7 @@
 import type { FontStacks } from '@rb/themes/types'
 
 /** Families registered via Font.register (not react-pdf built-ins). */
-export const REGISTERED_PDF_FAMILIES = new Set<string>(['Carlito'])
+export const REGISTERED_PDF_FAMILIES = new Set<string>(['Carlito', 'Source Serif 4'])
 
 function usesRegisteredFamily(fonts: FontStacks): boolean {
   return REGISTERED_PDF_FAMILIES.has(fonts.pdfBody)

@@ -16,10 +16,13 @@ describe('themes', () => {
     expect(theme.pdf.bodyFont).toBe('Times-Roman')
   })
 
-  it('academic-serif uses Times and smaller name', () => {
+  it('academic-serif uses Source Serif 4 and smaller name', () => {
     const theme = getTheme('academic-serif')
     expect(theme.typography.nameSize).toBe(16)
-    expect(theme.fonts.pdfBody).toBe('Times-Roman')
+    expect(theme.fonts.pdfBody).toBe('Source Serif 4')
+    expect(theme.fonts.previewBody).toContain('Source Serif 4')
+    // Legacy tokens still describe it as a serif for consumers that branch on it.
+    expect(theme.pdf.bodyFont).toBe('Times-Roman')
   })
 
   it('themeForDocument selects academic-serif for CV academic', () => {

@@ -24,11 +24,11 @@ export const academicSerifTheme = createTheme({
     headerBorderBottom: false,
   },
   fonts: {
-    previewBody: 'Georgia, "Times New Roman", Times, serif',
-    previewHeading: 'Georgia, "Times New Roman", Times, serif',
-    pdfBody: 'Times-Roman',
-    pdfHeading: 'Times-Bold',
-    pdfBold: 'Times-Bold',
-    pdfItalic: 'Times-Italic',
+    previewBody: '"Source Serif 4", Georgia, "Times New Roman", Times, serif',
+    previewHeading: '"Source Serif 4", Georgia, "Times New Roman", Times, serif',
+    pdfBody: 'Source Serif 4',
+    pdfHeading: 'Source Serif 4',
+    pdfBold: 'Source Serif 4',
+    pdfItalic: 'Source Serif 4',
   },
 })

@@ -3,16 +3,16 @@ import type { ResumeDocument } from '@rb/core/types/document'
 import { getTheme } from '@rb/themes/registry'
 import type { LayoutProfile, ThemeTokens, TypographyScale } from '@rb/themes/types'
 import { ptCss } from '@rb/styles/shared/pt'
-import { headerBandPaddingPt } from '@rb/render/blocks/blockVariants'
+import { headerBandPaddingPt } from '@rb/styles/shared/blockVariants'
 import type { PageDimensions, ResolvedCssStyles, ResolvedPdfStyles, ResolvedStyles } from '@rb/styles/shared/types'
-import { TEMPLATE_LAYOUTS } from '@rb/templates/shared/layoutProfiles'
+import { TEMPLATE_LAYOUTS } from '@rb/styles/shared/layoutProfiles'
 import { getPreset } from '@rb/presets/registry'
 import {
   pdfBoldStyle,
   pdfBodyFamily,
   pdfHeadingStyle,
   pdfItalicStyle,
-} from '@rb/render/fonts/pdfFontStyle'
+} from '@rb/styles/shared/pdfFontStyle'
 
 const PAGE_MM: Record<'a4' | 'letter', PageDimensions> = {
   a4: { widthMm: 210, heightMm: 297, size: 'a4' },
@@ -37,6 +37,16 @@ function mergeLayout(theme: ThemeTokens, meta: ResumeDocument['meta']): LayoutPr
   return { ...theme.layout, ...tpl.layout, ...presetLayout }
 }
 
+/** Tint and padding of a 'shaded-bar' section title; null for every other decoration. Shared by CSS and PDF so the measured height matches the drawn one. */
+function shadedBar(theme: ThemeTokens, layout: LayoutProfile) {
+  if (layout.sectionTitleDecoration !== 'shaded-bar') return null
+  return {
+    backgroundColor: theme.colors.border,
+    paddingVerticalPt: layout.shadedBarPaddingPt,
+    paddingHorizontalPt: layout.shadedBarPaddingPt * 2,
+  }
+}
+
 function textTransform(value: LayoutProfile['sectionTitleTransform']): CSSProperties['textTransform'] {
   return value === 'none' ? 'none' : value
 }
@@ -47,6 +57,7 @@ function sectionTitleBase(
   layout: LayoutProfile,
 ): CSSProperties {
   const withRule = layout.sectionTitleDecoration === 'rule'
+  const bar = shadedBar(theme, layout)
   return {
     fontFamily: theme.fonts.previewHeading,
     fontSize: ptCss(typography.sectionSize),
@@ -59,6 +70,14 @@ function sectionTitleBase(
     borderBottomStyle: withRule ? 'solid' : undefined,
     borderBottomColor: withRule ? theme.colors.border : undefined,
     paddingBottom: withRule ? ptCss(layout.bulletGapPt) : undefined,
+    textAlign: layout.sectionTitleAlign,
+    ...(bar && {
+      backgroundColor: bar.backgroundColor,
+      paddingTop: ptCss(bar.paddingVerticalPt),
+      paddingBottom: ptCss(bar.paddingVerticalPt),
+      paddingLeft: ptCss(bar.paddingHorizontalPt),
+      paddingRight: ptCss(bar.paddingHorizontalPt),
+    }),
   }
 }
 
@@ -187,6 +206,7 @@ function pdfSectionTitleBase(
   layout: LayoutProfile,
 ) {
   const withRule = layout.sectionTitleDecoration === 'rule'
+  const bar = shadedBar(theme, layout)
   return {
     fontSize: typography.sectionSize,
     ...pdfHeadingStyle(theme.fonts),
@@ -197,6 +217,14 @@ function pdfSectionTitleBase(
     borderBottomWidth: withRule ? layout.headerBorderWidthPt : 0,
     borderBottomColor: theme.colors.border,
     paddingBottom: withRule ? layout.bulletGapPt : 0,
+    textAlign: layout.sectionTitleAlign,
+    ...(bar && {
+      backgroundColor: bar.backgroundColor,
+      paddingTop: bar.paddingVerticalPt,
+      paddingBottom: bar.paddingVerticalPt,
+      paddingLeft: bar.paddingHorizontalPt,
+      paddingRight: bar.paddingHorizontalPt,
+    }),
   }
 }
 
@@ -310,6 +338,27 @@ export function resolveDocumentStyles(document: ResumeDocument): ResolvedStyles 
     page,
     css: buildCssStyles(theme, typography, layout, page),
     pdf: buildPdfStyles(theme, typography, layout),
+  }
+}
+
+/**
+ * Styles for text set on an accent-coloured rail (layout.sidebarInverse): paper-coloured text on the accent, with the
+ * theme's light border colour for secondary text. Only colours change, so every size, gap and wrap width — and so the
+ * measured plan — is the same as the page's. Not for a 'shaded-bar' template: the bar would become textMuted behind
+ * paper-coloured text, below AA. No template combines the two.
+ */
+export function inverseResolvedStyles(resolved: ResolvedStyles): ResolvedStyles {
+  const { theme, typography, layout, page } = resolved
+  const { colors } = theme
+  const inverse: ThemeTokens = {
+    ...theme,
+    colors: { text: colors.paper, textMuted: colors.border, accent: colors.paper, border: colors.textMuted, paper: colors.accent },
+  }
+  return {
+    ...resolved,
+    theme: inverse,
+    css: buildCssStyles(inverse, typography, layout, page),
+    pdf: buildPdfStyles(inverse, typography, layout),
   }
 }
 

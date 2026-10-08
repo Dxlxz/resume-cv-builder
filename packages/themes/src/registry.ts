@@ -1,4 +1,4 @@
-import type { TemplateId, ThemeId } from '@rb/core/types/document'
+import type { DocumentType, TemplateId, ThemeId } from '@rb/core/types/document'
 import type { ThemeTokens } from '@rb/themes/types'
 import { academicSerifTheme } from '@rb/themes/academic-serif'
 import { monoTheme } from '@rb/themes/mono'
@@ -19,10 +19,10 @@ export function getTheme(id: ThemeId): ThemeTokens {
 /** Auto-select serif theme for academic CV layouts */
 export function themeForDocument(
   templateId: TemplateId,
-  documentType: 'resume' | 'cv',
+  documentType: DocumentType,
   currentThemeId: ThemeId,
 ): ThemeId {
-  if (documentType === 'cv' && templateId === 'academic') {
+  if (templateId === 'ivy' || templateId === 'executive' || (documentType === 'cv' && templateId === 'academic')) {
     return 'academic-serif'
   }
   if (currentThemeId === 'academic-serif' && templateId !== 'academic') {

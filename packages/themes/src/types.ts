@@ -21,7 +21,8 @@ export interface TypographyScale {
   letterSpacingSection: number
 }
 
-export type SectionTitleDecoration = 'rule' | 'spacing-only' | 'accent-bar' | 'rule-inline'
+/** 'shaded-bar' sets the title on a full-width tinted bar (the theme's border colour). */
+export type SectionTitleDecoration = 'rule' | 'spacing-only' | 'accent-bar' | 'rule-inline' | 'shaded-bar'
 
 /** Document header: stacked text, or a full-bleed colour band. */
 export type HeaderStyle = 'stacked' | 'band'
@@ -56,6 +57,10 @@ export interface LayoutProfile {
   headerBorderWidthPt: number
   sectionTitleTransform: 'uppercase' | 'none' | 'capitalize'
   sectionTitleDecoration: SectionTitleDecoration
+  /** Title alignment for 'rule', 'spacing-only' and 'shaded-bar'; the bar and inline-rule variants are always left. */
+  sectionTitleAlign: 'left' | 'center'
+  /** Vertical padding inside a 'shaded-bar' title; the horizontal padding is twice this. */
+  shadedBarPaddingPt: number
   headerStyle: HeaderStyle
   entryStyle: EntryStyle
   skillsStyle: SkillsStyle
@@ -101,6 +106,15 @@ export interface LayoutProfile {
    * that is what keeps a parser's reading order intact.
    */
   sidebarSections: SectionId[]
+  /** Which side the rail sits on. A right rail is written after the main column, so reading order stays main-first. */
+  sidebarSide: 'left' | 'right'
+  /** Draw a hairline between the rail and the main column (used when the rail has no tint). */
+  sidebarRule: boolean
+  /**
+   * Paint the rail in the accent colour and set its text in the paper colour. Needs sidebarBackground. Only colours
+   * change, so measurement, pagination and reading order are the same as a tinted rail.
+   */
+  sidebarInverse: boolean
   headerAlign: 'left' | 'center'
   headerBorderBottom: boolean
   /** Character budget per packed skill line (content width at body size). */
@@ -177,6 +191,8 @@ export const DEFAULT_LAYOUT: LayoutProfile = {
   headerBorderWidthPt: 1,
   sectionTitleTransform: 'uppercase',
   sectionTitleDecoration: 'spacing-only',
+  sectionTitleAlign: 'left',
+  shadedBarPaddingPt: 2.5,
   headerAlign: 'left',
   headerBorderBottom: true,
   skillLineMaxChars: 100,
@@ -199,6 +215,9 @@ export const DEFAULT_LAYOUT: LayoutProfile = {
   sidebarGutterPt: 22,
   sidebarBackground: true,
   sidebarSections: [],
+  sidebarSide: 'left',
+  sidebarRule: false,
+  sidebarInverse: false,
 }
 
 export function buildLegacyPdf(theme: Pick<ThemeTokens, 'typography' | 'fonts'>): LegacyPdfTokens {

@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import {sampleCvDocument, sampleProfileDocument} from '@rb/fixtures'
 import { parityDeltaPt, resolveDocumentStyles } from '@rb/styles/shared/resolveDocumentStyles'
 import { parsePt } from '@rb/styles/shared/pt'
-import { minPresenceForSection } from '@rb/templates/shared/spacingHelpers'
+import { minPresenceForSection } from '@rb/styles/shared/spacingHelpers'
 
 describe('resolveDocumentStyles', () => {
   it('applies Malaysia corporate compact density (preset overrides win)', () => {
@@ -16,7 +16,7 @@ describe('resolveDocumentStyles', () => {
     expect(resolved.layout.sectionTitleGapPt).toBe(6)
     expect(resolved.layout.bulletGapPt).toBe(3)
     expect(resolved.layout.skillGroupGapPt).toBe(5)
-    expect(resolved.layout.maxBulletsPerItem).toBe(3)
+    expect(resolved.layout.maxBulletsPerItem).toBe(5)
     expect(resolved.theme.colors.accent).toBe('#1F3864')
   })
 

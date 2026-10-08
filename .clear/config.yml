@@ -1,0 +1,11 @@
+framework: CLEAR
+variant: lite
+version: 1.0.0
+default_delivery_class: L1
+default_ui_fidelity_class: U1
+accessibility_baseline: WCAG_2_2_AA
+feature_packet_path: .clear/features
+decision_path: docs/decisions
+debt_register_path: .clear/debt-register.md
+run_records_path: .clear/ai/runs
+agent_contract: AGENTS.md

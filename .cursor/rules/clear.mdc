@@ -1,0 +1,14 @@
+---
+description: Follow the adopted CLEAR lite lifecycle for every repository change
+alwaysApply: true
+---
+
+# CLEAR delivery
+
+**Reader:** repository agents · **Answers:** which delivery gates apply to this task?
+
+Before any repository change, read [AGENTS.md](../../AGENTS.md),
+[AGENTS.md §5 (CLEAR lite)](../../AGENTS.md#5-delivery--clear-lite), and
+[the project profile](../../.clear/PROJECT.md). Follow their class-appropriate
+lifecycle, locks, verification, review and record requirements.
+Skills in `.agents/skills/` supplement this contract.

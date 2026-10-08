@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import type { BreakPolicy, MeasuredBlock } from '@rb/layout/types'
 import {sampleProfileDocument} from '@rb/fixtures'
 import { compileStandardLayout } from '@rb/layout/compile/compileStandardLayout'
-import { measureLayout } from '@rb/layout/measure/measureLayout'
+import { measureLayout } from '@rb/render/measure/measureLayout'
 import { planPages } from '@rb/layout/plan/planPages'
 import { resolveDocumentStyles } from '@rb/styles'
 

@@ -1,7 +1,7 @@
 import { StyleSheet } from '@react-pdf/renderer'
 import type { ResolvedStyles } from '@rb/styles/shared/types'
-import { minPresenceForSection } from '@rb/templates/shared/spacingHelpers'
-import { pdfBoldStyle, pdfHeadingStyle } from '@rb/render/fonts/pdfFontStyle'
+import { minPresenceForSection } from '@rb/styles/shared/spacingHelpers'
+import { pdfBoldStyle, pdfHeadingStyle } from '@rb/styles/shared/pdfFontStyle'
 
 export function createPdfBlockStyles(resolved: ResolvedStyles) {
   const { pdf, theme, typography, layout } = resolved

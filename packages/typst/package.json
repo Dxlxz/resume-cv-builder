@@ -1,0 +1,15 @@
+{
+  "name": "@rb/typst",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Trial render backend: layout IR to Typst source, compiled to PDF by the Typst WASM compiler (F-006)",
+  "exports": {
+    ".": "./src/index.ts",
+    "./*": "./src/*"
+  },
+  "dependencies": {
+    "@myriaddreamin/typst-ts-web-compiler": "0.7.0",
+    "@myriaddreamin/typst.ts": "0.7.0"
+  }
+}

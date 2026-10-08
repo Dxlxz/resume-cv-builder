@@ -1,3 +1,4 @@
+import fs from 'node:fs'
 import js from '@eslint/js'
 import globals from 'globals'
 import reactHooks from 'eslint-plugin-react-hooks'
@@ -6,24 +7,23 @@ import tseslint from 'typescript-eslint'
 import { defineConfig, globalIgnores } from 'eslint/config'
 
 /**
- * UDS contract gate: className strings must use semantic tokens.
- * Bans Tailwind palette-color utilities (bg-gray-300, text-red-500, …) in
- * JSX className literals — the UDS semantic-only usage rule (see
- * packages/styles/src/uds/README.md). Cheap static guard; dynamic strings
- * (template concat) are out of scope — audit remains the backstop.
+ * Semantic-token gate: className strings must use semantic tokens (Gold Standard hybrid-shadcn-reui
+ * sections 7-8). Bans Tailwind palette-color utilities (bg-gray-300, text-red-500, ...) in JSX className
+ * literals; use bg-background, text-primary, border-border, or a status variant instead. Cheap static
+ * guard; dynamic strings (template concat) are out of scope.
  */
 const noPrimitiveTailwind = {
 	meta: {
 		type: 'problem',
-		docs: { description: 'Forbid Tailwind palette-color utilities in JSX className (UDS semantic-only rule)' },
+		docs: { description: 'Forbid Tailwind palette-color utilities in JSX className (semantic tokens only)' },
 		messages: {
-			primitive: 'Use semantic tokens (bg-background / text-primary / border-border / status-*) instead of the primitive utility "{{ util }}" (UDS contract, packages/styles/src/uds/README.md).',
+			primitive: 'Use semantic tokens (bg-background / text-primary / border-border / bg-muted) or a status variant instead of the primitive utility "{{ util }}" (docs/decisions/shadcn-reui-design-system.md).',
 		},
 		schema: [],
 	},
 	create(context) {
 		const PALETTE =
-			/(?:bg|text|border|ring|fill|stroke|decoration|outline|divide|from|via|to|accent|caret|shadow)-(?:gray|red|orange|amber|yellow|lime|green|emerald|teal|cyan|sky|blue|indigo|violet|purple|fuchsia|pink|rose)(?:-\d{2,3})?(?:\/\d+)?/g
+			/(?:bg|text|border|ring|fill|stroke|decoration|outline|divide|from|via|to|accent|caret|shadow)-(?:slate|gray|zinc|neutral|stone|red|orange|amber|yellow|lime|green|emerald|teal|cyan|sky|blue|indigo|violet|purple|fuchsia|pink|rose)(?:-\d{2,3})?(?:\/\d+)?/g
 		return {
 			JSXAttribute(node) {
 				if (node.name.name !== 'className') return
@@ -43,8 +43,56 @@ const noPrimitiveTailwind = {
 	},
 }
 
+/**
+ * Module boundaries, generated from the single module map (.clear/architecture/modules.json).
+ * scripts/check-modules.mjs is the gate (it also checks cycles and relative imports); these rules give early
+ * feedback in the editor for the common violations.
+ */
+const moduleMap = JSON.parse(fs.readFileSync(new URL('./.clear/architecture/modules.json', import.meta.url), 'utf8'))
+const restrict = (patterns) => ({ 'no-restricted-imports': ['error', { patterns }] })
+const boundaryRules = [
+  ...Object.entries(moduleMap.packages).map(([pkg, allowed]) => ({
+    files: [`packages/${pkg}/src/**/*.{ts,tsx}`],
+    ignores: ['**/*.test.*'],
+    rules: restrict([
+      {
+        group: Object.keys(moduleMap.packages)
+          .filter((other) => other !== pkg && !allowed.includes(other))
+          .flatMap((other) => [`@rb/${other}`, `@rb/${other}/**`]),
+        message: `package "${pkg}" may import only: ${allowed.join(', ') || 'nothing'} (.clear/architecture/modules.json)`,
+      },
+      { group: ['@/**', '@personal/**'], message: 'packages must not import the application or the personal pack' },
+    ]),
+  })),
+  ...Object.entries(moduleMap.modules)
+    .filter(([name]) => name !== 'app')
+    .map(([name, allowed]) => ({
+      files: [name === 'shared' ? 'src/shared/**/*.{ts,tsx}' : `src/modules/${name}/**/*.{ts,tsx}`],
+      ignores: ['**/*.test.*'],
+      rules: restrict([
+        ...(allowed.includes('*')
+          ? []
+          : [
+              {
+                group: Object.keys(moduleMap.modules)
+                  .filter((other) => other !== 'app' && other !== 'shared' && other !== name && !allowed.includes(other))
+                  .map((other) => `@/modules/${other}`),
+                message: `module "${name}" may import only: ${allowed.join(', ') || 'nothing'} (.clear/architecture/modules.json)`,
+              },
+            ]),
+        { group: ['@/modules/*/**'], message: "import a module through its entry, '@/modules/<module>'" },
+        { group: ['@/app', '@/app/**'], message: 'only the app composes modules' },
+      ]),
+    })),
+  {
+    files: ['src/app/**/*.{ts,tsx}'],
+    ignores: ['**/*.test.*'],
+    rules: restrict([{ group: ['@/modules/*/**'], message: "import a module through its entry, '@/modules/<module>'" }]),
+  },
+]
+
 export default defineConfig([
-  globalIgnores(['dist', 'personal']),
+  globalIgnores(['dist', 'personal', 'tmp']),
   {
     files: ['**/*.{ts,tsx}'],
     extends: [
@@ -65,68 +113,11 @@ export default defineConfig([
   {
     // The ui/ facade is a component library (Radix aliases + primitives);
     // fast-refresh's only-export-components rule does not apply.
-    files: ['src/components/ui/**/*.tsx'],
+    files: ['src/shared/ui/**/*.tsx'],
     rules: {
       'react-refresh/only-export-components': 'off',
     },
   },
-  {
-    files: ['packages/core/src/**/*.{ts,tsx}'],
-    ignores: ['**/*.test.*'],
-    rules: {
-      'no-restricted-imports': [
-        'error',
-        {
-          patterns: [
-            {
-              group: [
-                '@/app/**',
-                '@/components/**',
-                '@/hooks/**',
-                '@/lib/**',
-                '@/renderers/**',
-                '@rb/presets/**',
-                '@rb/themes/**',
-                '@rb/templates/**',
-                '@rb/layout/**',
-                '@rb/render/**',
-                '@rb/styles/**',
-                '@rb/validators/**',
-                '@rb/catalog/**',
-                '@rb/fixtures/**',
-              ],
-              message: 'core module must not import application, layout, theme, preset, renderer, style, validator, catalog, or fixture dependencies',
-            },
-          ],
-        },
-      ],
-    },
-  },
-  {
-    files: ['packages/layout/src/**/*.{ts,tsx}'],
-    ignores: ['**/*.test.*'],
-    rules: {
-      'no-restricted-imports': [
-        'error',
-        {
-          patterns: [
-            {
-              group: [
-                '@/app/**',
-                '@/components/**',
-                '@/hooks/**',
-                '@/lib/**',
-                '@/renderers/**',
-                '@rb/catalog/**',
-                '@rb/validators/**',
-                '@rb/presets/**',
-              ],
-              message: 'layout module must not import UI chrome, PDF renderers, catalog, or validators',
-            },
-          ],
-        },
-      ],
-    },
-  },
+  ...boundaryRules,
 ])
 

@@ -1,6 +1,6 @@
 import type { BlockPdfHints, LayoutBlock, MeasuredLayout, PagePlan } from '@rb/layout/types'
 import type { LayoutProfile, TypographyScale } from '@rb/themes/types'
-import { keepWithNextPeekPt, minPresenceForSection } from '@rb/templates/shared/spacingHelpers'
+import { keepWithNextPeekPt, minPresenceForSection } from '@rb/styles/shared/spacingHelpers'
 
 export function buildBlockPdfHints(
   blocks: LayoutBlock[],

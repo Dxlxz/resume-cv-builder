@@ -46,7 +46,7 @@ later is worse than splitting it now.
      over `shared/resolveDocumentStyles.ts`.
   3. New templates — `modern-rail`, `banner`, plus the `LayoutProfile` knobs and
      both block renderers.
-  4. Idrizz feature flag — `src/features/ai/enabled.ts` and its two call sites.
+  4. Idrizz feature flag (the AI assistant; removed 2026-10-07).
 - Resolve the two stashes (`helvetica-revert-wip*`). They revert Carlito to
   Helvetica; the evidence says that revert was based on a false signal. Drop them
   unless you disagree.
@@ -159,7 +159,7 @@ the only one that could not be landed with the current engine.
 pagination core, so it wants the Phase 1 safety net underneath it.
 
 **The actual problem.** Everything else so far worked because
-`packages/layout/src/measure/measureLayout.ts` measures the HTML blocks in a
+`packages/render/src/measure/measureLayout.ts` measures the HTML blocks in a
 hidden DOM and `planPages` lays them out in **one** vertical flow. The rail,
 accent bars and skills grid are *within-block* changes, so pagination never had
 to know about them. A sidebar is not: it is two independent block streams whose
@@ -286,6 +286,5 @@ prerequisite is met. Phase 4 additionally waits on the AGPL decision.
 - **Read-only share links** — real value (#6, medium), but it is the first feature
   that needs server-side storage and therefore changes the product's privacy
   posture. It deserves its own decision, not a line in a build plan.
-- **Re-enabling Idrizz** — currently flagged off by `VITE_IDRIZZ_ENABLED`. The
-  research found Rizzume's approval-flow design already matches the market
-  leader's; re-enabling is a product call, not a build task.
+- **Re-enabling Idrizz** — the AI assistant was removed on 2026-10-07 (F-002).
+  Bringing it back would be a new feature with its own decision.

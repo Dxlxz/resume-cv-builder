@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "resolveDocumentStyles, page specs, shared style types, UDS CSS tokens",
+  "description": "resolveDocumentStyles, page specs, shared style types, layout profiles",
   "exports": {
     ".": "./src/index.ts",
     "./*": "./src/*"

@@ -21,12 +21,6 @@ declare module '@personal/profile' {
   export const personalCvDocument: ResumeDocument
 }
 
-/** Build-time env. */
-interface ImportMetaEnv {
-  /** "true" enables Idrizz, the AI assistant. Any other value leaves it off. */
-  readonly VITE_IDRIZZ_ENABLED?: string
-}
-
 interface ImportMeta {
   readonly env: ImportMetaEnv
 }

@@ -33,32 +33,40 @@ Open the URL shown in the terminal (usually `http://localhost:5173`).
 | `pnpm run preview` | Preview production build |
 | `pnpm test` | Run unit tests |
 | `pnpm run lint` | Run ESLint |
+| `pnpm run modules:check` | Check module boundaries (also runs in `pnpm test`) |
 
 ## Package layout
 
-Monorepo (pnpm workspaces): the document engine is a set of independently
-versioned packages under `packages/*`, consumed as TS source by the thin
-app shell in `src/`.
+Modular monolith (pnpm workspaces). The document engine is a set of packages under `packages/*`, consumed as TS
+source by the application modules in `src/`. Every module declares what it may import in
+[`.clear/architecture/modules.json`](.clear/architecture/modules.json); `pnpm run modules:check` (also part of
+`pnpm test`) fails on a cycle, an unlisted import, or a deep import into another module.
 
 ```
-packages/
-  core/        @rb/core      — ResumeDocument, zod schema, migration, selectors, utils
-  layout/      @rb/layout    — compile → measure → plan → lint (no UI, no PDF)
-  render/      @rb/render    — RenderBackend contract, react-pdf adapter, block views
-  styles/      @rb/styles    — resolveDocumentStyles, page specs, UDS CSS tokens
-  templates/   @rb/templates — template contract + classic / academic / ats-strict
+packages/                  — engine, lowest layer first; each package imports only the ones above it in this list
+                             (catalog and fixtures use core only; validators sits on top)
+  core/        @rb/core      — ResumeDocument, zod schema, migration, selectors, interop, PDF import
   themes/      @rb/themes    — theme tokens: mono, navy-corporate, academic-serif
-  validators/  @rb/validators— ATS lint + regional lint (Malaysia)
   presets/     @rb/presets   — document presets (Malaysia corporate, international)
+  styles/      @rb/styles    — resolveDocumentStyles, page specs, layout profiles
+  layout/      @rb/layout    — compile → plan → hints (pure: no DOM, no PDF)
+  render/      @rb/render    — block views, DOM measurement, fonts, RenderBackend contract
+  templates/   @rb/templates — template PDFs: classic / academic / ats-strict / modern-rail / banner
+  pipeline/    @rb/pipeline  — computeLayoutPlan, renderDocumentToPdf
   catalog/     @rb/catalog   — versioned vocabulary bundles (edited in code)
   fixtures/    @rb/fixtures  — fictional sample documents for tests and demos
-src/                       — app shell: editor, toolbar, preview host
+  validators/  @rb/validators— ATS lint, regional lint (Malaysia), catalog lint, ATS proof suite
+src/
+  app/                     — composition root: routing, builder layout
+  shared/                  — UI primitives, app shell, hooks, utils
+  modules/<name>/          — document · pdf · catalog · editor · preview · toolbar · landing · ats-check
+                             (each entered only through its index.ts)
 personal/                  — PRIVATE: Dale's profile pack + personal scripts (gitignored, dev-only alias)
 ```
 
-The app shell imports packages via the `@rb/*` alias (tsconfig `paths` +
-Vite `resolve.alias`); package boundaries are enforced by ESLint
-(`no-restricted-imports`). Shipping builds never bundle `personal/` — a CI
+The app imports packages via the `@rb/*` alias (tsconfig `paths` +
+Vite `resolve.alias`); boundaries are enforced by `pnpm run modules:check` and, in the
+editor, by ESLint (`no-restricted-imports`, generated from `modules.json`). Shipping builds never bundle `personal/` — a CI
 leak check greps the repo and the bundle for personal markers on every push.
 
 ## Deploy
@@ -69,34 +77,6 @@ Deploy with Vercel (recommended): import this repo at vercel.com/new —
 Vite + pnpm are auto-detected (`build: pnpm run build`, output `dist/`),
 and the site redeploys on every push to `main`. The same `pnpm run build`
 output also serves statically on Netlify, GitHub Pages, or any static host.
-
-## AI assistance (optional)
-
-**Idrizz** is the built-in AI assistant: ask it to edit, add, or remove
-anything. Each form section has a round Idrizz icon, and a floating chat
-bubble (resizable) handles the conversation. Set a **section guide** (the
-pencil icon in any section header) to tell Idrizz exactly how to write
-that section - guides live in the document and travel with JSON
-export/import. Idrizz replies with a typed JSON edit plan that is
-validated before anything is shown, and you review each change group
-(Apply / Discard) before it touches your document. Nothing is applied
-automatically, and the first use shows a consent notice.
-
-AI calls go through a small serverless proxy (`api/ai.ts`) so the API key
-never ships in the client bundle. The upstream is OpenCode Go
-(`deepseek-v4-flash`); per their policy, inputs are not used for training
-and are retained for zero days.
-
-Setup:
-
-```bash
-# local dev: copy the example and add your key
-Copy-Item .env.example .env.local
-```
-
-For production, set `OPENCODE_GO_API_KEY` as a Vercel environment variable.
-The key is only ever read server-side; the CI leak check fails any commit
-that contains an `sk-` key.
 
 ## Personal dev scripts
 
@@ -111,18 +91,19 @@ They are excluded from CI and from `pnpm test` (see vite.config.ts).
 
 ## Styling
 
-The app chrome follows the **Universal Design System (UDS)** — Dale's
-design-system monorepo (`Universal Design System/` on the Desktop). The two
-CSS files the app needs are vendored into `packages/styles/src/uds/` (tokens +
-Tailwind bridge); see
-[`packages/styles/src/uds/README.md`](packages/styles/src/uds/README.md)
-for the sync procedure. UI code uses UDS semantic utilities
-(`bg-background`, `text-foreground`, `bg-card`, `bg-primary`,
-`text-muted-foreground`, status tokens) — no primitive literals.
+The app chrome is built on [shadcn/ui](https://ui.shadcn.com) (style `radix-nova`, Radix primitives) with
+[ReUI](https://reui.io) for `alert`, `badge`, `stepper`, `sortable` and `scrollspy`. It has a light and a dark theme
+that share one set of OKLCH semantic tokens (`src/shared/theme/tokens.css`); the theme is chosen in the app bar
+and follows the operating system by default. The resume PDF is separate: it has its own themes in
+`packages/themes` and always renders on a white page.
 
-The document output (resume/CV PDF) has its own themes in
-`packages/themes/` (`mono`, `navy-corporate`, `academic-serif`) — unrelated
-to the app chrome.
+- Components live in `src/shared/ui/` (lowercase file names). `src/shared/ui/MANIFEST.json` records where each
+  came from (shadcn, reui or internal). Add one with `npx shadcn@latest add <name>` or `add @reui/<name>`, review the
+  generated code, and add its manifest entry.
+- Only `src/shared/ui/` imports `radix-ui`; feature code uses the components.
+- Use semantic tokens (`bg-background`, `text-muted-foreground`, `border-border`) and status variants
+  (`<Badge variant="success-light">`), never palette utilities; ESLint enforces it.
+- Decision and rules: [docs/decisions/shadcn-reui-design-system.md](docs/decisions/shadcn-reui-design-system.md).
 
 ## Docs
 

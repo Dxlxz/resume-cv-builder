@@ -49,7 +49,7 @@ flowchart LR
 |-------|------------|
 | UI framework | React 19 + TypeScript |
 | Build | Vite 8 |
-| Styling | Tailwind CSS v4 (editor chrome) |
+| Styling | Tailwind CSS v4 + shadcn/ui and ReUI (light and dark themes) |
 | State | Zustand |
 | Validation | Zod (schema) + custom lint modules |
 | PDF generation | `@react-pdf/renderer` |
@@ -110,19 +110,52 @@ There is no API server, authentication provider, or cloud storage in the current
 
 ## 2.1 Bounded contexts
 
-| Module | Path | Responsibility |
-|--------|------|----------------|
-| **core** | `packages/core/src/` | `ResumeDocument` schema (v1/v2), Zod parsing, Zustand document store |
-| **presets** | `packages/presets/src/` | Regional defaults - template, theme, page size, validators, section labels |
+The module map is [`.clear/architecture/modules.json`](../.clear/architecture/modules.json). It lists, for every
+package and every application module, the modules it may import. `pnpm run modules:check` enforces it (it also
+runs inside `pnpm test`), and ESLint reports the common violations in the editor.
+
+**Engine packages** (`packages/*`, alias `@rb/*`). Packages sit in this order, lowest first, and each may import
+only packages below it (to its left), so there are no cycles:
+
+`core` → `themes` → `presets` → `styles` → `layout` → `render` → `templates` → `pipeline`
+
+`catalog` and `fixtures` depend on `core` only; `validators` sits on top and may import `core`, `themes`, `presets`,
+`styles`, `layout` and `catalog`.
+
+| Package | Path | Responsibility |
+|---------|------|----------------|
+| **core** | `packages/core/src/` | `ResumeDocument` schema (v1/v2/v3), Zod parsing, selectors, JSON Resume interop, PDF import |
 | **themes** | `packages/themes/src/` | Visual tokens - colors, typography scale, layout profile, font stacks |
-| **templates** | `packages/templates/src/` | Thin PDF entrypoints; layout profile overrides per template |
-| **layout** | `packages/layout/src/` | Compile IR, DOM measure, page plan, PDF hints - **no UI chrome, no final PDF** |
-| **render** | `packages/render/src/` | Shared block components (`LayoutBlockHtml`, `LayoutBlockPdf`) + `RenderBackend` contract |
-| **renderers** | `src/renderers/` | PDF generation orchestration, style resolution, PDF.js helpers, download |
-| **validators** | `packages/validators/src/` | ATS, typography, spacing, layout, pagination, regional lint |
+| **presets** | `packages/presets/src/` | Regional defaults - template, theme, page size, validators, section labels |
+| **styles** | `packages/styles/src/` | `resolveDocumentStyles`, page specs, template layout profiles, spacing helpers, block variants, PDF font styles |
+| **layout** | `packages/layout/src/` | Compile IR, page plan, PDF hints - pure, **no DOM, no React, no PDF** |
+| **render** | `packages/render/src/` | Block components (`LayoutBlockHtml`, `LayoutBlockPdf`), DOM measurement, fonts, `RenderBackend` contract |
+| **templates** | `packages/templates/src/` | Template PDF entrypoints (classic, academic, ats-strict, modern-rail, banner) + shared block layout |
+| **pipeline** | `packages/pipeline/src/` | `computeLayoutPlan` (compile + measure + plan) and `renderDocumentToPdf` (template dispatch) |
+| **validators** | `packages/validators/src/` | ATS, typography, spacing, layout, pagination, regional and catalog lint; ATS proof suite |
 | **catalog** | `packages/catalog/src/` | Bundled vocabulary, search, schema (edited in code, no admin) |
-| **app** | `src/app/`, `src/components/`, `src/hooks/` | Shell, editor, preview, toolbar, routing |
-| **personal** | personal/ (private) | Dale's profile pack - dev-only alias, never shipped |
+| **fixtures** | `packages/fixtures/src/` | Fictional sample documents (tests, demos) |
+
+**Application modules** (`src/`). Each module under `src/modules/<name>/` is entered only through its `index.ts`
+(`@/modules/<name>`); `src/shared/` is open to all; `src/app/` composes the modules.
+
+| Module | Path | Responsibility | May import |
+|--------|------|----------------|------------|
+| **shared** | `src/shared/` | UI primitives, `AppShell`, `useAppRoute`, `useMediaQuery`, `utils`, `scrollToSection` | - |
+| **pdf** | `src/modules/pdf/` | `generatePdf`, `downloadPdf`, `countPdfPages`, PDF.js client | shared |
+| **document** | `src/modules/document/` | `documentStore` (Zustand), draft persistence, JSON import/export | shared |
+| **catalog** | `src/modules/catalog/` | Catalog pickers, `useCatalogBundle` | document, shared |
+| **editor** | `src/modules/editor/` | Editor panel, section list, forms, `FormSection`, section status | document, catalog, gallery, shared |
+| **gallery** | `src/modules/gallery/` | Template gallery: live thumbnails of the open draft in every template | document, pdf, shared |
+| **preview** | `src/modules/preview/` | Preview panel, `PdfJsPreview`, `usePdfPreview` | document, pdf, shared |
+| **toolbar** | `src/modules/toolbar/` | Toolbar, lint panel, PDF preview modal | document, pdf, shared |
+| **landing** | `src/modules/landing/` | Landing page and sample PDF previews | pdf, shared |
+| **ats-check** | `src/modules/ats-check/` | Public ATS checker page | shared |
+| **app** | `src/app/` | `App`, `BuilderLayout`, `DocTypeSelector`, `RecoveryBanner`, `BrowserGuard` | every module |
+| **personal** | `personal/` (private) | Dale's profile pack - dev-only alias, never shipped | - |
+
+To add a module: create `src/modules/<name>/index.ts`, add its entry to `modules.json`, and list what it may
+import. A change to `modules.json` is a CLEAR change ([AGENTS.md](../AGENTS.md) section 5).
 
 ## 2.2 Preset, theme, and template
 
@@ -151,33 +184,46 @@ flowchart TB
 
 ## 2.3 Module dependencies
 
-```mermaid
-flowchart TB
-  app[src/app + components]
-  core[@rb/core]
-  catalog[@rb/catalog]
-  layout[@rb/layout]
-  render[@rb/render]
-  renderers[src/renderers]
-  templates[@rb/templates]
-  themes[@rb/themes]
-  presets[@rb/presets]
-  validators[@rb/validators]
+Arrows mean "may import".
 
-  app --> core
-  app --> catalog
-  app --> layout
-  app --> renderers
-  core --> presets
-  core --> themes
-  layout --> render
-  layout --> renderers
-  renderers --> templates
-  renderers --> themes
-  templates --> render
-  validators --> layout
-  validators --> themes
-  catalog --> presets
+```mermaid
+flowchart BT
+  subgraph Engine["Engine packages (arrow = may import)"]
+    themes --> core
+    presets --> themes
+    styles --> presets
+    layout --> styles
+    render --> layout
+    templates --> render
+    pipeline --> templates
+    catalog --> core
+    fixtures --> core
+    validators --> layout
+    validators --> catalog
+  end
+  subgraph App["Application modules"]
+    shared
+    pdf --> shared
+    document --> shared
+    catalog_ui[catalog] --> document
+    editor --> catalog_ui
+    editor --> document
+    editor --> gallery
+    gallery --> pdf
+    gallery --> document
+    preview --> pdf
+    preview --> document
+    toolbar --> pdf
+    toolbar --> document
+    landing --> pdf
+    atscheck[ats-check] --> shared
+    app --> editor
+    app --> preview
+    app --> toolbar
+    app --> landing
+    app --> atscheck
+  end
+  pdf -.-> pipeline
 ```
 
 ## 2.4 Data flow diagram - Level 0
@@ -456,7 +502,7 @@ After measurement, each block gains a **`bbox`** (`{ x, y, width, height }` in p
 
 ## 3.2 Layout pipeline
 
-Orchestrator: `computeLayoutPlan()` in `packages/layout/src/computeLayoutPlan.ts`.
+Orchestrator: `computeLayoutPlan()` in `packages/pipeline/src/computeLayoutPlan.ts`.
 
 ```mermaid
 flowchart TB
@@ -494,7 +540,7 @@ flowchart TB
 | Stage | File | Notes |
 |-------|------|-------|
 | Compile | `packages/layout/src/compile/compileStandardLayout.ts` | Walks `getVisibleSections()`; emits header + section blocks with spacing from `LayoutProfile` |
-| Measure | `packages/layout/src/measure/measureLayout.ts` | Off-screen DOM; reads `getBoundingClientRect()`; SSR fallback uses line-count heuristic |
+| Measure | `packages/render/src/measure/measureLayout.ts` | Off-screen DOM; reads `getBoundingClientRect()`; SSR fallback uses line-count heuristic |
 | Plan | `packages/layout/src/plan/planPages.ts` | Virtual pagination; orphan section titles; `keep` / `keepWithNext` breaks |
 | Adapt | `packages/layout/src/adapt/reactPdfPlan.ts` | Maps plan → `BlockPdfHints` (`wrap`, `breakBefore`, `minPresenceAhead`) |
 | Render | `packages/templates/src/shared/BlockLayoutPdf.tsx` | Single react-pdf `<Page wrap>`; all blocks via `LayoutBlockPdf` |
@@ -577,7 +623,7 @@ interface RenderBackend {
 | Backend | Status | Path |
 |---------|--------|------|
 | react-pdf + block walker | **v1 (shipped)** | `renderDocumentToPdf` → `BlockLayoutPdf` |
-| `reactPdfBackend` | Pluggable adapter | `packages/render/src/reactPdfBackend.tsx` |
+| `reactPdfBackend` | Pluggable adapter | `packages/pipeline/src/reactPdfBackend.tsx` |
 | Forme | v2 candidate | Not implemented - see [decisions/layout-engine.md](decisions/layout-engine.md) |
 
 ### Font registration
@@ -638,7 +684,7 @@ Orchestrator: `runValidation()` in `packages/validators/src/ats-lint.ts`.
 | Layout | `layout-lint.ts` | `LAYOUT_ORPHAN_TITLE`, `LAYOUT_PAGE_1_DEAD_ZONE` |
 | Pagination | `paginate-lint.ts` | `PAGINATION_OVERFLOW_RISK`, `PAGINATION_PAGE_COUNT_DRIFT` |
 | Regional | `regional/malaysia.ts` | `IC_NUMBER_DETECTED`, `LOCATION_EMPTY` |
-| Catalog | `catalog/lint/catalog-lint.ts` | Vocabulary consistency |
+| Catalog | `catalog-lint.ts` | Vocabulary consistency |
 
 Layout and spacing validators read `documentStore.layoutPlan`, so the compile → measure → plan pipeline must have run (via `usePdfPreview` or `useLayoutPlan`) before those rules produce results.
 
@@ -670,38 +716,26 @@ Avoid these - they caused spacing and parity bugs in earlier iterations:
 ## 3.9 File map
 
 ```
+packages/                       # engine, alias @rb/*  (core > themes > presets > styles > layout > render > templates > pipeline)
+├── core/src/                   # types/document.ts, schema/, selectors/, interop/, import-pdf/
+├── themes/src/                 # mono, navy-corporate, academic-serif
+├── presets/src/                # malaysia-corporate, international-generic
+├── styles/src/shared/          # resolveDocumentStyles, layoutProfiles, spacingHelpers, blockVariants, pdfFontStyle
+├── layout/src/                 # compile/, plan/, adapt/, pdfLayoutContext.ts, types.ts
+├── render/src/                 # types.ts (RenderBackend), blocks/, measure/, fonts/
+├── templates/src/              # classic/, academic/, ats-strict/, modern-rail/, banner/, shared/ (BlockLayoutPdf, ColumnLayoutPdf)
+├── pipeline/src/               # computeLayoutPlan, renderDocumentToPdf, reactPdfBackend
+├── validators/src/             # ats-lint orchestrator, lint modules, catalog-lint, ats-proof/
+├── catalog/src/                # bundles, search, schema
+└── fixtures/src/               # sample documents
 src/
-├── app/                    # App shell, routing, layout
-├── core/
-│   ├── types/document.ts   # ResumeDocument, sections, meta
-│   ├── schema/             # Zod v1/v2, migrate, safeParse
-│   └── store/              # documentStore (Zustand)
-├── presets/                # malaysia-corporate, international-generic
-├── themes/                 # mono, navy-corporate, academic-serif
-├── templates/
-│   ├── classic/            # ClassicPdf.tsx
-│   ├── academic/           # AcademicPdf.tsx
-│   ├── ats-strict/         # AtsStrictPdf.tsx
-│   └── shared/             # BlockLayoutPdf, layoutProfiles, blockHints
-├── layout/
-│   ├── compile/            # compileStandardLayout, skillLines
-│   ├── measure/            # measureLayout, MeasureRenderer
-│   ├── plan/               # planPages
-│   ├── adapt/              # buildBlockPdfHints
-│   ├── debug/              # inspector, schematic, overlay
-│   └── computeLayoutPlan.ts
-├── render/
-│   ├── types.ts            # RenderBackend contract
-│   ├── reactPdfBackend.tsx
-│   ├── blocks/             # LayoutBlockHtml, LayoutBlockPdf, blockSpacing
-│   └── fonts/              # registerPdfFonts, Carlito
-├── renderers/
-│   ├── pdf/                # generatePdf, renderDocumentToPdf, download
-│   └── shared/             # resolveDocumentStyles, pageSpec, contrast
-├── validators/             # ats-lint orchestrator + modules
-├── catalog/                # registry, bundles, store, admin, pickers data
-├── components/             # editor, preview, toolbar, catalog UI
-└── hooks/                  # usePdfPreview, useLayoutPlan, usePersistence, useAppRoute
+├── main.tsx
+├── app/                        # App, BuilderLayout, DocTypeSelector, RecoveryBanner, BrowserGuard
+├── shared/                     # ui/, hooks/, layout/AppShell, lib/
+└── modules/                    # each module is entered through its index.ts
+    ├── document/               # documentStore, storage/
+    ├── pdf/                    # generatePdf, download, countPdfPages, pdfjsClient
+    └── catalog/  editor/  preview/  toolbar/  landing/  ats-check/
 ```
 
 ## 3.10 Extension points

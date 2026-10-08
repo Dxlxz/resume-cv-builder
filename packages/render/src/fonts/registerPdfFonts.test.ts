@@ -12,7 +12,7 @@
  */
 import { describe, expect, it } from 'vitest'
 import { sampleProfileDocument } from '@rb/fixtures'
-import { renderDocumentToPdf } from '@rb/render/renderDocumentToPdf'
+import { renderDocumentToPdf } from '@rb/pipeline/renderDocumentToPdf'
 import { ensurePdfFontsRegistered } from '@rb/render/fonts/registerPdfFonts'
 
 async function embeddedFonts(blob: Blob): Promise<string[]> {

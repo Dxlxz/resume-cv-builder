@@ -3,13 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "Compile, measure, plan, lint pipeline — no UI, no PDF",
+  "description": "Compile, plan and PDF hints. Pure: no DOM, no React, no PDF",
   "exports": {
     ".": "./src/index.ts",
     "./*": "./src/*"
-  },
-  "dependencies": {
-    "react": "^19.2.6",
-    "react-dom": "^19.2.6"
   }
 }

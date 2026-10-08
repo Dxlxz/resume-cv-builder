@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest'
 import {sampleProfileDocument} from '@rb/fixtures'
-import { computeLayoutPlan } from '@rb/layout/computeLayoutPlan'
-import { generatePdfWithPlan } from '@/lib/pdf/generatePdf'
-import { countPdfPages } from '@/lib/pdf/countPdfPages'
+import { computeLayoutPlan } from '@rb/pipeline/computeLayoutPlan'
+import { generatePdfWithPlan } from '@/modules/pdf'
+import { countPdfPages } from '@/modules/pdf'
 import { buildBlockPdfHints } from '@rb/layout/adapt/reactPdfPlan'
 import { resolveDocumentStyles } from '@rb/styles'
 

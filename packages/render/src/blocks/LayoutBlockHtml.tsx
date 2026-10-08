@@ -12,7 +12,7 @@ import {
   usesInlineRule,
   usesRail,
   usesSkillGrid,
-} from '@rb/render/blocks/blockVariants'
+} from '@rb/styles/shared/blockVariants'
 
 interface LayoutBlockHtmlProps {
   block: LayoutBlock

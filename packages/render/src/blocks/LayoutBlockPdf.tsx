@@ -3,12 +3,12 @@ import type { LayoutBlock } from '@rb/layout/types'
 import type { PdfStyle, ResolvedStyles } from '@rb/styles/shared/types'
 import { blockWrapperStylePt } from '@rb/render/blocks/blockSpacing'
 import type { PdfBlockStyles } from '@rb/render/blocks/pdfBlockStyles'
-import { HeaderMetaLinesPdf } from '@rb/templates/shared/headerMetaLines'
+import { HeaderMetaLinesPdf } from '@rb/render/blocks/headerMetaLines'
 import {
   pdfBreakHint,
   pdfMinPresenceHint,
   pdfWrapHint,
-} from '@rb/templates/shared/blockHints'
+} from '@rb/render/blocks/blockHints'
 import {
   accentBarHeightPt,
   bulletIndentPt,
@@ -19,7 +19,7 @@ import {
   usesInlineRule,
   usesRail,
   usesSkillGrid,
-} from '@rb/render/blocks/blockVariants'
+} from '@rb/styles/shared/blockVariants'
 
 interface LayoutBlockPdfProps {
   block: LayoutBlock

@@ -1,0 +1,30 @@
+{
+  "$comment": "Module map for Rizzume. Enforced by scripts/check-modules.mjs (pnpm run modules:check, also run by pnpm test). Each key lists the modules it may import; '*' means any. Edit this file only through a CLEAR change.",
+  "packages": {
+    "core": [],
+    "themes": ["core"],
+    "presets": ["core", "themes"],
+    "styles": ["core", "themes", "presets"],
+    "layout": ["core", "themes", "styles"],
+    "render": ["core", "themes", "styles", "layout"],
+    "templates": ["core", "themes", "styles", "layout", "render"],
+    "typst": ["core", "themes", "styles", "layout", "render"],
+    "pipeline": ["core", "themes", "styles", "layout", "render", "templates", "typst"],
+    "catalog": ["core"],
+    "fixtures": ["core"],
+    "validators": ["core", "themes", "presets", "styles", "layout", "catalog"]
+  },
+  "modules": {
+    "shared": [],
+    "pdf": ["shared"],
+    "document": ["shared"],
+    "catalog": ["document", "shared"],
+    "editor": ["document", "catalog", "gallery", "shared"],
+    "gallery": ["document", "pdf", "shared"],
+    "preview": ["document", "pdf", "shared"],
+    "toolbar": ["document", "pdf", "shared"],
+    "landing": ["pdf", "shared"],
+    "ats-check": ["shared"],
+    "app": ["*"]
+  }
+}

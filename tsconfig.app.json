@@ -19,6 +19,8 @@
       "@rb/render/*": ["packages/render/src/*"],
       "@rb/styles": ["packages/styles/src"],
       "@rb/styles/*": ["packages/styles/src/*"],
+      "@rb/pipeline": ["packages/pipeline/src"],
+      "@rb/pipeline/*": ["packages/pipeline/src/*"],
       "@rb/templates": ["packages/templates/src"],
       "@rb/templates/*": ["packages/templates/src/*"],
       "@rb/themes": ["packages/themes/src"],
@@ -30,7 +32,9 @@
       "@rb/catalog": ["packages/catalog/src"],
       "@rb/catalog/*": ["packages/catalog/src/*"],
       "@rb/fixtures": ["packages/fixtures/src"],
-      "@rb/fixtures/*": ["packages/fixtures/src/*"]
+      "@rb/fixtures/*": ["packages/fixtures/src/*"],
+      "@rb/typst": ["packages/typst/src"],
+      "@rb/typst/*": ["packages/typst/src/*"]
     },
     "moduleResolution": "bundler",
     "allowImportingTsExtensions": true,

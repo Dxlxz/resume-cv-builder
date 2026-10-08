@@ -2,7 +2,7 @@
 
 > **Quick reference.** Full system architecture (DFD, ERD, flows, module map): [docs/architecture.md](docs/architecture.md)
 
-**Style:** modular monolith (pnpm workspace - engine packages under `packages/*`, thin app shell in `src/`).
+**Style:** modular monolith (pnpm workspace - engine packages under `packages/*`, application modules under `src/modules/*`). Boundaries are declared in [`.clear/architecture/modules.json`](.clear/architecture/modules.json) and enforced by `pnpm run modules:check`.
 
 ## Principle
 
@@ -11,19 +11,29 @@
 
 ## Bounded contexts
 
+Packages may import only the packages to their left, so there are no cycles:
+`core` → `themes` → `presets` → `styles` → `layout` → `render` → `templates` → `pipeline`.
+
 | Module | Package / Path | Responsibility |
 |--------|----------------|----------------|
-| **core** | `@rb/core` (`packages/core/`) | `ResumeDocument`, schema, migration, selectors, utils |
-| **layout** | `@rb/layout` (`packages/layout/`) | Compile IR, measure, plan, lint - **no UI, no PDF** |
-| **render** | `@rb/render` (`packages/render/`) | Block views + `RenderBackend` adapters + react-pdf document adapter |
-| **styles** | `@rb/styles` (`packages/styles/`) | `resolveDocumentStyles`, page specs, shared style types, UDS CSS tokens |
-| **templates** | `@rb/templates` (`packages/templates/`) | Template entrypoints (thin) + shared block layout |
+| **core** | `@rb/core` (`packages/core/`) | `ResumeDocument`, schema, migration, selectors, interop, PDF import |
 | **themes** | `@rb/themes` (`packages/themes/`) | Theme token definitions |
-| **validators** | `@rb/validators` (`packages/validators/`) | ATS lint + regional lint (Malaysia) |
 | **presets** | `@rb/presets` (`packages/presets/`) | Document presets |
+| **styles** | `@rb/styles` (`packages/styles/`) | `resolveDocumentStyles`, page specs, layout profiles, spacing helpers, block variants |
+| **layout** | `@rb/layout` (`packages/layout/`) | Compile IR, plan, PDF hints - **no UI, no DOM, no PDF** |
+| **render** | `@rb/render` (`packages/render/`) | Block views, DOM measurement, fonts, `RenderBackend` contract |
+| **templates** | `@rb/templates` (`packages/templates/`) | Template PDF entrypoints (thin) + shared block layout |
+| **pipeline** | `@rb/pipeline` (`packages/pipeline/`) | `computeLayoutPlan`, `renderDocumentToPdf`, `reactPdfBackend` |
+| **validators** | `@rb/validators` (`packages/validators/`) | ATS, regional and catalog lint; ATS proof suite |
 | **catalog** | `@rb/catalog` (`packages/catalog/`) | Versioned vocabulary bundles, search, schema (edited in code, no admin) |
 | **fixtures** | `@rb/fixtures` (`packages/fixtures/`) | Fictional sample documents (tests, demos) |
-| **app** | `src/components/`, `src/hooks/`, `src/renderers/` | Editor, preview host, toolbar, PDF.js preview, download |
+| **shared** | `src/shared/` | UI primitives, app shell, route and media hooks, utils |
+| **pdf** | `src/modules/pdf/` | `generatePdf`, download, page count, PDF.js client |
+| **document** | `src/modules/document/` | Zustand `documentStore`, draft persistence, JSON import/export |
+| **catalog** · **editor** · **preview** · **toolbar** · **landing** · **ats-check** | `src/modules/<name>/` | Feature modules; entered only through `index.ts` |
+| **app** | `src/app/` | Composition root: routing, builder layout, recovery banner |
+
+Application modules and their allowed imports: [docs/architecture.md section 2.1](docs/architecture.md).
 
 **Personal pack:** `personal/` (gitignored, dev-only `@personal/profile` alias). Never imported by packages; shipping builds leave the import external and it rejects at runtime.
 
@@ -109,16 +119,19 @@ See [docs/decisions/layout-engine.md](docs/decisions/layout-engine.md).
 ```
 packages/layout/src/
   compile/compileStandardLayout.ts   # doc → blocks
-  measure/measureLayout.ts           # blocks → bboxes (uses LayoutBlockHtml)
   plan/planPages.ts
   adapt/reactPdfPlan.ts              # hints only
 
 packages/render/src/
   types.ts                           # RenderBackend contract
-  reactPdfBackend.ts
-  renderDocumentToPdf.tsx            # full-document react-pdf adapter
+  measure/measureLayout.ts           # blocks → bboxes (uses LayoutBlockHtml)
   blocks/
     blockSpacing.ts
     LayoutBlockHtml.tsx
     LayoutBlockPdf.tsx
+
+packages/pipeline/src/
+  computeLayoutPlan.ts               # compile → measure → plan → hints
+  renderDocumentToPdf.tsx            # full-document react-pdf adapter
+  reactPdfBackend.tsx
 ```

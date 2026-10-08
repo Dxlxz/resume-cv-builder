@@ -9,7 +9,7 @@
 import { describe, expect, it } from 'vitest'
 import { sampleResumeDocument } from '@rb/fixtures'
 import { createEmptyDocument } from '@rb/presets/createDocument'
-import { renderDocumentToPdf } from '@rb/render/renderDocumentToPdf'
+import { renderDocumentToPdf } from '@rb/pipeline/renderDocumentToPdf'
 import { parseResumePdf, parseLines } from '@rb/core/import-pdf/parseResumePdf'
 import { groupIntoLines, type TextItem } from '@rb/core/import-pdf/readPdfText'
 import type { ResumeDocument, TemplateId } from '@rb/core/types/document'

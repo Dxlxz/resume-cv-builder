@@ -10,4 +10,4 @@
  */
 export * from '@rb/styles/types'
 export * from '@rb/styles/pageSpec'
-export { resolveDocumentStyles, parityDeltaPt } from '@rb/styles/shared/resolveDocumentStyles'
+export { inverseResolvedStyles, resolveDocumentStyles, parityDeltaPt } from '@rb/styles/shared/resolveDocumentStyles'

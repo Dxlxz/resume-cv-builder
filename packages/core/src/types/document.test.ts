@@ -8,7 +8,7 @@ import {
   type ThemeId,
 } from '@rb/core/types/document'
 import { PRESETS } from '@rb/presets/registry'
-import { TEMPLATE_LAYOUTS } from '@rb/templates/shared/layoutProfiles'
+import { TEMPLATE_LAYOUTS } from '@rb/styles/shared/layoutProfiles'
 import { THEMES } from '@rb/themes/registry'
 
 /**

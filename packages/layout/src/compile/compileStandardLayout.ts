@@ -6,8 +6,9 @@ import { resolveDocumentStyles } from '@rb/styles'
 import { formatDateRange } from '@rb/core/utils'
 import type { LayoutBlock, LayoutDocument } from '@rb/layout/types'
 import type { LayoutProfile, TypographyScale } from '@rb/themes/types'
-import { shouldKeepItemTogether } from '@rb/templates/shared/spacingHelpers'
+import { shouldKeepItemTogether } from '@rb/styles/shared/spacingHelpers'
 import { chunkSkillItems } from '@rb/layout/compile/skillLines'
+import { columnGeometry } from '@rb/styles/shared/columnGeometry'
 
 function titleBlock(
   id: string,
@@ -297,7 +298,60 @@ function emitProjects(ctx: CompileContext) {
   }
 }
 
+/**
+ * A cover letter's body. Unlike every other section this one has no heading —
+ * a letter that announces "LETTER" above itself would be absurd — so it emits
+ * its parts as plain paragraphs in reading order: date, recipient block,
+ * salutation, body, closing, signature.
+ */
+function emitLetter(ctx: CompileContext) {
+  const { document, blocks, layout } = ctx
+  const letter = document.letter
+  if (!letter) return
+
+  const para = (id: string, text: string, spacingBefore: number) => {
+    blocks.push({
+      id,
+      type: 'paragraph',
+      breakPolicy: 'auto',
+      spacingBeforePt: spacingBefore,
+      spacingAfterPt: layout.paragraphGapPt,
+      content: { kind: 'paragraph', text },
+    })
+  }
+
+  if (letter.date?.trim()) para('letter-date', letter.date.trim(), layout.sectionGapPt)
+
+  const recipient = [
+    letter.recipientName?.trim(),
+    letter.recipientTitle?.trim(),
+    letter.company?.trim(),
+    letter.companyAddress?.trim(),
+  ].filter((line): line is string => Boolean(line))
+
+  recipient.forEach((line, index) => {
+    para(`letter-recipient-${index}`, line, index === 0 ? layout.sectionGapPt : 0)
+  })
+
+  const salutation = letter.salutation?.trim() || 'Dear Hiring Manager,'
+  para('letter-salutation', salutation, layout.sectionGapPt)
+
+  letter.paragraphs
+    .map((paragraph) => paragraph.trim())
+    .filter(Boolean)
+    .forEach((paragraph, index) => {
+      para(`letter-body-${index}`, paragraph, index === 0 ? layout.paragraphGapPt : 0)
+    })
+
+  const closing = letter.closing?.trim() || 'Yours sincerely,'
+  para('letter-closing', closing, layout.sectionGapPt)
+  if (document.contact.fullName.trim()) {
+    para('letter-signature', document.contact.fullName.trim(), layout.sectionGapPt)
+  }
+}
+
 const SECTION_EMITTERS: Record<Exclude<SectionId, 'contact'>, (ctx: CompileContext) => void> = {
+  letter: emitLetter,
   summary: emitSummary,
   experience: emitExperience,
   education: emitEducation,
@@ -372,9 +426,8 @@ export function compileStandardLayout(
   // treat the columns as genuinely independent flows.
   let columnWidthsPt: LayoutDocument['columnWidthsPt']
   if (layout.columns === 2) {
-    const side = layout.sidebarWidthPt
-    const main = contentWidthPt - side - layout.sidebarGutterPt
-    columnWidthsPt = { side, main }
+    const geometry = columnGeometry(layout, contentWidthPt + layout.pageMarginPt * 2)
+    columnWidthsPt = { side: geometry.sideContentPt, main: geometry.mainContentPt }
     const sidebar = new Set(layout.sidebarSections)
     for (const block of blocks as LayoutBlock[]) {
       block.column = sidebar.has(block.sectionId) ? 'side' : 'main'

@@ -1,12 +1,26 @@
 import { useState } from 'react'
+import { CheckIcon } from 'lucide-react'
 import type { DocumentType, PresetId } from '@rb/core/types/document'
 import type { PresetDefinition } from '@rb/presets/types'
-import { useDocumentStore } from '@/store/documentStore'
 import { PRESET_LIST } from '@rb/presets/registry'
-import { AppShell } from '@/app/AppShell'
-import { Button } from '@/components/ui/Button'
-
-type Step = 'preset' | 'doctype'
+import { useDocumentStore } from '@/modules/document'
+import { AppShell } from '@/shared/layout/AppShell'
+import { Badge } from '@/shared/ui/badge'
+import { Button } from '@/shared/ui/button'
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/shared/ui/card'
+import { Field, FieldContent, FieldLabel, FieldTitle } from '@/shared/ui/field'
+import { RadioGroup, RadioGroupItem } from '@/shared/ui/radio-group'
+import {
+  Stepper,
+  StepperContent,
+  StepperIndicator,
+  StepperItem,
+  StepperNav,
+  StepperPanel,
+  StepperSeparator,
+  StepperTitle,
+  StepperTrigger,
+} from '@/shared/ui/stepper'
 
 interface DocOption {
   type: DocumentType
@@ -35,8 +49,8 @@ const DOC_OPTIONS: DocOption[] = [
     title: 'CV',
     line: 'Full career record, no page limit.',
     points: [
-      'Every role, project, and certification in detail',
-      'For academic, research, and senior applications',
+      'Every role, project and certification in detail',
+      'For academic, research and senior applications',
     ],
     pages: 3,
   },
@@ -49,6 +63,13 @@ const TEMPLATE_LABELS: Record<PresetDefinition['defaults']['templateId'], string
   'modern-rail': 'Modern rail layout',
   banner: 'Banner layout',
   sidebar: 'Sidebar layout',
+  ivy: 'Ivy layout',
+  compact: 'Compact layout',
+  split: 'Split layout',
+  executive: 'Executive layout',
+  harbor: 'Harbor layout',
+  slate: 'Slate layout',
+  minimal: 'Minimal layout',
 }
 
 /** What each preset is for - plain language, not lint rules. */
@@ -74,46 +95,32 @@ function presetChips(p: PresetDefinition): string[] {
   return chips
 }
 
-/** Decorative page schematic - differs per preset so the choice feels concrete. */
+/** Decorative page schematic - differs per preset so the choice feels concrete. It is paper, so it uses the paper tokens. */
 function PresetSchematic({ atsStrict }: { atsStrict: boolean }) {
-  const bar = (w: string, t: 'strong' | 'soft' | 'faint') =>
-    `h-1.5 rounded-full ${w} ${
-      t === 'strong'
-        ? 'bg-foreground/70'
-        : t === 'soft'
-          ? 'bg-foreground/40'
-          : 'bg-foreground/20'
+  const bar = (width: string, tone: 'strong' | 'soft' | 'faint') =>
+    `h-1.5 rounded-full ${width} ${
+      tone === 'strong' ? 'bg-paper-foreground/70' : tone === 'soft' ? 'bg-paper-foreground/40' : 'bg-paper-foreground/15'
     }`
+  const align = atsStrict ? '' : 'justify-center'
   return (
-    <div
-      aria-hidden
-      className="w-full max-w-44 shrink-0 rounded-md border border-border bg-card p-4 shadow-[var(--shadow-raised)]"
-    >
-      {atsStrict ? (
-        <div className="space-y-1">
-          <div className={bar('w-3/4', 'strong')} />
-          <div className={bar('w-1/2', 'soft')} />
-        </div>
-      ) : (
-        <div className="space-y-1 text-center">
-          <div className={`${bar('w-2/3', 'strong')} mx-auto`} />
-          <div className={`${bar('w-1/3', 'soft')} mx-auto`} />
-        </div>
-      )}
-      <div className="mt-3 space-y-2">
-        <div className={`flex items-center gap-1.5 ${atsStrict ? '' : 'justify-center'}`}>
+    <div aria-hidden className="w-full max-w-36 shrink-0 rounded-sm bg-paper p-3 shadow-md ring-1 ring-paper-foreground/10">
+      <div className={`space-y-1 ${atsStrict ? '' : 'flex flex-col items-center'}`}>
+        <div className={bar(atsStrict ? 'w-3/4' : 'w-2/3', 'strong')} />
+        <div className={bar(atsStrict ? 'w-1/2' : 'w-1/3', 'soft')} />
+      </div>
+      <div className="mt-3 space-y-1.5">
+        <div className={`flex items-center gap-1.5 ${align}`}>
           <div className={bar('w-1/5', 'soft')} />
-          <div className="h-px flex-1 bg-foreground/10" />
+          <div className="h-px flex-1 bg-paper-foreground/10" />
         </div>
         <div className={bar('w-full', 'faint')} />
         <div className={bar('w-5/6', 'faint')} />
-        <div className={bar('w-full', 'faint')} />
         <div className={bar('w-4/6', 'faint')} />
       </div>
-      <div className="mt-3 space-y-2">
-        <div className={`flex items-center gap-1.5 ${atsStrict ? '' : 'justify-center'}`}>
+      <div className="mt-3 space-y-1.5">
+        <div className={`flex items-center gap-1.5 ${align}`}>
           <div className={bar('w-1/4', 'soft')} />
-          <div className="h-px flex-1 bg-foreground/10" />
+          <div className="h-px flex-1 bg-paper-foreground/10" />
         </div>
         <div className={bar('w-full', 'faint')} />
         <div className={bar('w-3/4', 'faint')} />
@@ -126,18 +133,14 @@ function PresetSchematic({ atsStrict }: { atsStrict: boolean }) {
 function PageStack({ pages }: { pages: 1 | 3 }) {
   return (
     <div aria-hidden className="relative h-14 w-10 shrink-0">
-      {pages === 3 && (
-        <div className="absolute inset-0 translate-x-1.5 translate-y-1.5 rounded-sm border border-border bg-card" />
-      )}
-      {pages === 3 && (
-        <div className="absolute inset-0 translate-x-0.5 translate-y-0.5 rounded-sm border border-border bg-card" />
-      )}
-      <div className="absolute inset-0 rounded-sm border border-border bg-card shadow-[var(--shadow-raised)]">
+      {pages === 3 && <div className="absolute inset-0 translate-x-1.5 translate-y-1.5 rounded-sm bg-paper ring-1 ring-paper-foreground/15" />}
+      {pages === 3 && <div className="absolute inset-0 translate-x-0.5 translate-y-0.5 rounded-sm bg-paper ring-1 ring-paper-foreground/15" />}
+      <div className="absolute inset-0 rounded-sm bg-paper shadow-sm ring-1 ring-paper-foreground/15">
         <div className="mx-1.5 mt-2 space-y-1">
-          <div className="h-1 w-2/3 rounded-full bg-foreground/50" />
-          <div className="h-1 w-full bg-foreground/15" />
-          <div className="h-1 w-4/5 bg-foreground/15" />
-          <div className="h-1 w-full bg-foreground/15" />
+          <div className="h-1 w-2/3 rounded-full bg-paper-foreground/50" />
+          <div className="h-1 w-full bg-paper-foreground/15" />
+          <div className="h-1 w-4/5 bg-paper-foreground/15" />
+          <div className="h-1 w-full bg-paper-foreground/15" />
         </div>
       </div>
     </div>
@@ -153,202 +156,151 @@ export function DocTypeSelector({ onBack }: DocTypeSelectorProps) {
   const startFromSample = useDocumentStore((s) => s.startFromSample)
   const loadPersonalProfile = useDocumentStore((s) => s.loadPersonalProfile)
   const personalProfileAvailable = useDocumentStore((s) => s.personalProfileAvailable)
-  const [step, setStep] = useState<Step>('preset')
+  const [step, setStep] = useState(1)
   const [selectedPreset, setSelectedPreset] = useState<PresetId>('malaysia-corporate')
 
   const preset = PRESET_LIST.find((p) => p.id === selectedPreset)!
 
-  if (step === 'preset') {
-    return (
-      <AppShell backLabel="Home" onBack={onBack}>
-        <div className="mx-auto flex w-full max-w-5xl flex-1 flex-col justify-center px-6 py-12">
-          <div className="mb-10 text-center">
-            <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
-              Step 1 of 2
-            </p>
-            <h1 className="mt-2 text-4xl font-bold tracking-tight text-foreground">
-              Where are you applying?
-            </h1>
-            <p className="mt-3 text-lg text-muted-foreground">
-              This sets your template, page size, and writing norms. You can change
-              everything later in the builder.
-            </p>
-          </div>
-
-          <div className="grid gap-6 md:grid-cols-2">
-            {PRESET_LIST.map((p) => {
-              const isSelected = selectedPreset === p.id
-              return (
-                <article
-                  key={p.id}
-                  role="radio"
-                  aria-checked={isSelected}
-                  tabIndex={0}
-                  onClick={() => setSelectedPreset(p.id)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter' || e.key === ' ') {
-                      e.preventDefault()
-                      setSelectedPreset(p.id)
-                    }
-                  }}
-                  className={`flex cursor-pointer flex-col rounded-lg border bg-card p-6 transition-[border-color,background-color] duration-[var(--duration-state)] focus-visible:[box-shadow:var(--focus-ring)] ${
-                    isSelected
-                      ? 'border-ring ring-2 ring-ring/20 shadow-[var(--shadow-raised)]'
-                      : 'border-border shadow-[var(--shadow-raised)] hover:shadow-[var(--shadow-menu)]'
-                  }`}
-                >
-                  <div className="flex items-start justify-between gap-3">
-                    <div>
-                      <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                        {p.region}
-                      </p>
-                      <h2 className="mt-1 text-2xl font-bold text-foreground">{p.name}</h2>
-                    </div>
-                    <span
-                      aria-hidden
-                      className={`mt-1 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border ${
-                        isSelected
-                          ? 'border-primary bg-primary text-primary-foreground'
-                          : 'border-border bg-transparent'
-                      }`}
-                    >
-                      {isSelected && (
-                        <svg
-                          width="12"
-                          height="12"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2.5"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        >
-                          <path d="M20 6L9 17l-5-5" />
-                        </svg>
-                      )}
-                    </span>
-                  </div>
-
-                  <div className="mt-3 flex flex-wrap gap-1.5">
-                    {presetChips(p).map((chip) => (
-                      <span
-                        key={chip}
-                        className="rounded-full border border-border bg-muted px-2.5 py-0.5 text-xs text-muted-foreground"
-                      >
-                        {chip}
-                      </span>
-                    ))}
-                  </div>
-
-                  <div className="mt-5 flex items-center justify-between gap-5">
-                    <ul className="space-y-2 text-sm text-muted-foreground">
-                      {PRESET_POINTS[p.id].map((point) => (
-                        <li key={point} className="flex gap-2">
-                          <span aria-hidden className="mt-1.5 h-1 w-1 shrink-0 rounded-full bg-primary/70" />
-                          {point}
-                        </li>
-                      ))}
-                    </ul>
-                    <PresetSchematic atsStrict={p.id === 'malaysia-corporate'} />
-                  </div>
-                </article>
-              )
-            })}
-          </div>
-
-          <div className="mt-8 flex justify-center">
-            <Button className="min-w-48" onClick={() => setStep('doctype')}>
-              Continue with {preset.name}
-            </Button>
-          </div>
-        </div>
-      </AppShell>
-    )
-  }
-
   return (
-    <AppShell backLabel="Preset" onBack={() => setStep('preset')}>
-      <div className="mx-auto flex w-full max-w-4xl flex-1 flex-col justify-center px-6 py-12">
-        <div className="mb-10 text-center">
-          <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
-            Step 2 of 2
-          </p>
-          <h1 className="mt-2 text-3xl font-bold tracking-tight text-foreground">
-            Resume or CV?
-          </h1>
-          <p className="mt-3 text-lg text-muted-foreground">
-            Both start from the same details. You can switch later and nothing is lost.
-          </p>
-        </div>
+    <AppShell backLabel={step === 1 ? 'Home' : 'Preset'} onBack={step === 1 ? onBack : () => setStep(1)}>
+      <div className="mx-auto w-full max-w-5xl flex-1 px-4 py-10 sm:px-6 sm:py-14">
+        <Stepper value={step} onValueChange={setStep} indicators={{ completed: <CheckIcon className="size-4" aria-hidden /> }}>
+          <StepperNav className="mx-auto mb-10 max-w-sm">
+            <StepperItem step={1}>
+              <StepperTrigger className="flex-col gap-2 sm:flex-row">
+                <StepperIndicator className="size-7 text-sm">1</StepperIndicator>
+                <StepperTitle>Preset</StepperTitle>
+              </StepperTrigger>
+              <StepperSeparator className="mx-3 group-data-[state=completed]/step:bg-primary" />
+            </StepperItem>
+            <StepperItem step={2}>
+              <StepperTrigger className="flex-col gap-2 sm:flex-row">
+                <StepperIndicator className="size-7 text-sm">2</StepperIndicator>
+                <StepperTitle>Document</StepperTitle>
+              </StepperTrigger>
+            </StepperItem>
+          </StepperNav>
 
-        <div className="grid gap-6 md:grid-cols-2">
-          {DOC_OPTIONS.map((option) => (
-            <article
-              key={option.type}
-              className="flex flex-col rounded-lg border border-border bg-card p-6 shadow-[var(--shadow-raised)]"
-            >
-              <div className="flex items-start justify-between gap-4">
-                <div>
-                  <h2 className="text-2xl font-bold text-foreground">{option.title}</h2>
-                  <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">
-                    {option.line}
-                  </p>
-                </div>
-                <PageStack pages={option.pages} />
+          <StepperPanel>
+            <StepperContent value={1}>
+              <div className="mb-8 text-center">
+                <h1 className="font-display text-4xl font-semibold tracking-tight text-balance">Where are you applying?</h1>
+                <p className="mx-auto mt-3 max-w-xl text-muted-foreground">
+                  This sets your template, page size and writing norms. You can change everything later in the builder.
+                </p>
               </div>
-              <ul className="mt-5 space-y-2 text-sm text-muted-foreground">
-                {option.points.map((point) => (
-                  <li key={point} className="flex gap-2">
-                    <span aria-hidden className="mt-1.5 h-1 w-1 shrink-0 rounded-full bg-primary/70" />
-                    {point}
-                  </li>
+
+              <RadioGroup
+                value={selectedPreset}
+                onValueChange={(value) => setSelectedPreset(value as PresetId)}
+                aria-label="Preset"
+                className="grid gap-4 md:grid-cols-2"
+              >
+                {PRESET_LIST.map((p) => (
+                  <FieldLabel key={p.id} htmlFor={`preset-${p.id}`}>
+                    <Field orientation="horizontal" className="items-start">
+                      <FieldContent className="gap-3">
+                        <div>
+                          <p className="text-xs font-medium tracking-wide text-muted-foreground uppercase">{p.region}</p>
+                          <FieldTitle className="mt-1 text-lg">{p.name}</FieldTitle>
+                        </div>
+                        <div className="flex flex-wrap gap-1.5">
+                          {presetChips(p).map((chip) => (
+                            <Badge key={chip} variant="outline" size="lg">
+                              {chip}
+                            </Badge>
+                          ))}
+                        </div>
+                        <div className="flex items-end justify-between gap-5">
+                          <ul className="space-y-2 text-sm text-muted-foreground">
+                            {PRESET_POINTS[p.id].map((point) => (
+                              <li key={point} className="flex gap-2">
+                                <span aria-hidden className="mt-2 size-1 shrink-0 rounded-full bg-primary" />
+                                {point}
+                              </li>
+                            ))}
+                          </ul>
+                          <PresetSchematic atsStrict={p.id === 'malaysia-corporate'} />
+                        </div>
+                      </FieldContent>
+                      <RadioGroupItem value={p.id} id={`preset-${p.id}`} aria-label={p.name} />
+                    </Field>
+                  </FieldLabel>
                 ))}
-              </ul>
-              <div className="mt-6 space-y-2">
-                <Button
-                  className="w-full"
-                  onClick={() => startDocument(option.type, selectedPreset)}
-                >
-                  Start blank
+              </RadioGroup>
+
+              <div className="mt-8 flex justify-center">
+                <Button size="lg" className="h-10 min-w-56 px-4 text-sm" onClick={() => setStep(2)}>
+                  Continue with {preset.name}
                 </Button>
-                <Button
-                  className="w-full"
-                  variant="secondary"
-                  onClick={() => startFromSample(option.type, selectedPreset)}
-                >
-                  See a sample
-                </Button>
-                {personalProfileAvailable && (
-                  <Button
-                    className="w-full"
-                    variant="secondary"
-                    onClick={() =>
-                      startDocument(option.type, selectedPreset, { withPersonalProfile: true })
-                    }
-                  >
-                    Use my profile
-                  </Button>
-                )}
               </div>
-            </article>
-          ))}
-        </div>
+            </StepperContent>
 
-        <p className="mt-6 text-center text-sm text-muted-foreground">
-          Saved automatically in your browser. No account needed.
-        </p>
+            <StepperContent value={2}>
+              <div className="mb-8 text-center">
+                <h1 className="font-display text-4xl font-semibold tracking-tight text-balance">Resume or CV?</h1>
+                <p className="mx-auto mt-3 max-w-xl text-muted-foreground">
+                  Both start from the same details. You can switch later and nothing is lost.
+                </p>
+              </div>
 
-        {personalProfileAvailable && (
-          <p className="mt-2 text-center">
-            <button
-              type="button"
-              className="text-sm text-primary underline"
-              onClick={() => loadPersonalProfile()}
-            >
-              Load full personal profile (Malaysia Corporate preset)
-            </button>
-          </p>
-        )}
+              <div className="mx-auto grid max-w-3xl gap-4 md:grid-cols-2">
+                {DOC_OPTIONS.map((option) => (
+                  <Card key={option.type}>
+                    <CardHeader>
+                      <div className="flex items-start justify-between gap-4">
+                        <div>
+                          <CardTitle className="text-lg">{option.title}</CardTitle>
+                          <CardDescription className="mt-1.5">{option.line}</CardDescription>
+                        </div>
+                        <PageStack pages={option.pages} />
+                      </div>
+                    </CardHeader>
+                    <CardContent>
+                      <ul className="space-y-2 text-sm text-muted-foreground">
+                        {option.points.map((point) => (
+                          <li key={point} className="flex gap-2">
+                            <span aria-hidden className="mt-2 size-1 shrink-0 rounded-full bg-primary" />
+                            {point}
+                          </li>
+                        ))}
+                      </ul>
+                    </CardContent>
+                    <CardFooter className="flex-col items-stretch gap-2 border-t-0 bg-transparent">
+                      <Button className="w-full" onClick={() => startDocument(option.type, selectedPreset)}>
+                        Start blank
+                      </Button>
+                      <Button className="w-full" variant="outline" onClick={() => startFromSample(option.type, selectedPreset)}>
+                        See a sample
+                      </Button>
+                      {personalProfileAvailable && (
+                        <Button
+                          className="w-full"
+                          variant="outline"
+                          onClick={() => startDocument(option.type, selectedPreset, { withPersonalProfile: true })}
+                        >
+                          Use my profile
+                        </Button>
+                      )}
+                    </CardFooter>
+                  </Card>
+                ))}
+              </div>
+
+              <p className="mt-6 text-center text-sm text-muted-foreground">
+                Saved automatically in your browser. No account needed.
+              </p>
+
+              {personalProfileAvailable && (
+                <p className="mt-2 text-center">
+                  <Button type="button" variant="link" size="sm" className="h-auto whitespace-normal py-1" onClick={() => loadPersonalProfile()}>
+                    Load full personal profile (Malaysia Corporate preset)
+                  </Button>
+                </p>
+              )}
+            </StepperContent>
+          </StepperPanel>
+        </Stepper>
       </div>
     </AppShell>
   )

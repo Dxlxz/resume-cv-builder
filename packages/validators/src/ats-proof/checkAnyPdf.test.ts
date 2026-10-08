@@ -3,7 +3,7 @@
  */
 import { describe, expect, it } from 'vitest'
 import { sampleResumeDocument } from '@rb/fixtures'
-import { renderDocumentToPdf } from '@rb/render/renderDocumentToPdf'
+import { renderDocumentToPdf } from '@rb/pipeline/renderDocumentToPdf'
 import { checkAnyPdf } from '@rb/validators/ats-proof/checkAnyPdf'
 import type { ResumeDocument } from '@rb/core/types/document'
 

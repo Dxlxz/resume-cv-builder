@@ -1,5 +1,7 @@
 # Layout Engine Decision
 
+**Status:** Superseded on 2026-10-08 by [typst-engine.md](typst-engine.md).
+
 **Date:** 2026-06-11  
 **Decision:** Stay on `@react-pdf/renderer` v1 with a **measure → plan → hints** pipeline.
 

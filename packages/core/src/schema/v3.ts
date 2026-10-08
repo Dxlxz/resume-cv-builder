@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import type { ResumeDocument } from '@rb/core/types/document'
+import { TEMPLATE_IDS, type ResumeDocument } from '@rb/core/types/document'
 import {
   certificationItemSchema,
   contactSchema,
@@ -32,21 +32,15 @@ export const sectionGuidesSchema = z
     projects: z.string().max(2000).optional(),
     volunteer: z.string().max(2000).optional(),
     references: z.string().max(2000).optional(),
+    letter: z.string().max(2000).optional(),
   })
   .default({})
 
 export const documentMetaV3Schema = z.object({
   schemaVersion: z.literal(3),
-  documentType: z.enum(['resume', 'cv']),
+  documentType: z.enum(['resume', 'cv', 'cover-letter']),
   presetId: z.enum(['malaysia-corporate', 'international-generic']),
-  templateId: z.enum([
-    'classic',
-    'academic',
-    'ats-strict',
-    'modern-rail',
-    'banner',
-    'sidebar',
-  ]),
+  templateId: z.enum(TEMPLATE_IDS),
   themeId: z.enum(['mono', 'navy-corporate', 'academic-serif']),
   exportProfile: z.enum(['standard', 'portal-safe']),
   locale: z.enum(['en-MY', 'en-US']),
@@ -57,9 +51,24 @@ export const documentMetaV3Schema = z.object({
   updatedAt: z.string(),
 })
 
+/** Cover-letter body. Optional so resumes and CVs stay valid without it. */
+export const letterSchema = z
+  .object({
+    date: z.string().max(60).optional(),
+    recipientName: z.string().max(200).optional(),
+    recipientTitle: z.string().max(200).optional(),
+    company: z.string().max(200).optional(),
+    companyAddress: z.string().max(400).optional(),
+    salutation: z.string().max(200).optional(),
+    paragraphs: z.array(z.string().max(4000)).default([]),
+    closing: z.string().max(200).optional(),
+  })
+  .optional()
+
 export const resumeDocumentV3Schema = z.object({
   meta: documentMetaV3Schema,
   contact: contactSchema,
+  letter: letterSchema,
   summary: z.string(),
   experience: z.array(experienceItemSchema),
   education: z.array(educationItemSchema),

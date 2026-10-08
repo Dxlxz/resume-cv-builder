@@ -11,7 +11,7 @@
 import { describe, expect, it } from 'vitest'
 import { TEMPLATE_IDS, type ResumeDocument, type TemplateId } from '@rb/core/types/document'
 import { sampleCvDocument, sampleResumeDocument } from '@rb/fixtures'
-import { renderDocumentToPdf } from '@rb/render/renderDocumentToPdf'
+import { renderDocumentToPdf } from '@rb/pipeline/renderDocumentToPdf'
 import { groundTruthFor } from '@rb/validators/ats-proof/groundTruth'
 import { checkExtraction, extractPdfText } from '@rb/validators/ats-proof/extractPdfText'
 
@@ -77,6 +77,15 @@ describe('ATS proof', () => {
       }, 60000)
     })
   }
+
+  it('writes the main column before the right rail in the split template (AC-10)', async () => {
+    const { extracted } = await renderAndCheck(sampleResumeDocument, 'split')
+    const text = extracted.pages[0]
+    const lastRole = text.lastIndexOf(sampleResumeDocument.experience[0].title)
+    const skills = text.search(/skills/i)
+    expect(lastRole).toBeGreaterThan(-1)
+    expect(skills).toBeGreaterThan(lastRole)
+  }, 60000)
 
   it('reports a reading-order failure when anchors are out of sequence', () => {
     // Guards the guard: if this ever passes trivially, the suite is worthless.

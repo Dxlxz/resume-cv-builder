@@ -28,7 +28,8 @@ export async function extractPdfText(bytes: Uint8Array): Promise<ExtractedPdf> {
   // Scan for embedded fonts BEFORE handing the bytes to pdf.js: getDocument
   // takes ownership of the buffer and detaches it, so reading afterwards sees
   // an empty array and reports every file as fontless.
-  const raw = Buffer.from(bytes).toString('latin1')
+  // TextDecoder, not Buffer: this runs in the browser too (the builder's readability proof, the /ats-check page).
+  const raw = new TextDecoder('latin1').decode(bytes)
   const fonts = [
     ...new Set(
       [...raw.matchAll(/\/BaseFont\s*\/([A-Za-z0-9+\-,]+)/g)].map((m) =>
@@ -39,6 +40,10 @@ export async function extractPdfText(bytes: Uint8Array): Promise<ExtractedPdf> {
 
   // Legacy build: works under node without a DOM.
   const pdfjs = await import('pdfjs-dist/legacy/build/pdf.mjs')
+  // In a browser pdf.js needs its worker; node runs it in-process. The app may have set it already (pdfjsClient).
+  if (typeof window !== 'undefined' && typeof Worker !== 'undefined' && !pdfjs.GlobalWorkerOptions.workerSrc) {
+    pdfjs.GlobalWorkerOptions.workerSrc = (await import('pdfjs-dist/legacy/build/pdf.worker.min.mjs?url')).default
+  }
   const doc = await pdfjs.getDocument({
     data: bytes,
     // Silence font-substitution chatter; we assert on embedded fonts directly.

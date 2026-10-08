@@ -39,7 +39,7 @@ export function runLengthRules(
     const share = height / pageHeightPt
     if (share > SECTION_TOO_LONG_RATIO) {
       issues.push({
-        level: 'warning',
+        level: 'info',
         code: 'SECTION_TOO_LONG',
         message: `${getSectionLabel(sectionId, {})} takes about ${Math.round(share * 100)}% of a page - trim it or split the content.`,
         section: sectionId,
@@ -64,7 +64,7 @@ export function runLengthRules(
   for (const [base, { pages, title }] of itemPages) {
     if (pages.size > 1) {
       issues.push({
-        level: 'warning',
+        level: 'info',
         code: 'ITEM_SPANS_PAGES',
         message: title
           ? `"${title}" splits across ${pages.size} pages - shorten it or trim the bullets.`
@@ -97,6 +97,8 @@ export function runLengthRules(
   }
 
   // --- Empty sections (no layout needed) ---------------------------------
+  // A cover letter has none of these sections, so their absence is not a gap.
+  if (document.meta.documentType === 'cover-letter') return issues
   if (!document.summary.trim()) {
     issues.push({
       level: 'info',

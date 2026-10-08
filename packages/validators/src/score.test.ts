@@ -1,50 +1,30 @@
 import { describe, expect, it } from 'vitest'
-import { scoreDocument } from '@rb/validators/score'
+import { summarizeChecks } from '@rb/validators/score'
 import type { LintIssue } from '@rb/validators/types'
 
-const issue = (level: LintIssue['level'], code = 'TEST'): LintIssue => ({
-  level,
-  code,
-  message: 'test',
-})
+const issue = (level: LintIssue['level'], code = 'TEST'): LintIssue => ({ level, code, message: 'test' })
+const many = (level: LintIssue['level'], count: number) => Array.from({ length: count }, () => issue(level))
 
-describe('scoreDocument', () => {
-  it('scores a clean document 100', () => {
-    const r = scoreDocument([])
-    expect(r.score).toBe(100)
-    expect(r.band).toBe('excellent')
-    expect(r.bandLabel).toBe('Ready to export')
+describe('summarizeChecks (F-007 AC-2)', () => {
+  it('is ready with no issues', () => {
+    expect(summarizeChecks([])).toMatchObject({ status: 'ready', label: 'ATS ready', errors: 0, risks: 0, tips: 0 })
   })
 
-  it('applies flat weighted penalties', () => {
-    const r = scoreDocument([issue('error'), issue('warning'), issue('info')])
-    expect(r.score).toBe(100 - 14 - 7 - 2)
-    expect(r.errors).toBe(1)
-    expect(r.warnings).toBe(1)
-    expect(r.infos).toBe(1)
+  it('stays ready however many tips there are', () => {
+    const summary = summarizeChecks(many('info', 25))
+    expect(summary.status).toBe('ready')
+    expect(summary.tips).toBe(25)
   })
 
-  it('clamps to zero and never below', () => {
-    const many: LintIssue[] = []
-    for (let i = 0; i < 10; i++) many.push(issue('error'))
-    expect(scoreDocument(many).score).toBe(0)
+  it('reports risks when there is a warning', () => {
+    expect(summarizeChecks([issue('warning'), ...many('info', 3)])).toMatchObject({ status: 'risks', risks: 1, tips: 3 })
   })
 
-  it('caps at 100 for negative input', () => {
-    expect(scoreDocument([]).score).toBe(100)
-  })
-
-  it('assigns bands at boundaries', () => {
-    const withCounts = (errors: number, warnings: number, infos: number): LintIssue[] => [
-      ...Array.from({ length: errors }, () => issue('error')),
-      ...Array.from({ length: warnings }, () => issue('warning')),
-      ...Array.from({ length: infos }, () => issue('info')),
-    ]
-    expect(scoreDocument(withCounts(0, 0, 5)).band).toBe('excellent') // 90
-    expect(scoreDocument(withCounts(0, 1, 2)).band).toBe('good') // 89
-    expect(scoreDocument(withCounts(1, 1, 2)).band).toBe('good') // 75
-    expect(scoreDocument(withCounts(1, 0, 6)).band).toBe('fair') // 74
-    expect(scoreDocument(withCounts(2, 0, 6)).band).toBe('fair') // 60
-    expect(scoreDocument(withCounts(2, 1, 3)).band).toBe('poor') // 59
+  it('is blocked by an error, whatever else is present', () => {
+    expect(summarizeChecks([issue('error'), issue('warning'), issue('info')])).toMatchObject({
+      status: 'blocked',
+      label: 'Fix before export',
+      errors: 1,
+    })
   })
 })

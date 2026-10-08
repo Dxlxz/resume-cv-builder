@@ -16,7 +16,7 @@ export function runSpacingRules(
 
   if (layout.pageMarginPt < 36) {
     issues.push({
-      level: 'warning',
+      level: 'info',
       code: 'SPACE_MARGIN_TIGHT',
       message: `Page margins (${layout.pageMarginPt}pt) are below the recommended 36pt minimum.`,
     })
@@ -24,7 +24,7 @@ export function runSpacingRules(
 
   if (layout.bulletGapPt < 3) {
     issues.push({
-      level: 'warning',
+      level: 'info',
       code: 'SPACE_BULLETS_CRAMPED',
       message: `Bullet spacing (${layout.bulletGapPt}pt) is tight — use at least 3pt for readability.`,
     })
@@ -32,7 +32,7 @@ export function runSpacingRules(
 
   if (layout.sectionTitleGapPt < 6) {
     issues.push({
-      level: 'warning',
+      level: 'info',
       code: 'SPACE_HEADING_CRAMPED',
       message: `Heading-to-body gap (${layout.sectionTitleGapPt}pt) is tight — use at least 6pt.`,
     })

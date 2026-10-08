@@ -41,3 +41,15 @@ describe('catalog search', () => {
     expect(near?.label).toBe('Python')
   })
 })
+
+describe('similarityScore substring rule (F-007)', () => {
+  it('does not call a long skill close to a one-letter entry', () => {
+    expect(similarityScore('React.js / React', 'R')).toBeLessThan(0.8)
+    expect(similarityScore('English — Full professional', 'R')).toBeLessThan(0.8)
+    expect(findNearMatch([{ id: 'r', label: 'R' } as CatalogEntry], 'Malay — Full professional')).toBeNull()
+  })
+
+  it('still treats a close variant as a near match', () => {
+    expect(similarityScore('Reactjs', 'React')).toBeGreaterThanOrEqual(0.8)
+  })
+})

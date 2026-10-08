@@ -59,6 +59,6 @@ export const malaysiaCorporatePreset: PresetDefinition = {
     skillGroupGapPt: 5,
     paragraphGapPt: 5,
     skillLineMaxChars: 105,
-    maxBulletsPerItem: 3,
+    maxBulletsPerItem: 5,
   },
 }

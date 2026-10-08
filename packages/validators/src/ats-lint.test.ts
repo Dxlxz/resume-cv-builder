@@ -25,7 +25,7 @@ describe('ats-lint', () => {
     expect(issues.some((i) => i.code === 'IC_NUMBER_DETECTED')).toBe(true)
   })
 
-  it('warns when portal-safe without ats-strict template', () => {
+  it('suggests ATS Strict as a tip when portal-safe uses another template', () => {
     const doc = {
       ...sampleMalaysiaResume,
       meta: {
@@ -35,6 +35,35 @@ describe('ats-lint', () => {
       },
     }
     const issues = runValidation(doc)
-    expect(issues.some((i) => i.code === 'ATS_TEMPLATE_RECOMMENDED')).toBe(true)
+    expect(issues.find((i) => i.code === 'ATS_TEMPLATE_RECOMMENDED')?.level).toBe('info')
+  })
+
+  it('raises an ATS risk for a role without a start date (AC-5)', () => {
+    const [first, ...rest] = sampleMalaysiaResume.experience
+    const doc = { ...sampleMalaysiaResume, experience: [{ ...first, startDate: '' }, ...rest] }
+    const issue = runValidation(doc).find((i) => i.code === 'EXPERIENCE_DATES_MISSING')
+    expect(issue?.level).toBe('warning')
+    expect(runValidation(sampleMalaysiaResume).some((i) => i.code === 'EXPERIENCE_DATES_MISSING')).toBe(false)
+  })
+
+  it('raises at most one metrics tip for the whole document (AC-7)', () => {
+    const doc = {
+      ...sampleMalaysiaResume,
+      experience: sampleMalaysiaResume.experience.map((role) => ({
+        ...role,
+        bullets: ['Led the team', 'Built the platform', 'Ran the reviews'],
+      })),
+    }
+    const metric = runValidation(doc).filter((i) => i.code === 'BULLET_NO_METRIC')
+    expect(metric).toHaveLength(1)
+    expect(metric[0].level).toBe('info')
+  })
+
+  it('raises no empty-section, page-length or metric tip for a cover letter (AC-8)', () => {
+    const doc = createEmptyDocument('cover-letter', 'malaysia-corporate')
+    const codes = runValidation(doc).map((i) => i.code)
+    expect(codes).not.toContain('EMPTY_SECTION')
+    expect(codes).not.toContain('PAGE_LENGTH_RESUME')
+    expect(codes).not.toContain('BULLET_NO_METRIC')
   })
 })

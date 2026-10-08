@@ -10,7 +10,7 @@ export function typographyIssuesFromResolved(resolved: ResolvedStyles): LintIssu
 
   if (typography.bodySize < 10) {
     issues.push({
-      level: 'warning',
+      level: 'info',
       code: 'TYPE_SIZE_TOO_SMALL',
       message: `Body text is ${typography.bodySize}pt. Use at least 10pt for ATS compatibility.`,
     })
@@ -20,13 +20,13 @@ export function typographyIssuesFromResolved(resolved: ResolvedStyles): LintIssu
     issues.push({
       level: 'info',
       code: 'TYPE_LINE_HEIGHT_TIGHT',
-      message: 'Line height may reduce readability. Consider 1.3 or higher.',
+      message: 'Line height is tight and may reduce readability. Consider 1.2 or higher.',
     })
   }
 
   if (!meetsContrastAA(theme.colors.accent, theme.colors.paper)) {
     issues.push({
-      level: 'warning',
+      level: 'info',
       code: 'TYPE_LOW_CONTRAST',
       message: 'Accent color contrast against white is below WCAG AA (4.5:1).',
     })
@@ -59,7 +59,7 @@ export function typographyIssuesFromResolved(resolved: ResolvedStyles): LintIssu
   )
   if (familyGroups.size > 2) {
     issues.push({
-      level: 'warning',
+      level: 'info',
       code: 'TYPE_TOO_MANY_FAMILIES',
       message: 'Multiple font families detected. Use one body + one heading family.',
     })

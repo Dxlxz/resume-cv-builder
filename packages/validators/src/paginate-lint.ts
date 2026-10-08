@@ -1,6 +1,7 @@
 import type { ResumeDocument } from '@rb/core/types/document'
 import type { LintIssue } from '@rb/validators/types'
 
+/** Length is a recruiter preference, not a parsing rule (F-007 research), so it is a tip, and resumes only. */
 export function runPaginateRules(
   document: ResumeDocument,
   previewPageCount: number,
@@ -11,15 +12,7 @@ export function runPaginateRules(
     issues.push({
       level: 'info',
       code: 'PAGINATION_OVERFLOW_RISK',
-      message: `Preview shows ${previewPageCount} pages — corporate resumes are usually 1–2 pages.`,
-    })
-  }
-
-  if (document.meta.documentType === 'resume' && previewPageCount > 3) {
-    issues.push({
-      level: 'warning',
-      code: 'PAGINATION_OVERFLOW_RISK',
-      message: `Resume spans ${previewPageCount} pages — strongly consider trimming content.`,
+      message: `Preview shows ${previewPageCount} pages. Most corporate resumes are 1–2 pages; a third is fine when the experience needs it.`,
     })
   }
 
@@ -32,7 +25,7 @@ export function paginateDriftIssue(
 ): LintIssue | null {
   if (Math.abs(previewPages - pdfPages) > 1) {
     return {
-      level: 'warning',
+      level: 'info',
       code: 'PAGINATION_PAGE_COUNT_DRIFT',
       message: `Preview shows ${previewPages} pages but PDF has ${pdfPages}. Layout may differ slightly between browser and PDF engine.`,
     }

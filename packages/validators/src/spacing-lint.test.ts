@@ -14,7 +14,7 @@ describe('spacing-lint', () => {
       experience: [
         {
           ...sampleProfileDocument.experience[0],
-          bullets: ['a', 'b', 'c', 'd', 'e'],
+          bullets: ['a', 'b', 'c', 'd', 'e', 'f', 'g'],
         },
       ],
     }

@@ -64,21 +64,33 @@ export function similarityScore(a: string, b: string): number {
   const x = normalize(a)
   const y = normalize(b)
   if (x === y) return 1
-  if (x.includes(y) || y.includes(x)) return 0.9
   const longer = x.length > y.length ? x : y
   const shorter = x.length > y.length ? y : x
   if (!longer.length) return 1
-  let matches = 0
-  for (const char of shorter) {
-    if (longer.includes(char)) matches++
+  // A substring is a near match only when it is most of the other string ("Reactjs" ~ "React"); otherwise any skill
+  // containing the letter "r" would be "close to" the language R.
+  if (longer.includes(shorter) && shorter.length >= 3 && shorter.length / longer.length >= 0.6) return 0.9
+  // Edit distance, so a typo ("Pythn") is close and a different word with the same letters is not.
+  return 1 - levenshtein(x, y) / longer.length
+}
+
+function levenshtein(a: string, b: string): number {
+  let previous = Array.from({ length: b.length + 1 }, (_, j) => j)
+  for (let i = 1; i <= a.length; i++) {
+    const current = [i]
+    for (let j = 1; j <= b.length; j++) {
+      const cost = a[i - 1] === b[j - 1] ? 0 : 1
+      current[j] = Math.min(previous[j] + 1, current[j - 1] + 1, previous[j - 1] + cost)
+    }
+    previous = current
   }
-  return matches / longer.length
+  return previous[b.length]
 }
 
 export function findNearMatch(
   entries: CatalogEntry[],
   input: string,
-  threshold = 0.85,
+  threshold = 0.8,
 ): CatalogEntry | null {
   const n = normalize(input)
   if (!n) return null

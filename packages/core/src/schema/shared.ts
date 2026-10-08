@@ -4,6 +4,7 @@ import { createId } from '@rb/core/utils'
 
 export const sectionIdSchema = z.enum([
   'contact',
+  'letter',
   'summary',
   'experience',
   'education',

@@ -1,4 +1,7 @@
-import { useDocumentStore } from '@/store/documentStore'
+import { ArchiveRestoreIcon } from 'lucide-react'
+import { useDocumentStore } from '@/modules/document'
+import { Alert, AlertAction, AlertDescription } from '@/shared/ui/alert'
+import { Button } from '@/shared/ui/button'
 
 /**
  * Shown when a corrupted draft was quarantined instead of deleted. Restore
@@ -12,24 +15,17 @@ export function RecoveryBanner() {
   if (!recoverableBackup) return null
 
   return (
-    <div className="border-b border-status-warning/30 bg-badge-warning px-4 py-2 text-sm text-status-warning-foreground">
-      <div className="mx-auto flex max-w-[var(--layout-max-content)] flex-wrap items-center gap-x-4 gap-y-1">
-        <span>A backup of your last draft was found after it failed to load.</span>
-        <button
-          type="button"
-          className="font-medium underline transition-colors duration-[var(--duration-state)] hover:opacity-80"
-          onClick={recoverBackup}
-        >
+    <Alert variant="warning" className="rounded-none border-x-0 border-t-0">
+      <ArchiveRestoreIcon aria-hidden />
+      <AlertDescription>A backup of your last draft was found after it failed to load.</AlertDescription>
+      <AlertAction className="flex gap-2">
+        <Button type="button" size="sm" onClick={recoverBackup}>
           Restore it
-        </button>
-        <button
-          type="button"
-          className="underline transition-colors duration-[var(--duration-state)] hover:opacity-80"
-          onClick={dismissRecovery}
-        >
+        </Button>
+        <Button type="button" size="sm" variant="ghost" onClick={dismissRecovery}>
           Discard
-        </button>
-      </div>
-    </div>
+        </Button>
+      </AlertAction>
+    </Alert>
   )
 }

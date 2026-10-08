@@ -1,3 +1,6 @@
+> **Superseded on 2026-10-07** by [shadcn-reui-design-system.md](shadcn-reui-design-system.md): the chrome now
+> has a light and a dark theme. Kept for history.
+
 # Light-Only Chrome Decision
 
 **Date:** 2026-08-22

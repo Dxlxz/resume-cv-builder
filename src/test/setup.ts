@@ -26,3 +26,8 @@ class ResizeObserverMock {
 }
 
 globalThis.ResizeObserver = ResizeObserverMock as typeof ResizeObserver
+
+// jsdom has no layout, so it does not implement scrollIntoView; the jump helpers call it.
+if (typeof Element !== 'undefined' && !Element.prototype.scrollIntoView) {
+  Element.prototype.scrollIntoView = () => {}
+}

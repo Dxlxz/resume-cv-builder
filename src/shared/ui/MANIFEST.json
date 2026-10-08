@@ -1,0 +1,231 @@
+{
+  "accordion": {
+    "origin": "shadcn",
+    "registryItem": "accordion",
+    "primitiveBase": "radix",
+    "style": "nova",
+    "installed": "2026-10-07",
+    "modified": true,
+    "modification": "content grows with its content: removed the fixed measured height and the overflow clip (it clipped pickers and later growth)"
+  },
+  "alert": {
+    "origin": "reui",
+    "registryItem": "@reui/alert",
+    "primitiveBase": "radix",
+    "style": "nova",
+    "installed": "2026-10-07",
+    "modified": true,
+    "modification": "icons use the -foreground tokens (AA); no implicit role=\"alert\" (callers add it for errors)"
+  },
+  "alert-dialog": {
+    "origin": "shadcn",
+    "registryItem": "alert-dialog",
+    "primitiveBase": "radix",
+    "style": "nova",
+    "installed": "2026-10-07",
+    "modified": false
+  },
+  "badge": {
+    "origin": "reui",
+    "registryItem": "@reui/badge",
+    "primitiveBase": "radix",
+    "style": "nova",
+    "installed": "2026-10-07",
+    "modified": true,
+    "modification": "removed solid info/success/warning variants (fail AA); destructive dark text"
+  },
+  "brand": {
+    "origin": "internal",
+    "note": "Product wordmark"
+  },
+  "bullet-list-editor": {
+    "origin": "internal",
+    "note": "Pattern: editable bullet list for achievement lists"
+  },
+  "button": {
+    "origin": "shadcn",
+    "registryItem": "button",
+    "primitiveBase": "radix",
+    "style": "nova",
+    "installed": "2026-10-07",
+    "modified": false
+  },
+  "card": {
+    "origin": "shadcn",
+    "registryItem": "card",
+    "primitiveBase": "radix",
+    "style": "nova",
+    "installed": "2026-10-07",
+    "modified": false
+  },
+  "checkbox": {
+    "origin": "shadcn",
+    "registryItem": "checkbox",
+    "primitiveBase": "radix",
+    "style": "nova",
+    "installed": "2026-10-07",
+    "modified": false
+  },
+  "collapsible": {
+    "origin": "shadcn",
+    "registryItem": "collapsible",
+    "primitiveBase": "radix",
+    "style": "nova",
+    "installed": "2026-10-07",
+    "modified": false
+  },
+  "confirm-dialog": {
+    "origin": "internal",
+    "note": "Pattern: confirm dialog over AlertDialog"
+  },
+  "dialog": {
+    "origin": "shadcn",
+    "registryItem": "dialog",
+    "primitiveBase": "radix",
+    "style": "nova",
+    "installed": "2026-10-07",
+    "modified": true,
+    "modification": "import paths"
+  },
+  "dropdown-menu": {
+    "origin": "shadcn",
+    "registryItem": "dropdown-menu",
+    "primitiveBase": "radix",
+    "style": "nova",
+    "installed": "2026-10-07",
+    "modified": false
+  },
+  "empty-hint": {
+    "origin": "internal",
+    "note": "Pattern: empty-state block"
+  },
+  "field": {
+    "origin": "shadcn",
+    "registryItem": "field",
+    "primitiveBase": "radix",
+    "style": "nova",
+    "installed": "2026-10-07",
+    "modified": true,
+    "modification": "import paths"
+  },
+  "form-field": {
+    "origin": "internal",
+    "note": "Pattern: label + control + description + error over Field/Input/Textarea"
+  },
+  "input": {
+    "origin": "shadcn",
+    "registryItem": "input",
+    "primitiveBase": "radix",
+    "style": "nova",
+    "installed": "2026-10-07",
+    "modified": false
+  },
+  "item-card": {
+    "origin": "internal",
+    "note": "Pattern: one repeated list entry with a remove action"
+  },
+  "label": {
+    "origin": "shadcn",
+    "registryItem": "label",
+    "primitiveBase": "radix",
+    "style": "nova",
+    "installed": "2026-10-07",
+    "modified": false
+  },
+  "native-select": {
+    "origin": "shadcn",
+    "registryItem": "native-select",
+    "primitiveBase": "radix",
+    "style": "nova",
+    "installed": "2026-10-07",
+    "modified": false
+  },
+  "popover": {
+    "origin": "shadcn",
+    "registryItem": "popover",
+    "primitiveBase": "radix",
+    "style": "nova",
+    "installed": "2026-10-07",
+    "modified": false
+  },
+  "progress": {
+    "origin": "shadcn",
+    "registryItem": "progress",
+    "primitiveBase": "radix",
+    "style": "nova",
+    "installed": "2026-10-07",
+    "modified": false
+  },
+  "radio-group": {
+    "origin": "shadcn",
+    "registryItem": "radio-group",
+    "primitiveBase": "radix",
+    "style": "nova",
+    "installed": "2026-10-07",
+    "modified": false
+  },
+  "scrollspy": {
+    "origin": "reui",
+    "registryItem": "@reui/scrollspy",
+    "primitiveBase": "radix",
+    "style": "nova",
+    "installed": "2026-10-07",
+    "modified": true,
+    "modification": "listener cleanup removes the registered handler; sets aria-current on the active anchor"
+  },
+  "separator": {
+    "origin": "shadcn",
+    "registryItem": "separator",
+    "primitiveBase": "radix",
+    "style": "nova",
+    "installed": "2026-10-07",
+    "modified": false
+  },
+  "sonner": {
+    "origin": "shadcn",
+    "registryItem": "sonner",
+    "primitiveBase": "radix",
+    "style": "nova",
+    "installed": "2026-10-07",
+    "modified": true,
+    "modification": "theme from @/shared/theme/useTheme instead of next-themes"
+  },
+  "sortable": {
+    "origin": "reui",
+    "registryItem": "@reui/sortable",
+    "primitiveBase": "radix",
+    "style": "nova",
+    "installed": "2026-10-07",
+    "modified": true,
+    "modification": "typed child props (lint), removed use-client; dnd-kit attributes moved from the row to the handle (no button nested in a button)"
+  },
+  "stepper": {
+    "origin": "reui",
+    "registryItem": "@reui/stepper",
+    "primitiveBase": "radix",
+    "style": "nova",
+    "installed": "2026-10-07",
+    "modified": true,
+    "modification": "tablist moved from the wrapper to the nav, tabpanel ids on the content (axe), ref reads moved out of render (lint), memoized focus handlers"
+  },
+  "tabs": {
+    "origin": "shadcn",
+    "registryItem": "tabs",
+    "primitiveBase": "radix",
+    "style": "nova",
+    "installed": "2026-10-07",
+    "modified": false
+  },
+  "textarea": {
+    "origin": "shadcn",
+    "registryItem": "textarea",
+    "primitiveBase": "radix",
+    "style": "nova",
+    "installed": "2026-10-07",
+    "modified": false
+  },
+  "use-confirm": {
+    "origin": "internal",
+    "note": "Pattern: hook that asks before a destructive action"
+  }
+}

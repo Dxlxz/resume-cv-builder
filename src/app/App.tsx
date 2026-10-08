@@ -1,12 +1,25 @@
-import { useEffect } from 'react'
-import { useDocumentStore } from '@/store/documentStore'
-import { usePersistence } from '@/lib/storage/usePersistence'
-import { navigateTo, useAppRoute } from '@/hooks/useAppRoute'
+import { lazy, Suspense, useEffect } from 'react'
+import { Loader2Icon } from 'lucide-react'
+import { useDocumentStore } from '@/modules/document'
+import { usePersistence } from '@/modules/document'
+import { navigateTo, useAppRoute } from '@/shared/hooks/useAppRoute'
 import { BrowserGuard } from '@/app/BrowserGuard'
-import { LandingPage } from '@/app/LandingPage'
-import { DocTypeSelector } from '@/app/DocTypeSelector'
-import { BuilderLayout } from '@/app/BuilderLayout'
-import { AtsCheckerPage } from '@/app/AtsCheckerPage'
+import { RouteErrorBoundary } from '@/app/RouteErrorBoundary'
+import { LandingPage } from '@/modules/landing'
+
+// The builder, the chooser and the ATS checker are loaded on demand: the landing page does not need them.
+const DocTypeSelector = lazy(() => import('@/app/DocTypeSelector').then((m) => ({ default: m.DocTypeSelector })))
+const BuilderLayout = lazy(() => import('@/app/BuilderLayout').then((m) => ({ default: m.BuilderLayout })))
+const AtsCheckerPage = lazy(() => import('@/modules/ats-check').then((m) => ({ default: m.AtsCheckerPage })))
+
+function RouteFallback() {
+  return (
+    <div id="main-content" className="flex min-h-dvh items-center justify-center bg-background text-muted-foreground" role="status">
+      <Loader2Icon className="size-6 animate-spin" aria-hidden />
+      <span className="sr-only">Loading</span>
+    </div>
+  )
+}
 
 const ROUTE_TITLES: Record<string, string> = {
   '/': 'Rizzume - ATS-ready resumes, built locally',
@@ -29,6 +42,22 @@ export default function App() {
     window.document.title = ROUTE_TITLES[window.location.pathname] ?? ROUTE_TITLES['/']
   }, [route])
 
+  // A lazy chunk that 404s after a new deploy: reload once to pick up the new build; a second failure shows the boundary.
+  useEffect(() => {
+    const onPreloadError = (event: Event) => {
+      event.preventDefault()
+      try {
+        if (window.sessionStorage.getItem('rizzume:chunk-reload')) return
+        window.sessionStorage.setItem('rizzume:chunk-reload', '1')
+      } catch {
+        return
+      }
+      window.location.reload()
+    }
+    window.addEventListener('vite:preloadError', onPreloadError)
+    return () => window.removeEventListener('vite:preloadError', onPreloadError)
+  }, [])
+
   usePersistence()
 
   const loadProfile = () => {
@@ -47,17 +76,25 @@ export default function App() {
 
       {route === 'builder' && (
         <BrowserGuard>
-          {hasStarted ? (
-            <BuilderLayout onHome={() => navigateTo('landing')} />
-          ) : (
-            <DocTypeSelector onBack={() => navigateTo('landing')} />
-          )}
+          <RouteErrorBoundary>
+            <Suspense fallback={<RouteFallback />}>
+            {hasStarted ? (
+              <BuilderLayout onHome={() => navigateTo('landing')} />
+            ) : (
+              <DocTypeSelector onBack={() => navigateTo('landing')} />
+            )}
+            </Suspense>
+          </RouteErrorBoundary>
         </BrowserGuard>
       )}
 
       {route === 'ats-check' && (
         <BrowserGuard>
-          <AtsCheckerPage onHome={() => navigateTo('landing')} />
+          <RouteErrorBoundary>
+            <Suspense fallback={<RouteFallback />}>
+            <AtsCheckerPage onHome={() => navigateTo('landing')} />
+            </Suspense>
+          </RouteErrorBoundary>
         </BrowserGuard>
       )}
 

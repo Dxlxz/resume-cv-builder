@@ -1,7 +1,7 @@
 # Resume & CV Builder — Requirements Document
 
 > **Project Name:** MYGradResume — Personal Career Document & Portfolio Hub  
-> **Author:** Dale Jeffrey Gilimon  
+> **Author:** Dale  
 > **Version:** 1.1  
 > **Last Updated:** 2026-06-09  
 > **Stack:** Single-page HTML + Vanilla JS + TailwindCSS CDN (client-side only)
@@ -100,7 +100,7 @@ A **single-page, client-side web application** that lets users fill in their car
 |----|-------------|----------|
 | FR-36 | **Toast Notifications** — Slide-up alerts for save/load/export/error feedback | Must Have |
 | FR-37 | **Confirmation Modal** — "Are you sure?" dialog before clearing all data | Must Have |
-| FR-38 | **Load Default Data** — Pre-populate with Dale Jeffrey's sample career profile | Must Have |
+| FR-38 | **Load Default Data** — Pre-populate with a fictional sample career profile | Must Have |
 | FR-39 | **Mobile Responsive** — Toggle between Edit and Preview panes on small screens | Must Have |
 | FR-40 | **Dark Mode Editor UI** — The editor uses a dark theme (slate/indigo palette); the PDF preview stays white | Must Have |
 

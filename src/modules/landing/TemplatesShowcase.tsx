@@ -43,11 +43,11 @@ export function TemplatesShowcase({ onStart }: { onStart: () => void }) {
                 <figcaption className="mt-3">
                   <span className="flex flex-wrap items-center gap-2">
                     <span className="font-semibold text-foreground">{template.name}</span>
-                    <Badge variant="outline" size="sm">
+                    <Badge variant="outline">
                       {template.columns === 2 ? 'Two columns' : 'One column'}
                     </Badge>
                   </span>
-                  <span className="mt-1 block text-sm leading-snug text-muted-foreground">{template.description}</span>
+                  <span className="mt-1 block text-sm text-muted-foreground">{template.description}</span>
                 </figcaption>
               </figure>
             </li>

@@ -1,42 +1,27 @@
 import { MonitorIcon, MoonIcon, SunIcon } from 'lucide-react'
 import { Button } from '@/shared/ui/button'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuRadioGroup,
-  DropdownMenuRadioItem,
-  DropdownMenuTrigger,
-} from '@/shared/ui/dropdown-menu'
 import type { Theme } from './theme-context'
 import { useTheme } from './useTheme'
 
-const OPTIONS: { value: Theme; label: string; icon: typeof SunIcon }[] = [
-  { value: 'light', label: 'Light', icon: SunIcon },
-  { value: 'dark', label: 'Dark', icon: MoonIcon },
-  { value: 'system', label: 'System', icon: MonitorIcon },
-]
+/** One click moves to the next choice: system → light → dark → system. */
+const NEXT: Record<Theme, Theme> = { system: 'light', light: 'dark', dark: 'system' }
 
-/** Light / dark / system, in the app bar. The icon shows the theme that is applied now. */
+const LABEL: Record<Theme, string> = { system: 'System', light: 'Light', dark: 'Dark' }
+
+const ICON: Record<Theme, typeof SunIcon> = { system: MonitorIcon, light: SunIcon, dark: MoonIcon }
+
+/**
+ * Theme switch in the app bar: a single button that cycles the choice. The icon shows the choice (not the applied
+ * theme), so System and Light stay distinguishable; the name says what the next click does.
+ */
 export function ThemeToggle() {
-  const { theme, resolvedTheme, setTheme } = useTheme()
-  const Icon = resolvedTheme === 'dark' ? MoonIcon : SunIcon
+  const { theme, setTheme } = useTheme()
+  const Icon = ICON[theme]
+  const next = NEXT[theme]
+  const label = `Theme: ${LABEL[theme]}. Switch to ${LABEL[next]}`
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="icon" aria-label="Theme">
-          <Icon />
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end">
-        <DropdownMenuRadioGroup value={theme} onValueChange={(value) => setTheme(value as Theme)}>
-          {OPTIONS.map(({ value, label, icon: OptionIcon }) => (
-            <DropdownMenuRadioItem key={value} value={value}>
-              <OptionIcon />
-              {label}
-            </DropdownMenuRadioItem>
-          ))}
-        </DropdownMenuRadioGroup>
-      </DropdownMenuContent>
-    </DropdownMenu>
+    <Button type="button" variant="ghost" size="icon" aria-label={label} title={label} onClick={() => setTheme(next)}>
+      <Icon />
+    </Button>
   )
 }

@@ -154,8 +154,6 @@ interface DocTypeSelectorProps {
 export function DocTypeSelector({ onBack }: DocTypeSelectorProps) {
   const startDocument = useDocumentStore((s) => s.startDocument)
   const startFromSample = useDocumentStore((s) => s.startFromSample)
-  const loadPersonalProfile = useDocumentStore((s) => s.loadPersonalProfile)
-  const personalProfileAvailable = useDocumentStore((s) => s.personalProfileAvailable)
   const [step, setStep] = useState(1)
   const [selectedPreset, setSelectedPreset] = useState<PresetId>('malaysia-corporate')
 
@@ -273,15 +271,6 @@ export function DocTypeSelector({ onBack }: DocTypeSelectorProps) {
                       <Button className="w-full" variant="outline" onClick={() => startFromSample(option.type, selectedPreset)}>
                         See a sample
                       </Button>
-                      {personalProfileAvailable && (
-                        <Button
-                          className="w-full"
-                          variant="outline"
-                          onClick={() => startDocument(option.type, selectedPreset, { withPersonalProfile: true })}
-                        >
-                          Use my profile
-                        </Button>
-                      )}
                     </CardFooter>
                   </Card>
                 ))}
@@ -291,13 +280,6 @@ export function DocTypeSelector({ onBack }: DocTypeSelectorProps) {
                 Saved automatically in your browser. No account needed.
               </p>
 
-              {personalProfileAvailable && (
-                <p className="mt-2 text-center">
-                  <Button type="button" variant="link" size="sm" className="h-auto whitespace-normal py-1" onClick={() => loadPersonalProfile()}>
-                    Load full personal profile (Malaysia Corporate preset)
-                  </Button>
-                </p>
-              )}
             </StepperContent>
           </StepperPanel>
         </Stepper>

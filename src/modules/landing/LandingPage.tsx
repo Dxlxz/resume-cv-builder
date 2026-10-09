@@ -27,9 +27,6 @@ import {
 
 interface LandingPageProps {
   onStart: () => void
-  onLoadProfile: () => void
-  /** Private local personal pack present (dev-only feature; hidden otherwise). */
-  personalProfileAvailable?: boolean
 }
 
 const FACTS: { value: string; label: string }[] = [
@@ -127,7 +124,7 @@ const FAQ: { question: string; answer: string }[] = [
   },
 ]
 
-export function LandingPage({ onStart, onLoadProfile, personalProfileAvailable = false }: LandingPageProps) {
+export function LandingPage({ onStart }: LandingPageProps) {
   return (
     <div id="main-content" tabIndex={-1} className="min-h-screen bg-background text-foreground outline-none">
       {/* --- Nav --- */}
@@ -135,13 +132,13 @@ export function LandingPage({ onStart, onLoadProfile, personalProfileAvailable =
         <div className="mx-auto flex max-w-6xl items-center gap-2 px-4 py-3 sm:px-6">
           <Brand />
           <nav aria-label="Primary" className="ml-auto flex items-center gap-1 sm:gap-2">
-            <Button variant="ghost" size="sm" asChild className="hidden md:inline-flex">
+            <Button variant="ghost" asChild className="hidden md:inline-flex">
               <a href="#templates-heading">Templates</a>
             </Button>
-            <Button variant="ghost" size="sm" asChild className="hidden md:inline-flex">
+            <Button variant="ghost" asChild className="hidden md:inline-flex">
               <a href="#faq-heading">FAQ</a>
             </Button>
-            <Button type="button" variant="ghost" size="sm" onClick={() => navigateTo('ats-check')} className="hidden sm:inline-flex">
+            <Button type="button" variant="ghost" onClick={() => navigateTo('ats-check')} className="hidden sm:inline-flex">
               ATS check
             </Button>
             <ThemeToggle />
@@ -183,11 +180,6 @@ export function LandingPage({ onStart, onLoadProfile, personalProfileAvailable =
               >
                 Check a PDF
               </Button>
-              {personalProfileAvailable && (
-                <Button type="button" variant="ghost" size="lg" onClick={onLoadProfile} className="h-10 px-4 text-sm">
-                  Start with my profile
-                </Button>
-              )}
             </div>
 
             <p className="mt-6 text-sm text-muted-foreground">Free · No account · Runs entirely in your browser</p>
@@ -203,7 +195,7 @@ export function LandingPage({ onStart, onLoadProfile, personalProfileAvailable =
           {FACTS.map((fact) => (
             <li key={fact.value} className="flex flex-col gap-1">
               <span className="font-display text-2xl font-semibold tracking-tight text-foreground">{fact.value}</span>
-              <span className="text-sm leading-snug text-muted-foreground">{fact.label}</span>
+              <span className="text-sm text-muted-foreground">{fact.label}</span>
             </li>
           ))}
         </ul>

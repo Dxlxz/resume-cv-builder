@@ -47,7 +47,7 @@
 
 * **Gold Standard Rules:**
   * **Targeted Headline:** Must reflect the target role and core stack (e.g. *Data Science Engagement Lead \| Python ML · SHAP · Power BI · Business Partnering*), not a generic title.
-  * **Phone Format:** International format with country code (e.g. `+60 19-644 8821`).
+  * **Phone Format:** International format with country code (e.g. `+60 12-345 6789`).
   * **Location Clarity:** City, State, Country (e.g. *Kota Kinabalu, Sabah, Malaysia*). If open to relocation, state: *Open to Relocation (KL / Labuan / Miri / Nationwide)*.
   * **Direct Links:** Clean URLs for LinkedIn (`linkedin.com/in/...`) and GitHub (`github.com/...`).
   * **ATS Warning:** Never place contact details inside Microsoft Word headers/footers or image boxes—ATS parsers frequently ignore header/footer streams.
@@ -118,7 +118,7 @@
 * **Format:**
   * Project Title + Scope Tag (*EarthData Hub [Data Governance Platform]*).
   * Technologies Used (*TypeScript, Hono, React, PostgreSQL, Docker*).
-  * Direct GitHub URL (e.g. `github.com/Dxlxz/AML-Transaction-Risk-Scoring-Engine`).
+  * Direct GitHub URL (e.g. `github.com/username/project-name`).
   * 1–2 bullet points highlighting architecture, explainability (e.g. SHAP), or business utility.
 
 ---

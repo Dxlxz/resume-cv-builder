@@ -12,7 +12,6 @@ import {
   RotateCcwIcon,
   ScanSearchIcon,
   TriangleAlertIcon,
-  UserRoundIcon,
 } from 'lucide-react'
 import { useDocumentStore } from '@/modules/document'
 import { getPreset } from '@rb/presets/registry'
@@ -61,8 +60,6 @@ export function Toolbar({ onHome, previewVisible, onTogglePreview }: ToolbarProp
   const setShowLintPanel = useDocumentStore((s) => s.setShowLintPanel)
   const setShowFixList = useDocumentStore((s) => s.setShowFixList)
   const reset = useDocumentStore((s) => s.reset)
-  const loadPersonalProfile = useDocumentStore((s) => s.loadPersonalProfile)
-  const personalProfileAvailable = useDocumentStore((s) => s.personalProfileAvailable)
   const previewPageCount = useDocumentStore((s) => s.previewPageCount)
   const layoutPlan = useDocumentStore((s) => s.layoutPlan)
   const previewPdfBlob = useDocumentStore((s) => s.previewPdfBlob)
@@ -259,15 +256,6 @@ export function Toolbar({ onHome, previewVisible, onTogglePreview }: ToolbarProp
     })
   }
 
-  const handleLoadProfile = () => {
-    setConfirmRequest({
-      title: 'Replace your draft with your profile?',
-      description: 'Your current edits will be replaced.',
-      confirmLabel: 'Load my profile',
-      onConfirm: loadPersonalProfile,
-    })
-  }
-
   const saveBadge =
     saveStatus === 'error'
       ? { label: saveError ?? 'Save failed', variant: 'destructive-light' as const, Icon: TriangleAlertIcon }
@@ -316,7 +304,7 @@ export function Toolbar({ onHome, previewVisible, onTogglePreview }: ToolbarProp
               <ScanSearchIcon data-icon="inline-start" aria-hidden />
               ATS Check
               {atsSummary && atsBadge && (
-                <Badge variant={atsBadge.variant} size="sm">
+                <Badge variant={atsBadge.variant}>
                   {atsBadge.text}
                   {atsSummary.tips > 0 && (
                     <span className="font-normal">
@@ -363,12 +351,6 @@ export function Toolbar({ onHome, previewVisible, onTogglePreview }: ToolbarProp
                   <FileUpIcon />
                   Import JSON or PDF
                 </DropdownMenuItem>
-                {personalProfileAvailable && (
-                  <DropdownMenuItem onSelect={handleLoadProfile}>
-                    <UserRoundIcon />
-                    Load my profile
-                  </DropdownMenuItem>
-                )}
                 <DropdownMenuSeparator />
                 <DropdownMenuItem variant="destructive" onSelect={handleStartFresh}>
                   <RotateCcwIcon />

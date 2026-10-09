@@ -19,6 +19,8 @@ alwaysApply: false
 
 ## Sections that must stay complete in the master file
 
-Contact, Summary, Experience, Education, Certifications, Skills, Projects, Leadership & Volunteer, References, Builder Defaults.
+Contact, Summary, Experience, Education, Certifications, Skills, Projects, **Project Inventory**, Leadership & Volunteer, References, Builder Defaults.
+
+`Project Inventory` is the full build history (work, personal, academic) with scope tags. Filter it by tag when tailoring; never prune it.
 
 Job-specific drafts live in the app (`localStorage`) or exported JSON — not by gutting this file.

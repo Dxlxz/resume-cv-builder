@@ -213,6 +213,20 @@ describe('feature code stays on the design system', () => {
       .filter((f) => /idrizz|\/api\/ai|react-markdown|OPENCODE/i.test(read(f)))
     expect(offenders).toEqual([])
   })
+
+  it('keeps product text at 12 px or larger: no xs or sm badges (10 px) outside src/shared/ui', () => {
+    const offenders = sourceFiles()
+      .filter((f) => f.endsWith('.tsx') && !f.includes('src/shared/ui/') && !f.endsWith('.test.tsx'))
+      .filter((f) => /<Badge\b[^>]*\bsize="(xs|sm)"/.test(read(f)))
+    expect(offenders).toEqual([])
+  })
+
+  it('has no way to load the private personal pack', () => {
+    const offenders = sourceFiles()
+      .filter((f) => !f.endsWith('design-system.test.ts'))
+      .filter((f) => /@personal\/profile|loadPersonalProfile|withPersonalProfile/.test(read(f)))
+    expect(offenders).toEqual([])
+  })
 })
 
 describe('registry code that we changed on purpose', () => {

@@ -1,17 +1,7 @@
-import fs from 'node:fs'
 import path from 'node:path'
 import { defineConfig, defaultExclude } from 'vitest/config'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
-
-// Private personal pack (Dale's profile) — dev/test only. Shipping builds
-// apply no alias: `@personal/profile` stays an external dynamic import that
-// rejects at runtime, profile features hide, and no personal data is bundled.
-// In test mode without the pack (CI, clean checkouts), the alias points at a
-// stub so the dynamic import resolves; the feature stays off via
-// `__HAS_PERSONAL__`.
-const personalEntry = path.resolve(import.meta.dirname, './personal/personal-profile.ts')
-const hasPersonal = fs.existsSync(personalEntry)
 
 // @rb/* packages — TS source consumed directly (no build step). Alias
 // keeps vite/vitest in sync with tsconfig paths; subpaths are prefix-matched.
@@ -21,19 +11,7 @@ const rbAliases = Object.fromEntries(
   ),
 )
 
-export default defineConfig(({ command }) => {
-  const isBuild = command === 'build'
-  const personalAlias = !isBuild
-    ? hasPersonal
-      ? { '@personal/profile': personalEntry }
-      : {
-          '@personal/profile': path.resolve(
-            import.meta.dirname,
-            './src/test/stubs/personal-profile.ts',
-          ),
-        }
-    : {}
-
+export default defineConfig(() => {
   return {
     plugins: [
       react(),
@@ -46,17 +24,6 @@ export default defineConfig(({ command }) => {
       alias: {
         '@': path.resolve(import.meta.dirname, './src'),
         ...rbAliases,
-        ...personalAlias,
-      },
-    },
-    define: {
-      // Shipping builds never expose the personal pack feature.
-      __HAS_PERSONAL__: JSON.stringify(hasPersonal && !isBuild),
-    },
-    build: {
-      rollupOptions: {
-        // Never bundle the personal pack into product builds.
-        external: ['@personal/profile'],
       },
     },
     test: {

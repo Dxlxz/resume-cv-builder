@@ -29,23 +29,10 @@ import {
   sampleResumeDocument,
 } from '@rb/fixtures'
 
-/**
- * Personal pack — Dale's private profile, loaded from `personal/` via the
- * `@personal/profile` alias (defined only when that folder exists, see
- * vite.config.ts). Shipping builds resolve nothing: the import rejects, the
- * pack resolves to null, and profile features disable themselves. The
- * product never bundles personal data.
- */
-const personalProfilePromise: Promise<{
-  personalDocumentFor: (type: DocumentType) => ResumeDocument
-} | null> = import('@personal/profile').catch(() => null)
-
 
 interface DocumentState {
   document: ResumeDocument | null
   hasStarted: boolean
-  /** True when a local personal pack is available ("Load my profile"). */
-  personalProfileAvailable: boolean
   /** True when a corrupted draft was quarantined and can be restored. */
   recoverableBackup: boolean
   saveStatus: SaveStatus
@@ -72,12 +59,9 @@ interface DocumentState {
   startDocument: (
     type: DocumentType,
     presetId?: PresetId,
-    options?: { withPersonalProfile?: boolean },
   ) => void
   /** Start from a fictional sample document (same type + preset config). */
   startFromSample: (type: DocumentType, presetId?: PresetId) => void
-  loadPersonalProfile: () => void
-  resolvePersonalDocument: () => Promise<ResumeDocument | null>
   /** Adopts a draft from another tab (newer revision won). */
   importExternalDocument: (document: ResumeDocument) => void
   /** Restores the quarantined draft backup into the editor. */
@@ -153,7 +137,6 @@ export const useDocumentStore = create<DocumentState>((set, get) => {
   return {
     document: null,
     hasStarted: false,
-    personalProfileAvailable: __HAS_PERSONAL__,
     recoverableBackup: false,
     saveStatus: 'saved',
     saveError: null,
@@ -185,11 +168,6 @@ export const useDocumentStore = create<DocumentState>((set, get) => {
     } else if (hasRecoverableDraft()) {
       set({ recoverableBackup: true })
     }
-  },
-
-  resolvePersonalDocument: async () => {
-    const mod = await personalProfilePromise
-    return mod ? mod.personalDocumentFor('resume') : null
   },
 
   importExternalDocument: (document) => {
@@ -235,38 +213,18 @@ export const useDocumentStore = create<DocumentState>((set, get) => {
     set({ recoverableBackup: false })
   },
 
-  startDocument: (type, presetId = 'international-generic', options) => {
-    void (async () => {
-      let document: ResumeDocument
-      if (options?.withPersonalProfile) {
-        const mod = await personalProfilePromise
-        const profileDocument = mod?.personalDocumentFor(type)
-        document = profileDocument
-          ? touchMeta({
-              ...profileDocument,
-              meta: {
-                ...profileDocument.meta,
-                documentType: type,
-                presetId,
-              },
-            })
-          : createEmptyDocument(type, presetId)
-      } else {
-        document = createEmptyDocument(type, presetId)
-      }
-
-      set({
-        document,
-        hasStarted: true,
-        showOnboarding: !options?.withPersonalProfile,
-        saveStatus: 'saved',
-        exportFieldErrors: {},
-        pdfError: null,
-        lintIssues: [],
-        showLintPanel: false,
-        showFixList: false,
-      })
-    })()
+  startDocument: (type, presetId = 'international-generic') => {
+    set({
+      document: createEmptyDocument(type, presetId),
+      hasStarted: true,
+      showOnboarding: true,
+      saveStatus: 'saved',
+      exportFieldErrors: {},
+      pdfError: null,
+      lintIssues: [],
+      showLintPanel: false,
+      showFixList: false,
+    })
   },
 
   startFromSample: (type, presetId = 'malaysia-corporate') => {
@@ -290,26 +248,6 @@ export const useDocumentStore = create<DocumentState>((set, get) => {
     })
   },
 
-  loadPersonalProfile: () => {
-    void (async () => {
-      const mod = await personalProfilePromise
-      if (!mod) return // no personal pack — feature is hidden anyway
-      // Keep the current document type: reloading while editing a CV loads the
-      // complete CV profile, not the curated resume.
-      const type = get().document?.meta.documentType ?? 'resume'
-      set({
-        document: touchMeta(mod.personalDocumentFor(type)),
-        hasStarted: true,
-        showOnboarding: false,
-        saveStatus: 'saved',
-        exportFieldErrors: {},
-        pdfError: null,
-        lintIssues: [],
-        showLintPanel: false,
-        showFixList: false,
-      })
-    })()
-  },
 
   applyPreset: (presetId) => {
     dismissOnboardingIfOpen()

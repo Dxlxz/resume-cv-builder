@@ -60,7 +60,7 @@ async function openEverySection() {
 const screens: { name: string; element: () => React.ReactElement; setup?: () => void }[] = [
   {
     name: 'landing',
-    element: () => <LandingPage onStart={() => {}} onLoadProfile={() => {}} />,
+    element: () => <LandingPage onStart={() => {}} />,
   },
   { name: 'chooser', element: () => <DocTypeSelector onBack={() => {}} /> },
   {

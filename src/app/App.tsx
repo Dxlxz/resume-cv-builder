@@ -31,8 +31,6 @@ export default function App() {
   const route = useAppRoute()
   const hasStarted = useDocumentStore((s) => s.hasStarted)
   const init = useDocumentStore((s) => s.init)
-  const loadPersonalProfile = useDocumentStore((s) => s.loadPersonalProfile)
-  const personalProfileAvailable = useDocumentStore((s) => s.personalProfileAvailable)
 
   useEffect(() => {
     init()
@@ -59,11 +57,6 @@ export default function App() {
   }, [])
 
   usePersistence()
-
-  const loadProfile = () => {
-    loadPersonalProfile()
-    navigateTo('builder')
-  }
 
   return (
     <>
@@ -100,11 +93,7 @@ export default function App() {
 
       {route === 'landing' && (
         <BrowserGuard>
-          <LandingPage
-            onStart={() => navigateTo('builder')}
-            onLoadProfile={loadProfile}
-            personalProfileAvailable={personalProfileAvailable}
-          />
+          <LandingPage onStart={() => navigateTo('builder')} />
         </BrowserGuard>
       )}
     </>

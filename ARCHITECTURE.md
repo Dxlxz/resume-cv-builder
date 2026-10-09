@@ -35,7 +35,7 @@ Packages may import only the packages to their left, so there are no cycles:
 
 Application modules and their allowed imports: [docs/architecture.md section 2.1](docs/architecture.md).
 
-**Personal pack:** `personal/` (gitignored, dev-only `@personal/profile` alias). Never imported by packages; shipping builds leave the import external and it rejects at runtime.
+**Personal data:** `personal/` is gitignored and private. The app has no way to load it (the "load my profile" feature was removed on 2026-10-08); packages and the app must not import `@personal/*`, which `modules:check` and ESLint enforce.
 
 ## Data flow
 

@@ -85,16 +85,16 @@ export function TemplateGallery({ open, onOpenChange, returnFocusTo }: TemplateG
                 </span>
                 <span className="text-xs text-muted-foreground">{template.description}</span>
                 <span className="flex flex-wrap gap-1">
-                  <Badge variant="outline" size="sm">
+                  <Badge variant="outline">
                     {template.columns === 1 ? 'One column' : 'Two columns'}
                   </Badge>
                   {template.id === 'ats-strict' ? (
-                    <Badge variant="success-light" size="sm">
+                    <Badge variant="success-light">
                       Portal-safe
                     </Badge>
                   ) : (
                     template.atsOptimized && (
-                      <Badge variant="success-light" size="sm">
+                      <Badge variant="success-light">
                         ATS-friendly
                       </Badge>
                     )
